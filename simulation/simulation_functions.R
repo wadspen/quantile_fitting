@@ -50,8 +50,8 @@ est_quantiles <- function(sample, probs) {
 }
 
 
-abs_q <- function(p, qdist_est, qdist, l = 1) {
-  abs(qdist_est(p) - qdist(p))^l
+abs_q <- function(p, qdist_est, qdist, d = 1) {
+  abs(qdist_est(p) - qdist(p))^d
 }
 
 
@@ -61,21 +61,22 @@ wass_dist <- function(qdist_est, qdist, d = 1) {
 }
 
 
-make_stan_data <- function(data, m = 2, c = 3, sv = 3, nv = 3000,
+make_stan_data <- function(data, size, m = 2, c = 3, sv = 3, nv = 3000,
                            pv = 3) {
   quantiles <- data$quantile
   probs <- data$prob
+
   dat <- list(
     N = length(quantiles),
-    n = n,
+    n = size,
     Q = quantiles,
     inv_Phip = qnorm(probs),
     p = probs,
-    m = 2,
-    c = 3,
-    sv = 3,
-    nv = 3000,
-    pv = 3
+    m = m,
+    c = c,
+    sv = sv,
+    nv = nv,
+    pv = pv
   )
   
   dat
@@ -86,22 +87,23 @@ run_stan_model <- function(mod, data_list, burn = 5000, sample = 5000,
                            num_chain = 1) {
   
   samps <- mod$sample(data = data_list,
-                      iter_warmup = ,
-                      iter_sampling = ,
+                      iter_warmup = burn,
+                      iter_sampling = sample,
                       chains = num_chain,
                       refresh = 0)
-  
+ 
   samps
 }
 
 
 isolate_draws <- function(stan_samps, variable = "dist_samps") {
   draws <- stan_samps$draws(format = "df")
-  draws[, variable]
+  draws$dist_samps
 }
 
 stan_fit_draws <- function(mod, data_list, burn = 5000, sample = 5000,
                       num_chain = 1, variable = "dist_samps") {
+	
   samps <- run_stan_model(mod, data_list, burn = 5000, sample = 5000, 
                           num_chain = 1)
   
