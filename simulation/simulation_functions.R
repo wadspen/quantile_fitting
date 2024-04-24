@@ -89,7 +89,8 @@ run_stan_model <- function(mod, data_list, burn = 5000, sample = 5000,
   samps <- mod$sample(data = data_list,
                       iter_warmup = burn,
                       iter_sampling = sample,
-                      chains = num_chain,
+                      adapt_delta = .9999,
+		      chains = num_chain,
                       refresh = 0)
  
   samps

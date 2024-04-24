@@ -11,5 +11,6 @@ module load r
 module load udunits
 module load r-rgdal
 module load proj
+modeul load r gsl
 
 Rscript ./normal_7model_wd.R

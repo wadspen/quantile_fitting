@@ -5,7 +5,8 @@ library(cmdstanr)
 library(parallel)
 library(doParallel)
 library(doMC)
-
+library(distfromq)
+library(evmix)
 n.cores <- detectCores()
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
@@ -49,23 +50,24 @@ mu <- 1
 sigma <- 2.2
 qtrue <- function(p) {qnorm(p, mu, sigma)}
 
-models <- c("cltn", "ordn", "clt", "ord", "ind")#, "spline", "kern")
+models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
 
 # probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
 probs <- seq(0.05, .95, by = 0.05)
 # probs <- c(.025, .25, .5, .75, .975)
 text <- qnorm(.99, mu, sigma)
-reps <- 1000
+reps <- 10
 
 distance <- foreach(replicate = 1:reps,
-		    .packages = c("cmdstanr")
-		    #,.packages = c("evmix", "distfromq"),
+		    .packages = c("cmdstanr", "evmix", "distfromq")
 		    ,.errorhandling = "remove"
 		    ,.combine = rbind) %:%
 		foreach(n = samp_sizes, .combine = rbind) %:%
 			foreach(p = 1:length(levels), .combine = rbind) %dopar% {
  
-
+#replicate = 2
+#n = 100
+#p = 3
 source("./simulation_functions.R")
   samp <- rnorm(n, mu, sigma)
   probs <- levels[[p]]
@@ -81,7 +83,7 @@ source("./simulation_functions.R")
   draws_ord <- stan_fit_draws(ordmod, stan_data)
   draws_ind <- stan_fit_draws(indmod,stan_data)
   
-  
+   
   #make quantile functions
   qcltn <- function(p) {quantile(draws_cltn, p)}
   qordn <- function(p) {quantile(draws_ordn, p)}
@@ -89,8 +91,8 @@ source("./simulation_functions.R")
   qord <- function(p) {quantile(draws_ord, p)}
   qind <- function(p) {quantile(draws_ind, p)}
   #spline and kernel models go directly to quantile function
-  #qspline <- make_q_fn(probs, quantiles)
-  #qkern <- function(p) {qkden(p, quantiles, kernel = "triangular")}
+  qspline <- make_q_fn(probs, quantiles)
+  qkern <- function(p) {qkden(p, quantiles, kernel = "triangular")}
   
   
   #calculate 1wd
@@ -99,8 +101,8 @@ source("./simulation_functions.R")
   wd1_clt <- wass_dist(qclt, qtrue)
   wd1_ord <- wass_dist(qord, qtrue)
   wd1_ind <- wass_dist(qind, qtrue)
-  #wd1_spline <- wass_dist(qspline, qtrue)
-  #wd1_kern <- wass_dist(qkern, qtrue)
+  wd1_spline <- wass_dist(qspline, qtrue)
+  wd1_kern <- wass_dist(qkern, qtrue)
   
   
   #calculate 2wd
@@ -109,11 +111,11 @@ source("./simulation_functions.R")
   wd2_clt <- wass_dist(qclt, qtrue, d = 2)
   wd2_ord <- wass_dist(qord, qtrue, d = 2)
   wd2_ind <- wass_dist(qind, qtrue, d = 2)
-  #wd2_spline <- wass_dist(qspline, qtrue, d = 2)
-  #wd2_kern <- wass_dist(qkern, qtrue, d = 2)
+  wd2_spline <- wass_dist(qspline, qtrue, d = 2)
+  wd2_kern <- wass_dist(qkern, qtrue, d = 2)
   
-  wd1s <- c(wd1_cltn, wd1_ordn, wd1_clt, wd1_ord, wd1_ind)#, wd1_spline, wd1_kern)
-  wd2s <- c(wd2_cltn, wd2_ordn, wd2_clt, wd2_ord, wd2_ind)#, wd2_spline, wd2_kern)
+  wd1s <- c(wd1_cltn, wd1_ordn, wd1_clt, wd1_ord, wd1_ind, wd1_spline, wd1_kern)
+  wd2s <- c(wd2_cltn, wd2_ordn, wd2_clt, wd2_ord, wd2_ind, wd2_spline, wd2_kern)
   
   
   #print("rep, n, p, length(probs), models, wd1s, wd2s") 
@@ -125,7 +127,7 @@ source("./simulation_functions.R")
 }
 
 
-write.csv(distance, "normal_sim.csv", row.names = FALSE)
+write.csv(distance, "test.csv", row.names = FALSE)
 
 
 
