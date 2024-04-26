@@ -21,12 +21,17 @@ functions{
     
     real density;
     
-    density = pi[1]*exp(normal_lpdf(y | mu[1], sigma[1])) + 
-              pi[2]*exp(normal_lpdf(y | mu[2], sigma[2])) +
-              pi[3]*exp(normal_lpdf(y | mu[3], sigma[3])) +
-              pi[4]*exp(normal_lpdf(y | mu[4], sigma[4])) +
-              pi[5]*exp(normal_lpdf(y | mu[5], sigma[5]));
+    // density = pi[1]*exp(normal_lpdf(y | mu[1], sigma[1])) +
+    //           pi[2]*exp(normal_lpdf(y | mu[2], sigma[2])) +
+    //           pi[3]*exp(normal_lpdf(y | mu[3], sigma[3])) +
+    //           pi[4]*exp(normal_lpdf(y | mu[4], sigma[4])) +
+    //           pi[5]*exp(normal_lpdf(y | mu[5], sigma[5]));
     
+    density = log_sum_exp({log(pi[1]) + normal_lpdf(y | mu[1], sigma[1]),
+                           log(pi[2]) + normal_lpdf(y | mu[2], sigma[2]),
+                           log(pi[3]) + normal_lpdf(y | mu[3], sigma[3]),
+                           log(pi[4]) + normal_lpdf(y | mu[4], sigma[4]),
+                           log(pi[5]) + normal_lpdf(y | mu[5], sigma[5])});
     return density;
   }
   

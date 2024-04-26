@@ -54,12 +54,20 @@ abs_q <- function(p, qdist_est, qdist, d = 1) {
   abs(qdist_est(p) - qdist(p))^d
 }
 
+abs_punit <- function(x, ppitd_est, d = 1) {
+  abs(ppitd_est(x) - x)^d
+}
+
 
 wass_dist <- function(qdist_est, qdist, d = 1) {
   integrate(abs_q, lower = 0, upper = 1, qdist_est, qdist, d = d,
             subdivisions = 1500)$value^(1/d)
 }
 
+unit_wass_dist <- function(ppitd_est, d = 1) {
+  integrate(abs_punit, lower = 0, upper = 1, ppitd_est, d = d,
+            subdivisions = 3000)$value^(1/d)
+}
 
 make_stan_data <- function(data, size, m = 2, c = 3, sv = 3, nv = 3000,
                            pv = 3) {

@@ -10,6 +10,9 @@ library(distr)
 mod <- cmdstan_model(stan_file = 
                        './stan_models/fit_gaussian_mix5_quantiles.stan')
 
+indmod <- cmdstan_model(stan_file = 
+                          './stan_models/fit_gaussian_mix5_ind_quantiles.stan')
+
 comp <- 5
 n <- 400
 probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
@@ -62,6 +65,13 @@ sampsln <- mod$sample(data = datln,
                       iter_warmup = 5000,
                       iter_sampling = 2000,
                       chains = 1)
+
+indsampsln <- indmod$sample(data = datln,
+                      iter_warmup = 5000,
+                      iter_sampling = 2000,
+                      chains = 1)
+
+drawsindln <- indsampsln$draws(format = "df")
 
 drawsln <- sampsln$draws(format = "df")
 diagnosticsln <- sampsln$diagnostic_summary()

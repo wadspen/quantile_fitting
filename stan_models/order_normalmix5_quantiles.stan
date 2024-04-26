@@ -40,11 +40,11 @@ transformed parameters {
   pit = softmax(pi);
   
   for (i in 1:N)
-    U[i] = pit[1]*normal_cdf(Q[i], mus[1], sigmas[1]) + 
-           pit[2]*normal_cdf(Q[i], mus[2], sigmas[2]) +
-           pit[3]*normal_cdf(Q[i], mus[3], sigmas[3]) +
-           pit[4]*normal_cdf(Q[i], mus[4], sigmas[4]) +
-           pit[5]*normal_cdf(Q[i], mus[5], sigmas[5]);
+    U[i] = pit[1]*normal_cdf(Q[i]| mus[1], sigmas[1]) + 
+           pit[2]*normal_cdf(Q[i]| mus[2], sigmas[2]) +
+           pit[3]*normal_cdf(Q[i]| mus[3], sigmas[3]) +
+           pit[4]*normal_cdf(Q[i]| mus[4], sigmas[4]) +
+           pit[5]*normal_cdf(Q[i]| mus[5], sigmas[5]);
 }
 
 model {
@@ -54,14 +54,14 @@ model {
   n ~ normal(0, nv);
 
   
-  target += orderstatistics(n , N, p, U);
+  target += orderstatistics(n, N, p, U);
   
   for (i in 1:N)
-    target += log_sum_exp(normal_lpdf(Q[i] | mus[1], sigmas[1]),
-                          normal_lpdf(Q[i] | mus[2], sigmas[2]),
-                          normal_lpdf(Q[i] | mus[3], sigmas[3]),
-                          normal_lpdf(Q[i] | mus[4], sigmas[4]),
-                          normal_lpdf(Q[i] | mus[5], sigmas[5]));
+    target += log_sum_exp({log(pit[1]) + normal_lpdf(Q[i] | mus[1], sigmas[1]),
+                          log(pit[2]) + normal_lpdf(Q[i] | mus[2], sigmas[2]),
+                          log(pit[3]) + normal_lpdf(Q[i] | mus[3], sigmas[3]),
+                          log(pit[4]) + normal_lpdf(Q[i] | mus[4], sigmas[4]),
+                          log(pit[5]) + normal_lpdf(Q[i] | mus[5], sigmas[5])});
     
 }
 

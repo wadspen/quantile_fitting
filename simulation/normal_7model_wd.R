@@ -15,16 +15,16 @@ foreach::getDoParWorkers()
 registerDoMC(cores = n.cores)
 
 cltmod <- cmdstan_model(stan_file = 
-                       '../stan_models/simple_normal_quantiles.stan')
+                       '../stan_models/normal_quantiles.stan')
 
 indmod <- cmdstan_model(stan_file = 
-                          '../stan_models/ind_simple_normal_quantiles.stan')
+                          '../stan_models/ind_normal_quantiles.stan')
 
 ordmod <- cmdstan_model(stan_file = 
                           '../stan_models/order_normal_quantiles.stan')
 
 cltnmod <- cmdstan_model(stan_file = 
-                           '../stan_models/simple_normal_n_quantiles.stan')
+                           '../stan_models/normal_n_quantiles.stan')
 
 ordnmod <- cmdstan_model(stan_file = 
                           '../stan_models/order_normal_n_quantiles.stan')
@@ -119,8 +119,43 @@ source("./simulation_functions.R")
   
   
   #print("rep, n, p, length(probs), models, wd1s, wd2s") 
+  
+  
+  
+  
+  #unit draws
+  udraws_cltn <- pnorm(draws_cltn, mu, sigma)
+  udraws_ordn <- pnorm(draws_ordn, mu, sigma)
+  udraws_clt <- pnorm(draws_clt, mu, sigma)
+  udraws_ord <- pnorm(draws_ord, mu, sigma)
+  udraws_ind <- pnorm(draws_ind, mu, sigma)
+  
+  
+  #make unit ecdfs
+  pucltn <- function(x) {ecdf(udraws_cltn)(x)}
+  puordn <- function(x) {ecdf(udraws_ordn)(x)}
+  puclt <- function(x) {ecdf(udraws_clt)(x)}
+  puord <- function(x) {ecdf(udraws_ord)(x)}
+  puind <- function(x) {ecdf(udraws_ind)(x)}
+  qspline <- make_q_fn(probs, quantiles)
+  puspline <- function(x) {pnorm(qspline(x), mu, sigma)}
+  qkern <- function(p) {qkden(p, quantiles, kernel = "triangular")}
+  pukern <- function(x) {pnorm(qkern(x), mu, sigma)}
+  
+  
+  uwd1_cltn <- unit_wass_dist(pucltn, d = 1)
+  uwd1_ordn <- unit_wass_dist(puordn, d = 1)
+  uwd1_clt <- unit_wass_dist(puclt, d = 1)
+  uwd1_ord <- unit_wass_dist(puord, d = 1)
+  uwd1_ind <- unit_wass_dist(puind, d = 1)
+  uwd1_spline <- unit_wass_dist(puspline, d = 1)
+  uwd1_kern <- unit_wass_dist(pukern, d = 1)
+  
+  uwd1s <- c(uwd1_cltn, uwd1_ordn, uwd1_clt, uwd1_ord, uwd1_ind, uwd1_spline,
+             uwd1_kern)
+  
   data.frame(rep = replicate, n = n, probs = p, quants = length(probs), model = models, 
-             wd1 = wd1s, wd2 = wd2s)
+             wd1 = wd1s, wd2 = wd2s, uwd1 = uwd1s)
   
   
 

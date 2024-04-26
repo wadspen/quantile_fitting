@@ -21,11 +21,17 @@ functions{
     
     real density;
     
-    density = pi[1]*exp(normal_lpdf(y | mu[1], sigma[1])) + 
+    density = pi[1]*exp(normal_lpdf(y | mu[1], sigma[1])) +
               pi[2]*exp(normal_lpdf(y | mu[2], sigma[2])) +
               pi[3]*exp(normal_lpdf(y | mu[3], sigma[3])) +
               pi[4]*exp(normal_lpdf(y | mu[4], sigma[4])) +
               pi[5]*exp(normal_lpdf(y | mu[5], sigma[5]));
+              
+    // density = log_sum_exp({log(pi[1]) + normal_lpdf(y | mu[1], sigma[1]),
+    //                        log(pi[2]) + normal_lpdf(y | mu[2], sigma[2]),
+    //                        log(pi[3]) + normal_lpdf(y | mu[3], sigma[3]),
+    //                        log(pi[4]) + normal_lpdf(y | mu[4], sigma[4]),
+    //                        log(pi[5]) + normal_lpdf(y | mu[5], sigma[5])});
     
     return density;
   }
@@ -47,9 +53,9 @@ data {
 transformed data{
   real scaling_step = 1e-4;
   real rel_tol = 1e-13;
-  real f_tol = 1e-5;
-  int max_steps = 3000;
-  vector[1] y_guess = [1.0]';
+  real f_tol = 9e-2;
+  int max_steps = 7000;
+  vector[1] y_guess = [0.5]';
 }
 
 parameters {
@@ -72,13 +78,13 @@ transformed parameters {
   
   for (i in 1:N) {
     // // vector[1] Q_guess = [Q[i]]';
-    // Qi[i] = solve_powell_tol(GMInv_CDF, y_guess, 
-    //                          rel_tol, f_tol, max_steps,
-    //                          p[i], pit, mus, sigmas, N)[1];
-                             
-    Qi[i] = solve_newton_tol(GMInv_CDF, y_guess, 
-                             scaling_step, rel_tol, max_steps,
+    Qi[i] = solve_powell_tol(GMInv_CDF, y_guess,
+                             rel_tol, f_tol, max_steps,
                              p[i], pit, mus, sigmas, N)[1];
+                             
+    // Qi[i] = solve_newton_tol(GMInv_CDF, y_guess, 
+    //                          scaling_step, rel_tol, max_steps,
+    //                          p[i], pit, mus, sigmas, N)[1];
   }
   
   for (i in 1:N) {
