@@ -56,7 +56,7 @@ models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
 probs <- seq(0.05, .95, by = 0.05)
 # probs <- c(.025, .25, .5, .75, .975)
 text <- qnorm(.99, mu, sigma)
-reps <- 10
+reps <- 20
 
 distance <- foreach(replicate = 1:reps,
 		    .packages = c("cmdstanr", "evmix", "distfromq")
