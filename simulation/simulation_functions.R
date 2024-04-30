@@ -65,11 +65,13 @@ wass_dist <- function(qdist_est, qdist, d = 1) {
 }
 
 unit_wass_dist <- function(ppitd_est, d = 1) {
-  integrate(abs_punit, lower = 0, upper = 1, ppitd_est, d = d,
-            subdivisions = 3000)$value^(1/d)
+  (d + 1)*integrate(abs_punit, lower = 0, upper = 1, ppitd_est, d = d,
+            subdivisions = 3000)$value
 }
 
-make_stan_data <- function(data, size, m = 2, c = 3, sv = 3, nv = 3000,
+make_stan_data <- function(data, size, comps = 4, m = 2, c = 3, sv = 3, 
+                           comps = 4,
+                           nv = 3000,
                            pv = 3) {
   quantiles <- data$quantile
   probs <- data$prob
@@ -80,6 +82,7 @@ make_stan_data <- function(data, size, m = 2, c = 3, sv = 3, nv = 3000,
     Q = quantiles,
     inv_Phip = qnorm(probs),
     p = probs,
+    n_components = comps,
     m = m,
     c = c,
     sv = sv,
@@ -92,14 +95,23 @@ make_stan_data <- function(data, size, m = 2, c = 3, sv = 3, nv = 3000,
 
 
 run_stan_model <- function(mod, data_list, burn = 5000, sample = 5000, 
-                           num_chain = 1) {
+                           num_chain = 1, rfresh = 0, sampler = "MCMC",
+                           elbo = 1000, grad = 30, out_s = 1000) {
   
-  samps <- mod$sample(data = data_list,
-                      iter_warmup = burn,
-                      iter_sampling = sample,
-                      adapt_delta = .9999,
-		      chains = num_chain,
-                      refresh = 0)
+  if (sampler == "variational") {
+    samps <- mod$variational(data = data_list,
+                             elbo_samples = elbo,
+                             grad_samples = grad,
+                             output_samples = out_s)
+  } else {
+    samps <- mod$sample(data = data_list,
+                        iter_warmup = burn,
+                        iter_sampling = sample,
+                        adapt_delta = .9999,
+	  	      chains = num_chain,
+                        refresh = rfresh)
+    
+  }
  
   samps
 }
@@ -111,10 +123,13 @@ isolate_draws <- function(stan_samps, variable = "dist_samps") {
 }
 
 stan_fit_draws <- function(mod, data_list, burn = 5000, sample = 5000,
-                      num_chain = 1, variable = "dist_samps") {
+                      num_chain = 1, variable = "dist_samps", refresh = 0,
+                      sampler = "MCMC", elbo = 1000, grad = 30, out_s = 1000) {
 	
-  samps <- run_stan_model(mod, data_list, burn = 5000, sample = 5000, 
-                          num_chain = 1)
+  samps <- run_stan_model(mod, data_list, burn = burn, sample = sample, 
+                          num_chain = 1, rfresh = refresh,
+                          sampler = sampler, elbo = elbo, grad = grad,
+                          out_s = out_s)
   
   draws <- isolate_draws(samps, variable = "dist_samps")
   draws
