@@ -6,13 +6,13 @@ make_dist_string <- function(par1 = 0, par2 = 1, fam = "Norm") {
 }
 
 
-make_gaussian_mixture <- function(pars) {
-  mus <- pars$mu
-  sigmas <- pars$sigma
-  weights <- pars$weight
+make_gaussian_mixture <- function(mus, sigmas, weights) {
+  # mus <- pars$mu
+  # sigmas <- pars$sigma
+  # weights <- pars$weight
   
   dists <- list()
-  for (i in 1:nrow(pars)) {
+  for (i in 1:length(mu)) {
     dists[i] <- make_dist_string(mus[i], sigmas[i])
   }
   
@@ -69,8 +69,7 @@ unit_wass_dist <- function(ppitd_est, d = 1) {
             subdivisions = 3000)$value
 }
 
-make_stan_data <- function(data, size, comps = 4, m = 2, c = 3, sv = 3, 
-                           comps = 4,
+make_stan_data <- function(data, size, comps = 4, m = 2, c = 3, sv = 3,
                            nv = 3000,
                            pv = 3) {
   quantiles <- data$quantile
