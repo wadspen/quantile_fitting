@@ -69,6 +69,32 @@ unit_wass_dist <- function(ppitd_est, d = 1) {
             subdivisions = 3000)$value
 }
 
+
+
+psuedo_dist <- function(p1, p2) {
+  pi <- min(p1, p2)
+  pj <- max(p1, p2)
+  num <- pi*(1-pj)
+  den <- exp(-.5*(qnorm(pi)^2 + qnorm(pj)^2))
+  return(num/den)
+}
+
+
+
+make_qcorr <- function(probs) {
+  qcorr <- matrix(NA, nrow = length(probs), ncol = length(probs))
+  for (i in 1:length(probs)) {
+    for (j in 1:length(probs)) {
+      qcorr[i,j] <- psuedo_dist(probs[i], probs[j])
+    }
+  }
+  
+  return(2*pi*qcorr)
+  
+}
+
+
+
 make_stan_data <- function(data, size, comps = 4, m = 2, c = 3, sv = 3,
                            nv = 3000,
                            pv = 3) {
@@ -80,6 +106,7 @@ make_stan_data <- function(data, size, comps = 4, m = 2, c = 3, sv = 3,
     n = size,
     Q = quantiles,
     inv_Phip = qnorm(probs),
+    QCorr = make_qcorr(probs),
     p = probs,
     n_components = comps,
     m = m,
@@ -118,7 +145,12 @@ run_stan_model <- function(mod, data_list, burn = 5000, sample = 5000,
 
 isolate_draws <- function(stan_samps, variable = "dist_samps") {
   draws <- stan_samps$draws(format = "df")
-  draws$dist_samps
+  draws <- draws$dist_samps
+  summary <- stan_samps$summary() %>% 
+    filter(variable %in% c("mu", "sigma", "n")) %>% 
+    select(variable, q5, q95) %>% mutate(width = q95 - q5)
+  
+  return(list(draws = draws, summary = summary))
 }
 
 stan_fit_draws <- function(mod, data_list, burn = 5000, sample = 5000,
@@ -132,6 +164,35 @@ stan_fit_draws <- function(mod, data_list, burn = 5000, sample = 5000,
   
   draws <- isolate_draws(samps, variable = "dist_samps")
   draws
+}
+
+
+eval_sum <- function(summary, true_params) {
+  sum1 <- summary %>% 
+    left_join(true_params, by = "variable") %>% 
+    mutate(cover90 = between(truth, q5, q95)) %>% 
+    select(variable, width, cover90) %>% 
+    t() %>% 
+    row_to_names(1) %>% 
+    data.frame()
+  
+  width <- sum1[1,]
+  colnames(width) <- paste("width", colnames(width), sep = "_")
+  cover90 <- sum1[2,] 
+  colnames(cover90) <- paste("cover90", colnames(cover90), sep = "_")
+  
+  params_res <- cbind(width, cover90)
+  rownames(params_res) <- NULL
+  
+  if (sum(colnames(params_res) %in% c("width_n", "cover90_n")) == 0) {
+    blank_n <- data.frame(width_n = NA, cover90_n = NA)
+    params_res <- cbind(params_res, blank_n)
+  }
+  
+  params_res <- params_res %>% 
+    select(width_mu, width_sigma, width_n, cover90_mu, cover90_sigma, cover90_n)
+  return(params_res)
+  
 }
 
 

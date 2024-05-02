@@ -34,38 +34,45 @@ mod_loc <- "../stan_models/"
 #ordmod <- paste0(mod_loc, "order_normal_quantiles.stan")
 #indmod <- paste0(mod_loc, "ind_simple_normal_quantiles.stan")
 
-samp_sizes <- c(50, 100, 500, 1000, 5000)
+samp_sizes <- c(25, 50, 100, 500, 1000, 2000)
 levels <- list(
-	       c(.25, .5, .75),
-	       c(.25, .75),
-	       c(.025, .25, .75, .975),
-	       c(.025, .25, .5, .75, .975),
+  c(.2, .3, .4),
+  c(.4, .5, .6),
+  c(.05, .4, .5, .6, .95),
+  c(.3, .4, .5, .6, .7),
+  c(.2, .3, .4, .5, .6, .7, .8),
+  c(.01, .1, .2, .25, .5, .75, .8, .9, .99),
+  c(.1, .2, .3, .4, .5, .6, .7, .8, .9),
+  c(.01, .05, .1, .2, .3, .4, .5, .6, .7, .8, .9, .95, .99),
+  seq(.15, .85, by = .05),
+  seq(.1, .9, by = .05),
+  seq(.05, .95, by = .05),
+  c(.025, seq(.05, .95, by = .05), .975),
+  c(.01, .025, seq(.05, .95, by = .05), .975, .99))
 
-	       c(.025, seq(.05, .95, by = .05), .975),
-	       c(.01, .025, seq(.05, .95, by = .05), .975, .99))
+tails <- c(.5, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1)
 
-mu <- 1
-sigma <- 2.2
+mu <- 4
+sigma <- 3.5
 qtrue <- function(p) {qnorm(p, mu, sigma)}
 
-models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
+models <- c("cltn", "ordn", "clt", "ord", "ind", "kern", "spline")
 
-# probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
-probs <- seq(0.05, .95, by = 0.05)
-# probs <- c(.025, .25, .5, .75, .975)
-text <- qnorm(.99, mu, sigma)
 reps <- 20
 
+
+
 distance <- foreach(replicate = 1:reps,
-		    .packages = c("cmdstanr", "evmix", "distfromq")
+		    .packages = c("cmdstanr", "evmix", "distfromq", "dplyr", "tidyr",
+		                  "janitor")
 		    ,.errorhandling = "remove"
 		    ,.combine = rbind) %:%
 		foreach(n = samp_sizes, .combine = rbind) %:%
 			foreach(p = 1:length(levels), .combine = rbind) %dopar% {
- 
-#replicate = 2
-#n = 100
-#p = 3
+
+			  true_params <- data.frame(variable = c("mu", "sigma", "n"), 
+			                            truth = c(mu, sigma, n))
+
 source("./simulation_functions.R")
   samp <- rnorm(n, mu, sigma)
   probs <- levels[[p]]
@@ -75,58 +82,40 @@ source("./simulation_functions.R")
   stan_data <- make_stan_data(data, size = n)
   
   #fit models
-  draws_cltn <- stan_fit_draws(cltnmod, stan_data)
-  draws_ordn <- stan_fit_draws(ordnmod, stan_data)
-  draws_clt <- stan_fit_draws(cltmod, stan_data)
-  draws_ord <- stan_fit_draws(ordmod, stan_data)
-  draws_ind <- stan_fit_draws(indmod,stan_data)
+  fit_cltn <- stan_fit_draws(cltnmod, stan_data)
+  fit_ordn <- stan_fit_draws(ordnmod, stan_data)
+  fit_clt <- stan_fit_draws(cltmod, stan_data)
+  fit_ord <- stan_fit_draws(ordmod, stan_data)
+  fit_ind <- stan_fit_draws(indmod,stan_data)
+  
+  sum_cltn <- fit_cltn$summary
+  sum_ordn <- fit_ordn$summary
+  sum_clt <- fit_clt$summary
+  sum_ord <- fit_ord$summary
+  sum_ind <- fit_ind$summary
+  
+  sum_eval <- rbind(eval_sum(sum_cltn, true_params),
+                    eval_sum(sum_ordn, true_params),
+                    eval_sum(sum_clt, true_params),
+                    eval_sum(sum_ord, true_params),
+                    eval_sum(sum_ind, true_params)
+                    )
+  
+  sum_eval$model <- models[1:5]
+  
+  draws_cltn <- fit_cltn$draws
+  draws_ordn <- fit_cltn$draws
+  draws_clt <- fit_clt$draws
+  draws_ord <- fit_ord$draws
+  draws_ind <- fit_ind$draws
   
    
-  #make quantile functions
-  qcltn <- function(p) {quantile(draws_cltn, p)}
-  qordn <- function(p) {quantile(draws_ordn, p)}
-  qclt <- function(p) {quantile(draws_clt, p)}
-  qord <- function(p) {quantile(draws_ord, p)}
-  qind <- function(p) {quantile(draws_ind, p)}
-  #spline and kernel models go directly to quantile function
-  qspline <- make_q_fn(probs, quantiles)
-  qkern <- function(p) {qkden(p, quantiles, kernel = "triangular")}
-  
-  
-  #calculate 1wd
-  wd1_cltn <- wass_dist(qcltn, qtrue)
-  wd1_ordn <- wass_dist(qordn, qtrue)
-  wd1_clt <- wass_dist(qclt, qtrue)
-  wd1_ord <- wass_dist(qord, qtrue)
-  wd1_ind <- wass_dist(qind, qtrue)
-  wd1_spline <- wass_dist(qspline, qtrue)
-  wd1_kern <- wass_dist(qkern, qtrue)
-  
-  
-  #calculate 2wd
-  wd2_cltn <- wass_dist(qcltn, qtrue, d = 2)
-  wd2_ordn <- wass_dist(qordn, qtrue, d = 2)
-  wd2_clt <- wass_dist(qclt, qtrue, d = 2)
-  wd2_ord <- wass_dist(qord, qtrue, d = 2)
-  wd2_ind <- wass_dist(qind, qtrue, d = 2)
-  wd2_spline <- wass_dist(qspline, qtrue, d = 2)
-  wd2_kern <- wass_dist(qkern, qtrue, d = 2)
-  
-  wd1s <- c(wd1_cltn, wd1_ordn, wd1_clt, wd1_ord, wd1_ind, wd1_spline, wd1_kern)
-  wd2s <- c(wd2_cltn, wd2_ordn, wd2_clt, wd2_ord, wd2_ind, wd2_spline, wd2_kern)
-  
-  
-  #print("rep, n, p, length(probs), models, wd1s, wd2s") 
-  
-  
-  
-  
   #unit draws
-  udraws_cltn <- pnorm(draws_cltn, mu, sigma)
-  udraws_ordn <- pnorm(draws_ordn, mu, sigma)
-  udraws_clt <- pnorm(draws_clt, mu, sigma)
-  udraws_ord <- pnorm(draws_ord, mu, sigma)
-  udraws_ind <- pnorm(draws_ind, mu, sigma)
+  udraws_cltn <- pdist(draws_cltn)
+  udraws_ordn <- pdist(draws_ordn)
+  udraws_clt <- pdist(draws_clt)
+  udraws_ord <- pdist(draws_ord)
+  udraws_ind <- pdist(draws_ind)
   
   
   #make unit ecdfs
@@ -136,9 +125,9 @@ source("./simulation_functions.R")
   puord <- function(x) {ecdf(udraws_ord)(x)}
   puind <- function(x) {ecdf(udraws_ind)(x)}
   qspline <- make_q_fn(probs, quantiles)
-  puspline <- function(x) {pnorm(qspline(x), mu, sigma)}
-  qkern <- function(p) {qkden(p, quantiles, kernel = "triangular")}
-  pukern <- function(x) {pnorm(qkern(x), mu, sigma)}
+  puspline <- function(x) {pdist(qspline(x))}
+  qkern <- function(p) {qkden(p, quantiles, kernel = "gaussian")}
+  pukern <- function(x) {pdist(qkern(x))}
   
   
   uwd1_cltn <- unit_wass_dist(pucltn, d = 1)
@@ -149,18 +138,33 @@ source("./simulation_functions.R")
   uwd1_spline <- unit_wass_dist(puspline, d = 1)
   uwd1_kern <- unit_wass_dist(pukern, d = 1)
   
+  uwd2_cltn <- unit_wass_dist(pucltn, d = 2)
+  uwd2_ordn <- unit_wass_dist(puordn, d = 2)
+  uwd2_clt <- unit_wass_dist(puclt, d = 2)
+  uwd2_ord <- unit_wass_dist(puord, d = 2)
+  uwd2_ind <- unit_wass_dist(puind, d = 2)
+  uwd2_spline <- unit_wass_dist(puspline, d = 2)
+  uwd2_kern <- unit_wass_dist(pukern, d = 2)
+  
   uwd1s <- c(uwd1_cltn, uwd1_ordn, uwd1_clt, uwd1_ord, uwd1_ind, uwd1_spline,
              uwd1_kern)
+  uwd2s <- c(uwd2_cltn, uwd2_ordn, uwd2_clt, uwd2_ord, uwd2_ind, uwd2_spline,
+             uwd2_kern)
   
-  data.frame(rep = replicate, n = n, probs = p, quants = length(probs), model = models, 
-             wd1 = wd1s, wd2 = wd2s, uwd1 = uwd1s)
+  
+
+  
+  data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
+             tail = tails[p], model = models, uwd1 = uwd1s, uwd2 = uwd2s) %>% 
+    left_join(sum_eval, by = "model")
+    
   
   
 
 }
 
 
-write.csv(distance, "test.csv", row.names = FALSE)
+write.csv(distance, "results.csv", row.names = FALSE)
 
 
 

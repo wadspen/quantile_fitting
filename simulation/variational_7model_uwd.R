@@ -31,6 +31,9 @@ cltnmod <- cmdstan_model(stan_file =
 ordnmod <- cmdstan_model(stan_file =
                            '../stan_models/order_normal_n_mix4_quantiles.stan')
 
+metamod <- cmdstan_model(stan_file = 
+                           "../stan_models/metanorm_quantiles.stan")
+
 mod_loc <- "../stan_models/"
 
 #cltnmod <- paste0(mod_loc, "simple_normal_n_quantiles.stan")
@@ -60,13 +63,13 @@ omega <- 2.2
 alpha <- 12
 qtrue <- function(p) {qsn(p, xi, omega, alpha)}
 
-models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
+models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern", "meta")
 
 # probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
 probs <- seq(0.05, .95, by = 0.05)
 reps <- 1500
 
-distance <- foreach(rep = 1:reps,
+distance <- foreach(replicate = 1:reps,
                     .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
                                   "VGAM", "distr")
                     ,.errorhandling = "remove"
@@ -127,6 +130,11 @@ distance <- foreach(rep = 1:reps,
                                 elbo = 400, grad = 25,
                                 out_s = 2000)
     
+    draws_meta <- stan_fit_draws(metamod,stan_data,
+                                sampler = "variational",
+                                elbo = 400, grad = 25,
+                                out_s = 2000)
+    
     
     #unit draws
     udraws_cltn <- pdist(draws_cltn)
@@ -134,6 +142,7 @@ distance <- foreach(rep = 1:reps,
     udraws_clt <- pdist(draws_clt)
     udraws_ord <- pdist(draws_ord)
     udraws_ind <- pdist(draws_ind)
+    udraws_meta <- pdist(draws_meta)
     
     
     #make unit ecdfs
@@ -142,6 +151,7 @@ distance <- foreach(rep = 1:reps,
     puclt <- function(x) {ecdf(udraws_clt)(x)}
     puord <- function(x) {ecdf(udraws_ord)(x)}
     puind <- function(x) {ecdf(udraws_ind)(x)}
+    pumeta <- function(x) {ecdf(udraws_meta)(x)}
     qspline <- make_q_fn(probs, quantiles)
     puspline <- function(x) {pdist(qspline(x))}
     qkern <- function(p) {qkden(p, quantiles, kernel = "gaussian")}
@@ -153,6 +163,7 @@ distance <- foreach(rep = 1:reps,
     uwd1_clt <- unit_wass_dist(puclt, d = 1)
     uwd1_ord <- unit_wass_dist(puord, d = 1)
     uwd1_ind <- unit_wass_dist(puind, d = 1)
+    uwd1_meta <- unit_wass_dist(pumeta, d = 1)
     uwd1_spline <- unit_wass_dist(puspline, d = 1)
     uwd1_kern <- unit_wass_dist(pukern, d = 1)
     
@@ -161,17 +172,17 @@ distance <- foreach(rep = 1:reps,
     uwd2_clt <- unit_wass_dist(puclt, d = 2)
     uwd2_ord <- unit_wass_dist(puord, d = 2)
     uwd2_ind <- unit_wass_dist(puind, d = 2)
+    uwd2_meta <- unit_wass_dist(pumeta, d = 2)
     uwd2_spline <- unit_wass_dist(puspline, d = 2)
     uwd2_kern <- unit_wass_dist(pukern, d = 2)
     
     uwd1s <- c(uwd1_cltn, uwd1_ordn, uwd1_clt, uwd1_ord, uwd1_ind, uwd1_spline,
-               uwd1_kern)
+               uwd1_kern, uwd1_meta)
     uwd2s <- c(uwd2_cltn, uwd2_ordn, uwd2_clt, uwd2_ord, uwd2_ind, uwd2_spline,
-               uwd2_kern)
+               uwd2_kern, uwd2_meta)
     
-    data.frame(rep = rep, n = n, probs = p, quants = length(probs), 
-               model = models, 
-               uwd1 = uwd1s, uwd2 = uwd2s)
+    data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
+               tail = tails[p], model = models, uwd1 = uwd1s, uwd2 = uwd2s)
     
     
     
