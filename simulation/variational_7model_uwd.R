@@ -57,9 +57,7 @@ models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
 
 # probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
 probs <- seq(0.05, .95, by = 0.05)
-# probs <- c(.025, .25, .5, .75, .975)
-text <- qnorm(.99, mu, sigma)
-reps <- 30
+reps <- 2000
 
 distance <- foreach(rep = 1:reps,
                     .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
