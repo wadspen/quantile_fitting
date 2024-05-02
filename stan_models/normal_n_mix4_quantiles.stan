@@ -9,8 +9,8 @@ functions{
     // this encodes the cdf from which we want to sample
     cdf = pi[1]*exp(normal_lcdf(Q | mu[1], sigma[1])) +
           pi[2]*exp(normal_lcdf(Q | mu[2], sigma[2])) +
-          pi[3]*exp(normal_lcdf(Q | mu[3], sigma[3])) +
-          pi[4]*exp(normal_lcdf(Q | mu[4], sigma[4]))
+          pi[3]*exp(normal_lcdf(Q | mu[3], sigma[3])) //+
+          //pi[4]*exp(normal_lcdf(Q | mu[4], sigma[4]))
           ;
     z[1] = cdf - p;
     return z;
@@ -24,7 +24,7 @@ functions{
     density = pi[1]*(exp(normal_lpdf(y | mu[1], sigma[1]))) +
               pi[2]*(exp(normal_lpdf(y | mu[2], sigma[2]))) +
               pi[3]*(exp(normal_lpdf(y | mu[3], sigma[3]))) +
-              pi[4]*exp(normal_lpdf(y | mu[4], sigma[4])) +
+              //pi[4]*exp(normal_lpdf(y | mu[4], sigma[4])) +
               .00001;
               
     // density = log_sum_exp({log(pi[1]) + normal_lpdf(y | mu[1], sigma[1]),

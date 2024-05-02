@@ -97,7 +97,7 @@ distance <- foreach(rep = 1:reps,
     quantiles <- quantile(samp, probs)
     
     data <- data.frame(quantile = quantiles, prob = probs)
-    stan_data <- make_stan_data(data, size = n, comps = 4)
+    stan_data <- make_stan_data(data, size = n, comps = 3)
     
     #fit models
     draws_cltn <- stan_fit_draws(cltnmod, stan_data, 
