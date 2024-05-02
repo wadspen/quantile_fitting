@@ -13,7 +13,8 @@ foreach::getDoParRegistered()
 foreach::getDoParWorkers()
 registerDoMC(cores = n.cores)
 
-
+args <- commandArgs()
+dist <- args[6]
 
 cltmod <- cmdstan_model(stan_file = 
                           '../stan_models/normal_mix4_quantiles.stan')
@@ -38,16 +39,22 @@ mod_loc <- "../stan_models/"
 #ordmod <- paste0(mod_loc, "order_normal_quantiles.stan")
 #indmod <- paste0(mod_loc, "ind_simple_normal_quantiles.stan")
 
-samp_sizes <- c(50, 100, 500, 1000, 5000)
+samp_sizes <- c(25, 50, 100, 500, 1000, 2000)
 levels <- list(
-  c(.25, .5, .75),
-  c(.25, .75),
-  c(.025, .25, .75, .975),
-  c(.025, .25, .5, .75, .975),
-  
+  c(.4, .5, .6),
+  c(.05, .4, .5, .6, .95),
+  c(.3, .4, .5, .6, .7),
+  c(.2, .3, .4, .5, .6, .7, .8),
+  c(.01, .1, .2, .25, .5, .75, .8, .9, .99),
+  c(.1, .2, .3, .4, .5, .6, .7, .8, .9),
+  c(.01, .05, .1, .2, .3, .4, .5, .6, .7, .8, .9, .95, .99),
+  seq(.15, .85, by = .05),
+  seq(.1, .9, by = .05),
+  seq(.05, .95, by = .05),
   c(.025, seq(.05, .95, by = .05), .975),
   c(.01, .025, seq(.05, .95, by = .05), .975, .99))
 
+tails <- c(0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1)
 xi <- 1
 omega <- 2.2
 alpha <- 12
@@ -57,7 +64,7 @@ models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
 
 # probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
 probs <- seq(0.05, .95, by = 0.05)
-reps <- 2000
+reps <- 1500
 
 distance <- foreach(rep = 1:reps,
                     .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
@@ -86,11 +93,12 @@ distance <- foreach(rep = 1:reps,
       pars <- data.frame(mu = c(-.7, 1.2),
                          sigma = c(.9, .6),
                          weight = c(.35, .65))
-      mdist <- make_gaussian_mixture(pars)
+      mdist <- make_gaussian_mixture(pars$mu, pars$sigma, pars$weight)
       samp <- r(mdist)(n)
       pdist <- function(x) {p(mdist)(x)}
     }
     
+    tail <- tails[p]
     probs <- levels[[p]]
     quantiles <- quantile(samp, probs)
     
@@ -100,23 +108,23 @@ distance <- foreach(rep = 1:reps,
     #fit models
     draws_cltn <- stan_fit_draws(cltnmod, stan_data, 
                                  sampler = "variational",
-                                 elbo = 300, grad = 20,
+                                 elbo = 400, grad = 25,
                                  out_s = 2000)
     draws_ordn <- stan_fit_draws(ordnmod, stan_data, 
                                  sampler = "variational",
-                                 elbo = 300, grad = 20,
+                                 elbo = 400, grad = 25,
                                  out_s = 2000)
     draws_clt <- stan_fit_draws(cltmod, stan_data,
                                 sampler = "variational",
-                                elbo = 300, grad = 20,
+                                elbo = 400, grad = 25,
                                 out_s = 2000)
     draws_ord <- stan_fit_draws(ordmod, stan_data,
                                 sampler = "variational",
-                                elbo = 300, grad = 20,
+                                elbo = 400, grad = 25,
                                 out_s = 2000)
     draws_ind <- stan_fit_draws(indmod,stan_data,
                                 sampler = "variational",
-                                elbo = 300, grad = 20,
+                                elbo = 400, grad = 25,
                                 out_s = 2000)
     
     

@@ -12,7 +12,7 @@ make_gaussian_mixture <- function(mus, sigmas, weights) {
   # weights <- pars$weight
   
   dists <- list()
-  for (i in 1:length(mu)) {
+  for (i in 1:length(mus)) {
     dists[i] <- make_dist_string(mus[i], sigmas[i])
   }
   
