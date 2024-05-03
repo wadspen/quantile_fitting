@@ -171,10 +171,14 @@ eval_sum <- function(summary, true_params) {
   sum1 <- summary %>% 
     left_join(true_params, by = "variable") %>% 
     mutate(cover90 = between(truth, q5, q95)) %>% 
+    mutate(cover90 = as.numeric(cover90)) %>%
     select(variable, width, cover90) %>% 
     t() %>% 
     row_to_names(1) %>% 
-    data.frame()
+    data.frame() %>%
+    mutate_all(as.numeric)
+  
+  
   
   width <- sum1[1,]
   colnames(width) <- paste("width", colnames(width), sep = "_")
@@ -191,6 +195,7 @@ eval_sum <- function(summary, true_params) {
   
   params_res <- params_res %>% 
     select(width_mu, width_sigma, width_n, cover90_mu, cover90_sigma, cover90_n)
+
   return(params_res)
   
 }

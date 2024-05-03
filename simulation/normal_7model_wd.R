@@ -58,9 +58,9 @@ qtrue <- function(p) {qnorm(p, mu, sigma)}
 
 models <- c("cltn", "ordn", "clt", "ord", "ind", "kern", "spline")
 
-reps <- 20
+reps <- 2000
 
-
+pdist <- function(x) {pnorm(x, mu, sigma)} 
 
 distance <- foreach(replicate = 1:reps,
 		    .packages = c("cmdstanr", "evmix", "distfromq", "dplyr", "tidyr",
@@ -100,6 +100,8 @@ source("./simulation_functions.R")
                     eval_sum(sum_ord, true_params),
                     eval_sum(sum_ind, true_params)
                     )
+
+  
   
   sum_eval$model <- models[1:5]
   
