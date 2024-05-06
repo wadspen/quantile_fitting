@@ -23,9 +23,10 @@ functions{
     
     density = pi[1]*(exp(normal_lpdf(y | mu[1], sigma[1]))) +
               pi[2]*(exp(normal_lpdf(y | mu[2], sigma[2]))) +
-              pi[3]*(exp(normal_lpdf(y | mu[3], sigma[3]))) +
+              pi[3]*(exp(normal_lpdf(y | mu[3], sigma[3]))) //+
               //pi[4]*exp(normal_lpdf(y | mu[4], sigma[4])) +
-              .00001;
+              + .000001
+	      ;
               
     // density = log_sum_exp({log(pi[1]) + normal_lpdf(y | mu[1], sigma[1]),
     //                        log(pi[2]) + normal_lpdf(y | mu[2], sigma[2]),
@@ -75,13 +76,13 @@ transformed parameters {
   
   for (i in 1:N) {
     // // vector[1] Q_guess = [Q[i]]';
-    Qi[i] = solve_powell_tol(GMInv_CDF, y_guess,
-                             rel_tol, f_tol, max_steps,
-                             p[i], pit, mus, sigmas, N)[1];
+    //Qi[i] = solve_powell_tol(GMInv_CDF, y_guess,
+    //                         rel_tol, f_tol, max_steps,
+    //                         p[i], pit, mus, sigmas, N)[1];
                              
-    // Qi[i] = solve_newton_tol(GMInv_CDF, y_guess,
-    //                          scaling_step, f_tol, max_steps,
-    //                          p[i], pit, mus, sigmas, N)[1];
+    Qi[i] = solve_newton_tol(GMInv_CDF, y_guess,
+                             scaling_step, f_tol, max_steps,
+                             p[i], pit, mus, sigmas, N)[1];
   }
   
   for (i in 1:N) {
@@ -89,13 +90,16 @@ transformed parameters {
       
       q_var[i, j] = ((fmin(p[i],p[j])*(1 - fmax(p[i],p[j]))) / 
                     (n*GM_PDF(mus, sigmas, pit, Qi[i])*
-                     GM_PDF(mus, sigmas, pit, Qi[j]) + .000001)) +
-                     .000001;
+                     GM_PDF(mus, sigmas, pit, Qi[j]))) 
+                    //+ .000001
+		    ;
       
       q_var[j, i] = q_var[i, j];
       
     }
   }
+  
+  for (i in 1:N) q_var[i,i] = q_var[i,i] + .000001;
 
 }
 

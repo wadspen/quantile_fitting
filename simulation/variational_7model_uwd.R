@@ -16,6 +16,7 @@ registerDoMC(cores = n.cores)
 args <- commandArgs()
 dist <- args[6]
 
+dist <- "lp"
 cltmod <- cmdstan_model(stan_file = 
                           '../stan_models/normal_mix4_quantiles.stan')
 
@@ -42,22 +43,24 @@ mod_loc <- "../stan_models/"
 #ordmod <- paste0(mod_loc, "order_normal_quantiles.stan")
 #indmod <- paste0(mod_loc, "ind_simple_normal_quantiles.stan")
 
-samp_sizes <- c(25, 50, 100, 500, 1000, 2000)
+samp_sizes <- c(25, 50)#, 100, 500, 1000, 2000)
 levels <- list(
-  c(.4, .5, .6),
-  c(.05, .4, .5, .6, .95),
-  c(.3, .4, .5, .6, .7),
-  c(.2, .3, .4, .5, .6, .7, .8),
-  c(.01, .1, .2, .25, .5, .75, .8, .9, .99),
-  c(.1, .2, .3, .4, .5, .6, .7, .8, .9),
-  c(.01, .05, .1, .2, .3, .4, .5, .6, .7, .8, .9, .95, .99),
-  seq(.15, .85, by = .05),
-  seq(.1, .9, by = .05),
-  seq(.05, .95, by = .05),
-  c(.025, seq(.05, .95, by = .05), .975),
-  c(.01, .025, seq(.05, .95, by = .05), .975, .99))
+  c(.25, .75))#,
+  #c(.025, .975),
+  #c(.4, .5, .6),
+  #c(.05, .4, .5, .6, .95),
+  #c(.3, .4, .5, .6, .7),
+  #c(.2, .3, .4, .5, .6, .7, .8),
+  #c(.01, .1, .2, .25, .5, .75, .8, .9, .99),
+  #c(.1, .2, .3, .4, .5, .6, .7, .8, .9),
+  #c(.01, .05, .1, .2, .3, .4, .5, .6, .7, .8, .9, .95, .99),
+  #seq(.15, .85, by = .05),
+  #seq(.1, .9, by = .05),
+  #seq(.05, .95, by = .05),
+  #c(.025, seq(.05, .95, by = .05), .975),
+  #c(.01, .025, seq(.05, .95, by = .05), .975, .99))
 
-tails <- c(0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1)
+tails <- c(0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1)
 xi <- 1
 omega <- 2.2
 alpha <- 12
@@ -67,12 +70,12 @@ models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern", "meta")
 
 # probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
 probs <- seq(0.05, .95, by = 0.05)
-reps <- 1500
+reps <- 2
 
 distance <- foreach(replicate = 1:reps,
                     .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
-                                  "VGAM", "distr")
-                    ,.errorhandling = "remove"
+                                  "VGAM", "distr", "dplyr")
+                    ,.errorhandling = "stop"
                     ,.combine = rbind) %:%
   foreach(n = samp_sizes, .combine = rbind) %:%
   foreach(p = 1:length(levels), .combine = rbind) %dopar% {
@@ -108,41 +111,43 @@ distance <- foreach(replicate = 1:reps,
     data <- data.frame(quantile = quantiles, prob = probs)
     stan_data <- make_stan_data(data, size = n, comps = 3)
     
+    saveRDS(list(2), "test0.rds") 
     #fit models
-    draws_cltn <- stan_fit_draws(cltnmod, stan_data, 
+    fit_cltn <- stan_fit_draws(cltnmod, stan_data, 
+                                 sampler = "MCMC",
+                                 elbo = 400, grad = 25,
+                                 out_s = 2000, refresh = 100)
+    fit_ordn <- stan_fit_draws(ordnmod, stan_data, 
                                  sampler = "variational",
                                  elbo = 400, grad = 25,
                                  out_s = 2000)
-    draws_ordn <- stan_fit_draws(ordnmod, stan_data, 
-                                 sampler = "variational",
-                                 elbo = 400, grad = 25,
-                                 out_s = 2000)
-    draws_clt <- stan_fit_draws(cltmod, stan_data,
+    #fit_clt <- stan_fit_draws(cltmod, stan_data,
+    #                            sampler = "variational",
+    #                            elbo = 400, grad = 25,
+    #                            out_s = 2000)
+    fit_ord <- stan_fit_draws(ordmod, stan_data,
                                 sampler = "variational",
                                 elbo = 400, grad = 25,
                                 out_s = 2000)
-    draws_ord <- stan_fit_draws(ordmod, stan_data,
-                                sampler = "variational",
-                                elbo = 400, grad = 25,
-                                out_s = 2000)
-    draws_ind <- stan_fit_draws(indmod,stan_data,
-                                sampler = "variational",
-                                elbo = 400, grad = 25,
-                                out_s = 2000)
-    
-    draws_meta <- stan_fit_draws(metamod,stan_data,
+    saveRDS(list(.5) , "test.5.rds")
+    fit_ind <- stan_fit_draws(indmod,stan_data,
                                 sampler = "variational",
                                 elbo = 400, grad = 25,
                                 out_s = 2000)
     
+    fit_meta <- stan_fit_draws(metamod,stan_data,
+                                sampler = "variational",
+                                elbo = 400, grad = 25,
+                                out_s = 2000)
     
+    saveRDS(list(4), "test1.rds") 
     #unit draws
-    udraws_cltn <- pdist(draws_cltn)
-    udraws_ordn <- pdist(draws_ordn)
-    udraws_clt <- pdist(draws_clt)
-    udraws_ord <- pdist(draws_ord)
-    udraws_ind <- pdist(draws_ind)
-    udraws_meta <- pdist(draws_meta)
+    udraws_cltn <- pdist(fit_cltn$draws)
+    udraws_ordn <- pdist(fit_ordn$draws)
+    udraws_clt <- pdist(fit_clt$draws)
+    udraws_ord <- pdist(fit_ord$draws)
+    udraws_ind <- pdist(fit_ind$draws)
+    udraws_meta <- pdist(fit_meta$draws)
     
     
     #make unit ecdfs
@@ -175,14 +180,17 @@ distance <- foreach(replicate = 1:reps,
     uwd2_meta <- unit_wass_dist(pumeta, d = 2)
     uwd2_spline <- unit_wass_dist(puspline, d = 2)
     uwd2_kern <- unit_wass_dist(pukern, d = 2)
-    
+    saveRDS(list(2), "test2.rds") 
     uwd1s <- c(uwd1_cltn, uwd1_ordn, uwd1_clt, uwd1_ord, uwd1_ind, uwd1_spline,
                uwd1_kern, uwd1_meta)
     uwd2s <- c(uwd2_cltn, uwd2_ordn, uwd2_clt, uwd2_ord, uwd2_ind, uwd2_spline,
                uwd2_kern, uwd2_meta)
     
-    data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
+     
+    test <- data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
                tail = tails[p], model = models, uwd1 = uwd1s, uwd2 = uwd2s)
+
+    saveRDS(test, "test.rds")
     
     
     

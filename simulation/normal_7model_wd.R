@@ -58,7 +58,7 @@ qtrue <- function(p) {qnorm(p, mu, sigma)}
 
 models <- c("cltn", "ordn", "clt", "ord", "ind", "kern", "spline")
 
-reps <- 2000
+reps <- 1000
 
 pdist <- function(x) {pnorm(x, mu, sigma)} 
 
