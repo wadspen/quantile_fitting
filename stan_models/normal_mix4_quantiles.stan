@@ -90,7 +90,7 @@ transformed parameters {
       
       q_var[i, j] = ((fmin(p[i],p[j])*(1 - fmax(p[i],p[j]))) / 
                     (n*GM_PDF(mus, sigmas, pit, Qi[i])*
-                     GM_PDF(mus, sigmas, pit, Qi[j]))) +
+                     GM_PDF(mus, sigmas, pit, Qi[j])))
                      ;
       
       q_var[j, i] = q_var[i, j];
