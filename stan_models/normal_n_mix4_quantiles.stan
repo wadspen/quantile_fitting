@@ -52,15 +52,15 @@ data {
 }
 
 transformed data{
-  real scaling_step = 1e-5;
+  real scaling_step = 1e-2;
   real rel_tol = 1e-6;
   real f_tol = 1;
-  int max_steps = 3000;
+  int max_steps = 500;
   vector[1] y_guess = [0.5]';
 }
 
 parameters {
-  ordered[n_components] mus;
+  vector[n_components] mus;
   vector<lower=0>[n_components] sigmas;
   vector<lower=0,upper=1>[n_components] pi;
 
@@ -76,13 +76,13 @@ transformed parameters {
   
   for (i in 1:N) {
     // // vector[1] Q_guess = [Q[i]]';
-    //Qi[i] = solve_powell_tol(GMInv_CDF, y_guess,
-    //                         rel_tol, f_tol, max_steps,
-    //                         p[i], pit, mus, sigmas, N)[1];
-                             
-    Qi[i] = solve_newton_tol(GMInv_CDF, y_guess,
-                             scaling_step, f_tol, max_steps,
+    Qi[i] = solve_powell_tol(GMInv_CDF, y_guess,
+                             rel_tol, f_tol, max_steps,
                              p[i], pit, mus, sigmas, N)[1];
+                             
+    //Qi[i] = solve_newton_tol(GMInv_CDF, y_guess,
+    //                         scaling_step, f_tol, max_steps,
+    //                         p[i], pit, mus, sigmas, N)[1];
   }
   
   for (i in 1:N) {
@@ -99,7 +99,7 @@ transformed parameters {
     }
   }
   
-  for (i in 1:N) q_var[i,i] = q_var[i,i] + .000001;
+  for (i in 1:N) q_var[i,i] = q_var[i,i] + .0000001;
 
 }
 

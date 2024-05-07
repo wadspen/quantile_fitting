@@ -46,15 +46,15 @@ data {
 }
 
 transformed data{
-  real scaling_step = 1e-4;
+  real scaling_step = 1e-2;
   real rel_tol = 1e-6;
   real f_tol = 1;
-  int max_steps = 3000;
+  int max_steps = 500;
   vector[1] y_guess = [0.5]';
 }
 
 parameters {
-  ordered[n_components] mus;
+  vector[n_components] mus;
   vector<lower=0>[n_components] sigmas;
   real<lower=0> n;
   vector<lower=0,upper=1>[n_components] pi;

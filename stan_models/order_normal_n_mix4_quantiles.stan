@@ -28,7 +28,7 @@ data {
 }
 
 parameters {
-  ordered[n_components] mus;
+  vector[n_components] mus;
   vector<lower=0>[n_components] sigmas;
   vector<lower=0,upper=1>[n_components] pi;
 }

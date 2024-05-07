@@ -146,9 +146,10 @@ run_stan_model <- function(mod, data_list, burn = 5000, sample = 5000,
 isolate_draws <- function(stan_samps, variable = "dist_samps") {
   draws <- stan_samps$draws(format = "df")
   draws <- draws$dist_samps
-  summary <- stan_samps$summary() %>% 
+  summary <- stan_samps$summary()
+  summary <- summary %>% 
     filter(variable %in% c("mu", "sigma", "n")) %>% 
-    select(variable, q5, q95) %>% mutate(width = q95 - q5)
+    dplyr::select(variable, q5, q95) %>% mutate(width = q95 - q5)
   
   return(list(draws = draws, summary = summary))
 }
