@@ -80,12 +80,9 @@ distance <- foreach(replicate = 1:reps,
   foreach(n = samp_sizes, .combine = rbind) %:%
   foreach(p = 1:length(levels), .combine = rbind) %dopar% {
     
-    #replicate = 2
-    #n = 100
-    #p = 3
+    
     source("./simulation_functions.R")
-    # samp <- rsn(n, xi, omega, alpha)
-    # samp <- r(mixdist)(n)
+    
     if (dist == "norm") {
       samp <- rnorm(n)
       pdist <- function(x) {pnorm(x)}
@@ -96,7 +93,7 @@ distance <- foreach(replicate = 1:reps,
       samp <- rlaplace(n)
       pdist <- function(x) {plaplace(x)}
     } else if (dist == "gmix") {
-      pars <- data.frame(mu = c(-.7, 1.2),
+      pars <- data.frame(mu = c(-1, 1.2),
                          sigma = c(.9, .6),
                          weight = c(.35, .65))
       mdist <- make_gaussian_mixture(pars$mu, pars$sigma, pars$weight)
@@ -111,36 +108,36 @@ distance <- foreach(replicate = 1:reps,
     data <- data.frame(quantile = quantiles, prob = probs)
     stan_data <- make_stan_data(data, size = n, comps = 3)
     
-    saveRDS(list(2), "test0.rds") 
+    
     #fit models
     fit_cltn <- stan_fit_draws(cltnmod, stan_data, 
-                                 sampler = "MCMC",
-                                 elbo = 400, grad = 25,
+                                 sampler = "variational",
+                                 elbo = 300, grad = 10,
                                  out_s = 2000, refresh = 100)
     fit_ordn <- stan_fit_draws(ordnmod, stan_data, 
                                  sampler = "variational",
-                                 elbo = 400, grad = 25,
+                                 elbo = 300, grad = 10,
                                  out_s = 2000)
-    #fit_clt <- stan_fit_draws(cltmod, stan_data,
-    #                            sampler = "variational",
-    #                            elbo = 400, grad = 25,
-    #                            out_s = 2000)
+    fit_clt <- stan_fit_draws(cltmod, stan_data,
+                               sampler = "variational",
+                               elbo = 300, grad = 10,
+                               out_s = 2000)
     fit_ord <- stan_fit_draws(ordmod, stan_data,
                                 sampler = "variational",
-                                elbo = 400, grad = 25,
+                                elbo = 300, grad = 10,
                                 out_s = 2000)
-    saveRDS(list(.5) , "test.5.rds")
+    
     fit_ind <- stan_fit_draws(indmod,stan_data,
                                 sampler = "variational",
-                                elbo = 400, grad = 25,
+                                elbo = 300, grad = 10,
                                 out_s = 2000)
     
     fit_meta <- stan_fit_draws(metamod,stan_data,
                                 sampler = "variational",
-                                elbo = 400, grad = 25,
+                                elbo = 300, grad = 10,
                                 out_s = 2000)
     
-    saveRDS(list(4), "test1.rds") 
+    
     #unit draws
     udraws_cltn <- pdist(fit_cltn$draws)
     udraws_ordn <- pdist(fit_ordn$draws)
@@ -180,17 +177,17 @@ distance <- foreach(replicate = 1:reps,
     uwd2_meta <- unit_wass_dist(pumeta, d = 2)
     uwd2_spline <- unit_wass_dist(puspline, d = 2)
     uwd2_kern <- unit_wass_dist(pukern, d = 2)
-    saveRDS(list(2), "test2.rds") 
+    
     uwd1s <- c(uwd1_cltn, uwd1_ordn, uwd1_clt, uwd1_ord, uwd1_ind, uwd1_spline,
                uwd1_kern, uwd1_meta)
     uwd2s <- c(uwd2_cltn, uwd2_ordn, uwd2_clt, uwd2_ord, uwd2_ind, uwd2_spline,
                uwd2_kern, uwd2_meta)
     
      
-    test <- data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
+    data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
                tail = tails[p], model = models, uwd1 = uwd1s, uwd2 = uwd2s)
 
-    saveRDS(test, "test.rds")
+    
     
     
     
