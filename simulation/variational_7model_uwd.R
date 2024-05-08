@@ -16,7 +16,7 @@ registerDoMC(cores = n.cores)
 args <- commandArgs()
 dist <- args[6]
 
-dist <- "lp"
+
 cltmod <- cmdstan_model(stan_file = 
                           '../stan_models/normal_mix4_quantiles.stan')
 
@@ -73,12 +73,12 @@ models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern", "meta")
 
 # probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
 probs <- seq(0.05, .95, by = 0.05)
-reps <- 2
+reps <- 1000
 
 distance <- foreach(replicate = 1:reps,
                     .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
                                   "VGAM", "distr", "dplyr")
-                    ,.errorhandling = "stop"
+                    ,.errorhandling = "remove"
                     ,.combine = rbind) %:%
   foreach(n = samp_sizes, .combine = rbind) %:%
   foreach(p = 1:length(levels), .combine = rbind) %dopar% {
