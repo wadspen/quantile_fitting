@@ -126,7 +126,7 @@ source("./simulation_functions.R")
   sum_eval$model <- models[1:5]
   
   draws_cltn <- fit_cltn$draws
-  draws_ordn <- fit_cltn$draws
+  draws_ordn <- fit_ordn$draws
   draws_clt <- fit_clt$draws
   draws_ord <- fit_ord$draws
   draws_ind <- fit_ind$draws
@@ -203,7 +203,7 @@ source("./simulation_functions.R")
 }
 
 
-write.csv(distance, "results2.csv", row.names = FALSE)
+write.csv(distance, "results.csv", row.names = FALSE)
 
 
 
