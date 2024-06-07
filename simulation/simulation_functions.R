@@ -79,17 +79,25 @@ psuedo_dist <- function(p1, p2) {
   return(num/den)
 }
 
+brownian_corr <- function(p1, p2) {
+  pi <- min(p1, p2)
+  pj <- max(p1, p2)
+  return(pi*(1-pj))
+}
+
 
 
 make_qcorr <- function(probs) {
   qcorr <- matrix(NA, nrow = length(probs), ncol = length(probs))
   for (i in 1:length(probs)) {
     for (j in 1:length(probs)) {
-      qcorr[i,j] <- psuedo_dist(probs[i], probs[j])
+      # qcorr[i,j] <- psuedo_dist(probs[i], probs[j])
+      qcorr[i,j] <- brownian_corr(probs[i], probs[j])
     }
   }
   
-  return(2*pi*qcorr)
+  # return(2*pi*qcorr)
+  return(qcorr)
   
 }
 
@@ -97,7 +105,7 @@ make_qcorr <- function(probs) {
 
 make_stan_data <- function(data, size, comps = 4, m = 2, c = 3, sv = 3,
                            nv = 3000,
-                           pv = 3) {
+                           pv = 3, alpha = 1) {
   quantiles <- data$quantile
   probs <- data$prob
 
@@ -113,7 +121,8 @@ make_stan_data <- function(data, size, comps = 4, m = 2, c = 3, sv = 3,
     c = c,
     sv = sv,
     nv = nv,
-    pv = pv
+    pv = pv, 
+    alpha = rep(alpha, comps)
   )
   
   dat

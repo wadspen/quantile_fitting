@@ -24,30 +24,35 @@ data {
   real<lower=0> c; 
   real<lower=0> sv; // sd prior sd
   real<lower=0> nv; // n prior sd
+  vector[n_components] alpha;
 }
 
 parameters {
   vector[n_components] mus;
   vector<lower=0>[n_components] sigmas;
   real<lower=0> n;
-  vector<lower=0,upper=1>[n_components] pi;
+  // vector<lower=0,upper=1>[n_components] pi;
+  simplex[n_components] pi;
 }
 
 transformed parameters {
   vector[N] U;
-  vector[n_components] pit;
+  // vector[n_components] pit;
   
-  pit = softmax(pi);
+  // pit = softmax(pi);
   
   for (i in 1:N)
-    U[i] = pit[1]*normal_cdf(Q[i]| mus[1], sigmas[1]) + 
-           pit[2]*normal_cdf(Q[i]| mus[2], sigmas[2]) +
-           pit[3]*normal_cdf(Q[i]| mus[3], sigmas[3]);// +
-           //pit[4]*normal_cdf(Q[i]| mus[4], sigmas[4]);
+    U[i] = pi[1]*normal_cdf(Q[i]| mus[1], sigmas[1]) + 
+           pi[2]*normal_cdf(Q[i]| mus[2], sigmas[2]) +
+           pi[3]*normal_cdf(Q[i]| mus[3], sigmas[3])
+           + pi[4]*normal_cdf(Q[i]| mus[4], sigmas[4])
+           //+ pi[5]*normal_cdf(Q[i] | mus[5], sigmas[5])
+           ;
 }
 
 model {
-  pi ~ normal(4,5);
+  // pi ~ normal(4,5);
+  pi ~ dirichlet(alpha);
   mus ~ normal(4, 5);
   sigmas ~ normal(0,7);
   n ~ normal(0, nv);
@@ -56,17 +61,19 @@ model {
   target += orderstatistics(n, N, p, U);
   
   for (i in 1:N)
-    target += log_sum_exp({log(pit[1]) + normal_lpdf(Q[i] | mus[1], sigmas[1]),
-                          log(pit[2]) + normal_lpdf(Q[i] | mus[2], sigmas[2]),
-                          log(pit[3]) + normal_lpdf(Q[i] | mus[3], sigmas[3])});//,
-                          //log(pit[4]) + normal_lpdf(Q[i] | mus[4], sigmas[4])});
+    target += log_sum_exp({log(pi[1]) + normal_lpdf(Q[i] | mus[1], sigmas[1]),
+                          log(pi[2]) + normal_lpdf(Q[i] | mus[2], sigmas[2]),
+                          log(pi[3]) + normal_lpdf(Q[i] | mus[3], sigmas[3]),
+                          log(pi[4]) + normal_lpdf(Q[i] | mus[4], sigmas[4])
+                          //,log(pi[5]) + normal_lpdf(Q[i] | mus[5], sigmas[5])
+                          });
     
 }
 
 generated quantities {
   vector[N] pred_q;
   real dist_samps;
-  int samp_comp = categorical_rng(pit);
+  int samp_comp = categorical_rng(pi);
   dist_samps = normal_rng(mus[samp_comp], sigmas[samp_comp]);
 }
 
