@@ -59,9 +59,6 @@ all_forecasts <- forecasts <- foreach(mod = models,
                  output_type == "quantile") %>% 
           unique()
         
-        forecast %>%
-          ggplot() +
-          geom_point(aes(x = output_type_id, y = log(value + 1)))
         
         quantiles <- log(as.numeric(forecast$value) + 1)
         probs <- as.numeric(forecast$output_type_id)
