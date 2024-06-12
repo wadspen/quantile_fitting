@@ -1,5 +1,5 @@
-source("~/flu_research/nonlinear_flu_forecast/get_data_functions.R")
 setwd("~/quantile_fitting/")
+source("./simulation/simulation_functions.R")
 library(cmdstanr)
 library(evmix)
 library(parallel)

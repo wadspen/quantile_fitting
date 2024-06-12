@@ -1,4 +1,5 @@
 source("./simulation_functions.R")
+setwd("~/quantile_fitting/simulation/")
 library(cmdstanr)
 library(distr)
 library(distfromq)
@@ -18,10 +19,10 @@ dist <- args[6]
 
 
 cltmod <- cmdstan_model(stan_file = 
-                          '../stan_models/normal_mix4_quantiles.stan')
+                          '../stan_models/normal_t_mix4_quantiles.stan')
 
 indmod <- cmdstan_model(stan_file = 
-                          '../stan_models/normal_mix4_ind_quantiles.stan')
+                          '../stan_models/normal_t_mix4_ind_quantiles.stan')
 
 ordmod <- cmdstan_model(stan_file = 
                           '../stan_models/order_normal_mix4_quantiles.stan')
@@ -112,7 +113,7 @@ distance <- foreach(replicate = 1:reps,
     quantiles <- quantile(samp, probs)
     
     data <- data.frame(quantile = quantiles, prob = probs)
-    stan_data <- make_stan_data(data, size = n, comps = 3)
+    stan_data <- make_stan_data(data, size = n, comps = 5)
     
     
     #fit models
@@ -125,16 +126,19 @@ distance <- foreach(replicate = 1:reps,
                                  elbo = 300, grad = 10,
                                  out_s = 2000)
     fit_clt <- stan_fit_draws(cltmod, stan_data,
-                               sampler = "variational",
+                               sampler = "MCMC", refresh = 10, burn = 2000,
+                              samp = 2000,
                                elbo = 300, grad = 10,
-                               out_s = 2000)
+                               out_s = 10000)
     fit_ord <- stan_fit_draws(ordmod, stan_data,
-                                sampler = "variational",
+                                sampler = "MCMC", refresh = 10,
+                                burn = 2000, samp = 2000,
                                 elbo = 300, grad = 10,
-                                out_s = 2000)
+                                out_s = 10000)
     
     fit_ind <- stan_fit_draws(indmod,stan_data,
-                                sampler = "variational",
+                                sampler = "MCMC", burn = 2000, samp = 2000,
+                                refresh = 10,
                                 elbo = 300, grad = 10,
                                 out_s = 2000)
     
@@ -169,7 +173,7 @@ distance <- foreach(replicate = 1:reps,
     punorm <- function(x) {ecdf(udraws_norm)(x)}
     qspline <- make_q_fn(probs, quantiles)
     puspline <- function(x) {pdist(qspline(x))}
-    qkern <- function(p) {qkden(p, quantiles, kernel = "gaussian")}
+    qkern <- function(p) {qkden(p, quantiles, kernel = "epanechnikov")}
     pukern <- function(x) {pdist(qkern(x))}
     
     
