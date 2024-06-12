@@ -1,4 +1,4 @@
-setwd("~/quantile_fitting/")
+setwd("../")
 source("./simulation/simulation_functions.R")
 library(cmdstanr)
 library(evmix)
@@ -12,15 +12,18 @@ qgp_stan <- cmdstan_model(stan_file =
 burn <- 6000
 sample <- 7000
 
-mod_loc <- "~/forecast-hub/FluSight-forecast-hub/model-output/"
+mod_loc <- "../FluSight-forecast-hub/model-output/"
 models <- list.files(mod_loc)
 sub_dates <- substr(list.files(paste0(mod_loc, "FluSight-baseline")), 1, 10)
 horizons <- -1:3
-# get_loc_file <- list.files(paste0(mod_loc, "FluSight-baseline/"))[4]
-# get_loc_forc <- read.csv(paste0(mod_loc, "FluSight-baseline/", get_loc_file))
+get_loc_file <- list.files(paste0(mod_loc, "FluSight-baseline/"))[4]
+get_loc_forc <- read.csv(paste0(mod_loc, "FluSight-baseline/", get_loc_file))
 locations <- unique(get_loc_forc$location)
 
-
+locations <- locations[3:5]
+sub_dates <- locations[4:6]
+horizons <- 1:2
+models <- models[6:7]
 
 
 all_forecasts <- forecasts <- foreach(mod = models,
@@ -78,17 +81,20 @@ all_forecasts <- forecasts <- foreach(mod = models,
         
         
         draws <- stan_samp$draws(format = "df")
-        saveRDS(draws, paste0("model-fits/", mod, "/draws/", date, "-", mod,
+        saveRDS(draws, paste0("model-fits/", mod, "/draws/", date, "-", loc,
+			      "-", h, "-", mod,
                               ".rds"))
         
         summary <- stan_samp$summary()
         saveRDS(summary, paste0("model-fits/", mod, 
-                                "/summary_diagnostics/", date, "-", mod, "_",
+                                "/summary_diagnostics/", date, "-", loc,
+				"-", h, "-", mod, "_",
                               "summary.rds"))
         
         diagnostics <- stan_samp$diagnostic_summary()
         saveRDS(diagnostics, paste0("model-fits/", mod, 
-                                "/summary_diagnostics/", date, "-", mod, "_",
+                                "/summary_diagnostics/", date, "-", loc,
+				"-", h, "-", mod, "_",
                                 "diagnostics.rds"))
         
         dist_samp <- draws$dist_samp
