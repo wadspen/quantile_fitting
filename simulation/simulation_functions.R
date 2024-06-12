@@ -103,7 +103,7 @@ make_qcorr <- function(probs) {
 
 
 
-make_stan_data <- function(data, size, comps = 4, m = 2, c = 3, sv = 3,
+make_stan_data <- function(data, size, comps = 4, m = 5, c = 7, sv = 6,
                            nv = 3000,
                            pv = 3, alpha = 1) {
   quantiles <- data$quantile

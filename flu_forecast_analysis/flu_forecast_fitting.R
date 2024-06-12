@@ -7,7 +7,7 @@ library(doParallel)
 library(doMC)
 
 qgp_stan <- cmdstan_model(stan_file = 
-                          './stan_models/normal_t_mix4_quantiles.stan')
+                          './stan_models/cdf_quantile_normal_mix4.stan')
 
 burn <- 6000
 sample <- 7000
@@ -15,15 +15,15 @@ sample <- 7000
 mod_loc <- "~/forecast-hub/FluSight-forecast-hub/model-output/"
 models <- list.files(mod_loc)
 sub_dates <- substr(list.files(paste0(mod_loc, "FluSight-baseline")), 1, 10)
-horizons <- 0:3
-get_loc_file <- list.files(paste0(mod_loc, "FluSight-baseline/"))[4]
-get_loc_forc <- read.csv(paste0(mod_loc, "FluSight-baseline/", get_loc_file))
+horizons <- -1:3
+# get_loc_file <- list.files(paste0(mod_loc, "FluSight-baseline/"))[4]
+# get_loc_forc <- read.csv(paste0(mod_loc, "FluSight-baseline/", get_loc_file))
 locations <- unique(get_loc_forc$location)
 
 
 
 
-forecasts <- foreach(mod = models,
+all_forecasts <- forecasts <- foreach(mod = models,
         .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
                       "VGAM", "distr", "dplyr")
         ,.errorhandling = "remove"
@@ -43,6 +43,11 @@ forecasts <- foreach(mod = models,
         
         if (dir.exists(paste0("model-fits/", mod, "/forecasts")) == FALSE) {
           dir.create(paste0("model-fits/", mod, "/forecasts"))
+        }
+        
+        if (dir.exists(paste0("model-fits/", mod, 
+                              "/summary_diagnostics")) == FALSE) {
+          dir.create(paste0("model-fits/", mod, "/summary_diagnostics"))
         }
         
         forc_file <- list.files(paste0(mod_loc, mod), pattern = date)
@@ -65,59 +70,42 @@ forecasts <- foreach(mod = models,
         
         dat <- dat %>% 
           filter(quantile != 0)
-        # dat <- dat[-c(21:23),]
         
-        stan_data <- make_stan_data(dat, size = 1, comps = 5)
-        stan_samps <- qgp_stan$sample(data = stan_data,
+        stan_data <- make_stan_data(dat, size = 1, comps = 4)
+        stan_samp <- qgp_stan$sample(data = stan_data,
                             iter_warmup = burn,
                             iter_sampling = sample,
                             chains = 1,
-                            adapt_delta = .9999,
+                            adapt_delta = .99,
                             refresh = 100)
         
         
-        draws <- stan_samps$draws(format = "df")
+        draws <- stan_samp$draws(format = "df")
         saveRDS(draws, paste0("model-fits/", mod, "/draws/", date, "-", mod,
                               ".rds"))
-        dist_samp <- draws$dist_samps
         
+        summary <- stan_samp$summary()
+        saveRDS(summary, paste0("model-fits/", mod, 
+                                "/summary_diagnostics/", date, "-", mod, "_",
+                              "summary.rds"))
         
-        # dist_samp <- ifelse(dist_samp < 0, 0, dist_samp)
+        diagnostics <- stan_samp$diagnostic_summary()
+        saveRDS(diagnostics, paste0("model-fits/", mod, 
+                                "/summary_diagnostics/", date, "-", mod, "_",
+                                "diagnostics.rds"))
+        
+        dist_samp <- draws$dist_samp
+        
         est_quantiles <- quantile(dist_samp, probs = probs)
         est_quantiles <- ifelse(est_quantiles < 0, 0, est_quantiles)
-        # q <- q[-length(q)]
-        # plot(q ~ probs)#[-length(probs)])
-        # plot(q[-c(21:23)] ~ stan_data$Q)
-        # abline(a = 0, b = 1)
         eval_quantiles <- ecdf(dist_samp)(quantiles)
         
         forecast$est_quantile <- exp(est_quantiles) - 1
         forecast$eval_quantile <- eval_quantiles
         
         forecast
-        # plot(test~probs)
-        # abline(a = 0, b = 1)
-        # sum((test[6:22] - probs[6:22])^2) 
-                              #Flu-base, US, date 2
-                              #.033299 no 0
-                              #.03203 keep only smallest 0
-                              #.070431 keep all 0s
-                              #.085867 keep only largest 0
-        
-                              #"CEPH-Rtrend_fluH" 17 date2
-                              #all data .033506
-                              #remove all 0s .009452
-                              #keep only smallest 0 .01302
-                              #keep largest 0
-        
-                              #GT-FluFNP 17 2
-                              #keep all data .252011
-                              #remove all 0s .171061
-                              #keep only largest 0 .127768
-                              #keep only smallest 0 .071998
-    
-    
-      }
+  
+    }
 
-
+saveRDS(all_forecasts, "test_forecasts.rds")
 
