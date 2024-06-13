@@ -1,11 +1,18 @@
 setwd("../")
 source("./simulation/simulation_functions.R")
 library(cmdstanr)
+library(dplyr)
 library(evmix)
 library(parallel)
 library(doParallel)
 library(doMC)
-
+n.cores <- detectCores()
+my.cluster <- makeCluster(n.cores, type = "PSOCK")
+doParallel::registerDoParallel(cl = my.cluster)
+foreach::getDoParRegistered()
+foreach::getDoParWorkers()
+registerDoMC(cores = n.cores)
+print(paste("There are", n.cores, "cores!"))
 qgp_stan <- cmdstan_model(stan_file = 
                           './stan_models/cdf_quantile_normal_mix4.stan')
 
@@ -14,17 +21,17 @@ sample <- 7000
 
 mod_loc <- "../FluSight-forecast-hub/model-output/"
 models <- list.files(mod_loc)
+models <- models[models != "README.md"]
 sub_dates <- substr(list.files(paste0(mod_loc, "FluSight-baseline")), 1, 10)
 horizons <- -1:3
 get_loc_file <- list.files(paste0(mod_loc, "FluSight-baseline/"))[4]
 get_loc_forc <- read.csv(paste0(mod_loc, "FluSight-baseline/", get_loc_file))
 locations <- unique(get_loc_forc$location)
 
-locations <- locations[3:5]
-sub_dates <- locations[4:6]
-horizons <- 1:2
-models <- models[6:7]
-
+#locations <- locations[3:5]
+#sub_dates <- sub_dates[4:6]
+#horizons <- 1:2
+#models <- models[6:7]
 
 all_forecasts <- forecasts <- foreach(mod = models,
         .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
@@ -32,10 +39,13 @@ all_forecasts <- forecasts <- foreach(mod = models,
         ,.errorhandling = "remove"
         ,.combine = rbind) %:%
   foreach(date = sub_dates, .combine = rbind) %:%
-    foreach(loc = locations) %:%
+    foreach(loc = locations, .combine = rbind) %:%
       foreach(h = horizons, .combine = rbind) %dopar% {
-        source("./simulation_functions.R")
-    
+        source("./simulation/simulation_functions.R")
+   #mod <- models[3]
+   #h <- 1
+   #loc <- locations[22]
+   #date <- sub_dates[4]
         if (dir.exists(paste0("model-fits/", mod)) == FALSE) {
           dir.create(paste0("model-fits/", mod))
         }
@@ -52,17 +62,19 @@ all_forecasts <- forecasts <- foreach(mod = models,
                               "/summary_diagnostics")) == FALSE) {
           dir.create(paste0("model-fits/", mod, "/summary_diagnostics"))
         }
-        
+       
+        print(mod)
+        print(paste0(mod_loc, mod))	
         forc_file <- list.files(paste0(mod_loc, mod), pattern = date)
-        all_forecasts <- read.csv(paste0(mod_loc, mod, "/", forc_file))
+        forecasts <- read.csv(paste0(mod_loc, mod, "/", forc_file))
         
-        forecast <- all_forecasts %>% 
-          filter(location == as.character(loc), 
-                 horizon == as.numeric(h), 
+        forecast <- forecasts %>% 
+          filter(location == as.character(loc) | location == as.numeric(loc), 
+                 horizon == as.numeric(h) | horizon == as.character(h), 
                  output_type == "quantile") %>% 
           unique()
         
-        
+        #print(head(forecast)) 
         quantiles <- log(as.numeric(forecast$value) + 1)
         probs <- as.numeric(forecast$output_type_id)
         dat <- data.frame(quantile = quantiles,
@@ -70,13 +82,13 @@ all_forecasts <- forecasts <- foreach(mod = models,
         
         dat <- dat %>% 
           filter(quantile != 0)
-        
+    
         stan_data <- make_stan_data(dat, size = 1, comps = 4)
         stan_samp <- qgp_stan$sample(data = stan_data,
                             iter_warmup = burn,
                             iter_sampling = sample,
                             chains = 1,
-                            adapt_delta = .99,
+                            adapt_delta = .999,
                             refresh = 100)
         
         
@@ -105,10 +117,32 @@ all_forecasts <- forecasts <- foreach(mod = models,
         
         forecast$est_quantile <- exp(est_quantiles) - 1
         forecast$eval_quantile <- eval_quantiles
-        
+        forecast$model <- mod 
         forecast
   
     }
+#write.csv(all_forecasts, "test_forecasts.csv") 
+#saveRDS(all_forecasts, "test_forecasts.rds")
 
-saveRDS(all_forecasts, "test_forecasts.rds")
+forecasts <- all_forecasts %>%
+	group_split(model, reference_date)
+
+
+for (i in 1:length(forecasts)) {
+        forc <- forecasts[[i]]
+	ref_date <- unique(forc$reference_date)
+	model <- unique(forc$model)
+	forc <- forc %>%
+		dplyr::select(-model)
+	
+	save_name <- paste0("./model-fits/", model, "/forecasts/",
+	       ref_date, "-", model, ".csv")
+
+	write.csv(forc, save_name, row.names = FALSE)
+}
+
+
+
+
+
 
