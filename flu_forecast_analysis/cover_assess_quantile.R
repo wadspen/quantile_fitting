@@ -1,57 +1,74 @@
-setwd("~/quantile_fitting/")
-source("./simulation/simulation_functions.R")
+source("../simulation/simulation_functions.R")
 library(dplyr)
+library(scoringRules)
+library(stringr)
+library(evalcast)
 library(lubridate)
 library(evmix)
 library(parallel)
 library(doParallel)
 library(doMC)
+n.cores <- detectCores()
+my.cluster <- makeCluster(n.cores, type = "PSOCK")
+doParallel::registerDoParallel(cl = my.cluster)
+foreach::getDoParRegistered()
+foreach::getDoParWorkers()
+registerDoMC(cores = n.cores)
 
 
+args <- commandArgs()
+mod <- args[6]
+print(mod)
 
-read.csv("~/forecast-hub/FluSight-forecast-hub/target-data/target-hospital-admissions.csv")
-forc_loc <- "../../FluSight-forecast-hub/model-output/"
-forc_loc <- "~/forecast-hub/FluSight-forecast-hub/model-output/"
+
+forc_loc <- "../../../FluSight-forecast-hub/model-output/"
 hosp_loc <- paste0(forc_loc, "../target-data/target-hospital-admissions.csv")
-mod_loc <- "./model-fits/"
-mod_loc <- "~/forecast-hub/FluSight-forecast-hub/model-output/"
-models <- list.files(mod_loc)
-sub_dates <- substr(list.files(paste0(mod_loc, 
-                                "FluSight-forecast-hub/model-output/")),
+mod_loc <- "../model-fits/"
+models <- list.files(forc_loc)
+sub_dates <- substr(list.files(paste0(forc_loc, 
+                                "FluSight-baseline/")),
                     1, 10)
-sub_dates <- substr(list.files(paste0(mod_loc, "FluSight-baseline")), 1, 10)
 horizons <- -1:3
-get_loc_file <- list.files(paste0(mod_loc, "FluSight-baseline/"))[4]
-get_loc_forc <- read.csv(paste0(mod_loc, "FluSight-baseline/", get_loc_file))
+get_loc_file <- list.files(paste0(forc_loc, "FluSight-baseline/"))[4]
+get_loc_forc <- read.csv(paste0(forc_loc, "FluSight-baseline/", get_loc_file))
 locations <- unique(get_loc_forc$location)
 
 hosp_data <- read.csv(hosp_loc) %>% 
-  select(-X) %>% 
+  #select(-X) %>% 
   filter(year(date) >= 2023)
+#
+#mod <- "FluSight-lop_norm"
+#h <- 2
+#loc <- "17"
+#sub_date <- "2023-10-28"
 
-mod <- "FluSight-lop_norm"
-h <- 2
-loc <- "17"
-sub_date <- "2023-10-28"
+ all_forecasts <- forecasts <- foreach(sub_date = sub_dates,
+                                       .packages = c("distr", "dplyr", 
+                                                     "stringr", "scoringRules",
+                                                     "evalcast")
+                                       ,.errorhandling = "remove"
+                                       ,.combine = rbind) %:%
+   #foreach(sub_date = sub_dates, .combine = rbind) %:%
+     foreach(loc = locations) %:%
+       foreach(h = horizons, .combine = rbind) %dopar% {
+       
+       if (dir.exists(paste0(mod_loc, mod, "/coverage")) == FALSE) {
+          dir.create(paste0(mod_loc, mod, "/coverage"))
+        }
 
-# all_forecasts <- forecasts <- foreach(mod = models,
-#                                       .packages = c("distr", "dplyr", 
-#                                                     "stringr", "scoringRules",
-#                                                     "eval_cast")
-#                                       ,.errorhandling = "remove"
-#                                       ,.combine = rbind) %:%
-#   foreach(sub_date = sub_dates, .combine = rbind) %:%
-#     foreach(loc = locations) %:%
-#       foreach(h = horizons, .combine = rbind) %dopar% {
-        
-        forc_file <- list.files(paste0(forc_loc, mod), pattern = sub_date)
-        all_forecasts <- read.csv(paste0(forc_loc, mod, "/", forc_file))
-        
-        forecast <- all_forecasts %>% 
-          filter(location == as.character(loc), 
+        forc_file <- paste0(mod_loc, mod, "/forecasts/", sub_date, "-",
+			    loc, "-", h, "-", mod, ".rds")
+
+	forcRDS <- readRDS(forc_file)
+        forecast <- forcRDS %>% 
+          filter(location == as.numeric(loc), 
                  horizon == as.numeric(h), 
                  output_type == "quantile") %>% 
           unique()
+
+  	forecast <- forecast %>%
+		mutate(date = date(reference_date) + 7*as.numeric(horizon),
+		       location = as.numeric(location))
         
         quantiles <- log(as.numeric(forecast$value) + 1)
         probs <- as.numeric(forecast$output_type_id)
@@ -59,20 +76,16 @@ sub_date <- "2023-10-28"
         draws <- readRDS(paste0(mod_loc, mod, "/draws/", sub_date, "-", 
                                 loc, "-", h, "-", mod, ".rds"))
         
-        true_hosp <- hosp_data %>% 
-          filter(date == date(sub_date) + 7*h, location == loc) %>% 
-          mutate(value = log(value + 1))
         
-        crps <- crps_sample(true_hosp$value, draws$dist_samp)
-        logs <- logs_sample(true_hosp$value, draws$dist_samp)
+        num_samps <- 2000 
+	draws_s <- draws[sample(nrow(draws), num_samps, replace = TRUE), ]
+         
+        all_pis <- draws_s[, str_detect(colnames(draws), "pi")]
+        all_mus <- draws_s[, str_detect(colnames(draws), "mus")]
+        all_sigmas <- draws_s[, str_detect(colnames(draws), "sigmas")]
+        all_ns <- draws_s$n
         
         
-        all_pis <- draws[, str_detect(colnames(draws), "pi")]
-        all_mus <- draws[, str_detect(colnames(draws), "mus")]
-        all_sigmas <- draws[, str_detect(colnames(draws), "sigmas")]
-        all_ns <- draws$n
-        
-        num_samps <- nrow(draws)
         
         m <- 1
         samp_quantiles <- matrix(NA, nrow = num_samps, ncol = length(probs))
@@ -122,26 +135,27 @@ sub_date <- "2023-10-28"
                  cover40 = between(quantile, `0.3`, `0.7`),
                  cover30 = between(quantile, `0.35`, `0.65`),
                  cover20 = between(quantile, `0.4`, `0.6`),
-                 cover10 = between(quantile, `0.45`, `0.55`))
+                 cover10 = between(quantile, `0.45`, `0.55`),
+	  	 wid98 = `0.99` - `0.01`,
+	  	 wid95 = `0.975` - `0.025`,
+	  	 wid90 = `0.95` - `0.05`,
+	  	 wid80 = `0.9` - `0.1`,
+	  	 wid70 = `0.85` - `0.15`,
+	  	 wid60 = `0.8` - `0.2`,
+	  	 wid50 = `0.75` - `0.25`,
+	  	 wid40 = `0.7` - `0.3`,
+	  	 wid30 = `0.65` - `0.35`,
+	  	 wid20 = `0.6` - `0.4`,
+	  	 wid10 = `0.55` - `0.45`)
+	
+		saveRDS(quant_bounds, paste0(mod_loc, mod,
+				 "/coverage/", sub_date, "-", loc,
+				 "-", h, "-", mod, ".rds"))
+
+		
     
-        
-        # quant_bounds %>% 
-        #   filter(between(prob, .25, .75)) %>%
-        #   ggplot() +
-        #   geom_segment(aes(x = prob, y = `0.025`, yend = `0.975`),
-        #                size = 1.5) +
-        #   geom_segment(aes(x = prob, y = `0.25`, yend = `0.75`), 
-        #                colour = "red",
-        #                size = 10) +
-        #   geom_point(aes(x = prob, y = `0.5`), colour = "pink",
-        #              fill = "pink", shape = 24, size = 2) +
-        #   geom_point(aes(x = prob, y = quantile), size = 2,
-        #              colour = "violet") +
-        #   theme_bw()
-    
-    
-    
-      # }
+     
+       }
 
 
 
