@@ -53,8 +53,8 @@ transformed parameters {
 model {
   // pi ~ normal(4,5);
   pi ~ dirichlet(alpha);
-  mus ~ normal(4, 5);
-  sigmas ~ normal(0,7);
+  mus ~ normal(m, c);
+  sigmas ~ normal(0, sv);
   n ~ normal(0, nv);
 
   
@@ -72,8 +72,8 @@ model {
 
 generated quantities {
   vector[N] pred_q;
-  real dist_samps;
+  real dist_samp;
   int samp_comp = categorical_rng(pi);
-  dist_samps = normal_rng(mus[samp_comp], sigmas[samp_comp]);
+  dist_samp = normal_rng(mus[samp_comp], sigmas[samp_comp]);
 }
 

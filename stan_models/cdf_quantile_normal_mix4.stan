@@ -74,8 +74,8 @@ transformed parameters {
 
 model {
   pi ~ dirichlet(alpha);
-  mus ~ normal(4, 5);
-  sigmas ~ normal(0,7);
+  mus ~ normal(m, c);
+  sigmas ~ normal(0, sv);
   n ~ normal(0, nv);
   
   p_hat ~ multi_normal(p, (1/n)*QCorr);

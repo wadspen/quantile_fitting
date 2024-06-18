@@ -38,11 +38,11 @@ data {
   vector[N] Q;
   vector<lower=0, upper=1>[N] p;
   int<lower=1> n_components;
-  real m;
-  real<lower=0> c; 
+  real m; // mean prior mean
+  real<lower=0> c; // mean prior sd  
   real<lower=0> sv; // sd prior sd
-  real<lower=0> nv; // n prior sd
-  vector[n_components] alpha;
+  real<lower=0> nv;
+  vector[n_components] alpha; // component weights prior parameter
 }
 
 
@@ -54,41 +54,29 @@ parameters {
   simplex[n_components] pi;
   real<lower=0> sigma;
   
-  
-  
 }
 
 transformed parameters {
-  // vector[n_components] pit;
   vector<lower=0,upper=1>[N] p_hat;
   
   for (i in 1:N) p_hat[i] = GM_CDF(Q[i], mus, sigmas, pi);
   
-
-  // pit = softmax(pi);
-  
-
-
 }
 
 model {
-  // pi ~ normal(4,5);
   pi ~ dirichlet(alpha);
-  mus ~ normal(4, 5);
-  sigmas ~ normal(0,7);
-  sigma ~ normal(0,1);
+  mus ~ normal(m, c);
+  sigmas ~ normal(0, sv);
+  sigma ~ normal(0, nv);
   
-  // for (i in 1:N) Q[i] ~ normal(Qi[i], sigma);
-  for (i in 1:N) p_hat[i] ~ normal(p[i], sigma);
-  //Q ~ multi_normal(Qi, diag_matrix(square(sigma)));
+  
+  for (i in 1:N) p_hat[i] ~ normal(p[i], 1/sigma);
 }
 
 generated quantities {
   vector[N] pred_q;
-  real dist_samps;
-  // for (i in 1:N) pred_q[i] = normal_rng(Qi[i], sigma);
-  //pred_q = multi_normal_rng(Qi, diag_matrix(square(sigma)));
+  real dist_samp;
   int samp_comp = categorical_rng(pi);
-  dist_samps = normal_rng(mus[samp_comp], sigmas[samp_comp]);
+  dist_samp = normal_rng(mus[samp_comp], sigmas[samp_comp]);
 }
 
