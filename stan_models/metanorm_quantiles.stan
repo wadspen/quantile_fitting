@@ -84,13 +84,13 @@ model {
 generated quantities {
   vector[N] pred_q;
   real log_score;
-  real dist_samps;
+  real dist_samp;
   
   pred_q = multi_normal_rng(mu + exp(log_sigma).*inv_Phip, (n^(-1))*QRho);
   
   real<lower=0,upper=1> samp_p = uniform_rng(0,1); 
   
-  dist_samps = a1 + a4*(samp_p - .5)  
+  dist_samp = a1 + a4*(samp_p - .5)  
                 + a5*(samp_p - .5)^2
                 + a7*(samp_p - .5)^3
                 // + a9*(samp_p - .5)^4

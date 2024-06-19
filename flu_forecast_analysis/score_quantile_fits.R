@@ -59,8 +59,11 @@ horizons <- -1:3
 get_loc_file <- list.files(paste0(forc_loc, "FluSight-baseline/"))[4]
 get_loc_forc <- read.csv(paste0(forc_loc, "FluSight-baseline/", get_loc_file))
 locations <- unique(get_loc_forc$location)
-
+print(locations)
 hosp_data <- read.csv(hosp_loc) %>% 
+  mutate(location = as.character(location)) %>%
+  mutate(location = ifelse(nchar(location) < 2, paste0(0 location),
+			   location)) %>%
   #select(-X) %>% 
   filter(year(date) >= 2023)
 #
@@ -87,15 +90,18 @@ all_scores <- foreach(sub_date = sub_dates,
 			    loc, "-", h, "-", mod, ".rds")
 
 	forcRDS <- readRDS(forc_file)
-        forecast <- forcRDS %>% 
-          filter(location == as.numeric(loc), 
+        forecast <- forcRDS %>%
+	  mutate(location = as.character(location)) %>%
+  	  mutate(location = ifelse(nchar(location) < 2, paste0(0, location),
+			   location)) %>%	     
+          filter(location == loc, 
                  horizon == as.numeric(h), 
                  output_type == "quantile") %>% 
           unique()
 
   	forecast <- forecast %>%
 		mutate(date = date(reference_date) + 7*as.numeric(horizon),
-		       location = as.numeric(location))
+		       location = location)
         
         quantiles <- log(as.numeric(forecast$value) + 1)
         probs <- as.numeric(forecast$output_type_id)
@@ -103,20 +109,20 @@ all_scores <- foreach(sub_date = sub_dates,
         draws <- readRDS(paste0(mod_loc, mod, "/draws/", sub_date, "-", 
                                 loc, "-", h, "-", mod, ".rds"))
        
-        cover <- readRDS(paste0(mod_loc, mod, "/coverage/", sub_date, "-", 
-                                loc, "-", h, "-", mod, ".rds"))
-        cover <- cover %>%
-		dplyr::select(contains("cover"), contains("wid"), prob) %>%
-		filter(as.numeric(prob) %in% c(0.01, 0.99, 0.025, 0.975, 0.25, 0.75)) %>%
-		dplyr::select(contains("50"), contains("95"), contains("98"), prob) %>%
-		pivot_wider(values_from = 1:6, names_from = prob)
+        #cover <- readRDS(paste0(mod_loc, mod, "/coverage/", sub_date, "-", 
+        #                        loc, "-", h, "-", mod, ".rds"))
+        #cover <- cover %>%
+	#	dplyr::select(contains("cover"), contains("wid"), prob) %>%
+	#	filter(as.numeric(prob) %in% c(0.01, 0.99, 0.025, 0.975, 0.25, 0.75)) %>%
+	#	dplyr::select(contains("50"), contains("95"), contains("98"), prob) %>%
+	#	pivot_wider(values_from = 1:6, names_from = prob)
 
 
         true_hosp <- hosp_data %>% 
 	  dplyr::select(-X) %>%
           filter(date == date(sub_date) + 7*h, location == loc) %>% 
           mutate(value = log(value + 1), date = date(date),
-	         location = as.numeric(location), true_value = value) %>%
+	         true_value = value) %>%
 	  dplyr::select(-value)
         
         crps <- crps_sample(true_hosp$true_value, draws$dist_samp)
@@ -176,7 +182,7 @@ all_scores <- foreach(sub_date = sub_dates,
 		)
 	
 	scores <- data.frame(model = mod, date = sub_date, location = loc, horizon = h, 
-			     logs = logs, crps = crps, scores, scores0, cover)
+			     logs = logs, crps = crps, scores, scores0) #, cover)
         
 	scores    
      

@@ -1,6 +1,30 @@
 library(distr)
 
 
+eval_dist <- function(ests, probs, p = 1) {
+	ests <- c(0, ests, 1)
+	probs <- c(0, probs, 1)
+
+	est_diffs <- distancePointToPoint(ests)
+	prob_diffs <- distancePointToPoint(probs)
+
+	return((p + 1)*sum(abs(est_diffs - prob_diffs)^p)^(1/p))
+}
+
+get_lm <- function(y, x, stat = "slope") {
+	mod <- lm(y ~ x)
+	if (stat == "int") {
+		return(mod$coefficient[1])
+	} else if (stat == "slope") {
+		return(mod$coefficient[2])
+	} else if (stat == "df") {
+		return(mod$df)
+	} else if (stat == "se_int") {
+		return(coef(summary(mod))[, "Std. Error"][1])
+	} else if (stat == "se_slope") {
+		return(coef(summary(mod))[, "Std. Error"][2])
+	}
+}
 make_dist_string <- function(par1 = 0, par2 = 1, fam = "Norm") {
   paste0(fam, "(", par1, ",", par2, ")")
 }
@@ -152,9 +176,9 @@ run_stan_model <- function(mod, data_list, burn = 5000, sample = 5000,
 }
 
 
-isolate_draws <- function(stan_samps, variable = "dist_samps") {
+isolate_draws <- function(stan_samps, variable = "dist_samp") {
   draws <- stan_samps$draws(format = "df")
-  draws <- draws$dist_samps
+  draws <- draws$dist_samp
   summary <- stan_samps$summary()
   summary <- summary %>% 
     filter(variable %in% c("mu", "sigma", "n")) %>% 
@@ -164,7 +188,7 @@ isolate_draws <- function(stan_samps, variable = "dist_samps") {
 }
 
 stan_fit_draws <- function(mod, data_list, burn = 5000, sample = 5000,
-                      num_chain = 1, variable = "dist_samps", refresh = 0,
+                      num_chain = 1, variable = "dist_samp", refresh = 0,
                       sampler = "MCMC", elbo = 1000, grad = 30, out_s = 1000) {
 	
   samps <- run_stan_model(mod, data_list, burn = burn, sample = sample, 
@@ -172,7 +196,7 @@ stan_fit_draws <- function(mod, data_list, burn = 5000, sample = 5000,
                           sampler = sampler, elbo = elbo, grad = grad,
                           out_s = out_s)
   
-  draws <- isolate_draws(samps, variable = "dist_samps")
+  draws <- isolate_draws(samps, variable = "dist_samp")
   draws
 }
 
@@ -212,7 +236,7 @@ eval_sum <- function(summary, true_params) {
 
 
 est_quantile <- function(p, draws) {
-  quantile(cltnormdraws$dist_samps, p)
+  quantile(cltnormdraws$dist_samp, p)
 }
 
 

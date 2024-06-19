@@ -63,8 +63,8 @@ model {
 
 generated quantities {
   vector[N] pred_q;
-  real dist_samps;
+  real dist_samp;
   int samp_comp = categorical_rng(pi);
-  dist_samps = normal_rng(mus[samp_comp], sigmas[samp_comp]);
+  dist_samp = normal_rng(mus[samp_comp], sigmas[samp_comp]);
 }
 

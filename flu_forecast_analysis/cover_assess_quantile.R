@@ -28,7 +28,7 @@ models <- list.files(forc_loc)
 sub_dates <- substr(list.files(paste0(forc_loc, 
                                 "FluSight-baseline/")),
                     1, 10)
-horizons <- -1:3
+horizons <- 0:3
 get_loc_file <- list.files(paste0(forc_loc, "FluSight-baseline/"))[4]
 get_loc_forc <- read.csv(paste0(forc_loc, "FluSight-baseline/", get_loc_file))
 locations <- unique(get_loc_forc$location)
@@ -45,13 +45,13 @@ hosp_data <- read.csv(hosp_loc) %>%
  all_forecasts <- forecasts <- foreach(sub_date = sub_dates,
                                        .packages = c("distr", "dplyr", 
                                                      "stringr", "scoringRules",
-                                                     "evalcast")
+                                                     "evalcast", "LaplacesDemon")
                                        ,.errorhandling = "remove"
                                        ,.combine = rbind) %:%
    #foreach(sub_date = sub_dates, .combine = rbind) %:%
      foreach(loc = locations) %:%
        foreach(h = horizons, .combine = rbind) %dopar% {
-       
+       #start1 <- Sys.time()
        if (dir.exists(paste0(mod_loc, mod, "/coverage")) == FALSE) {
           dir.create(paste0(mod_loc, mod, "/coverage"))
         }
@@ -77,7 +77,7 @@ hosp_data <- read.csv(hosp_loc) %>%
                                 loc, "-", h, "-", mod, ".rds"))
         
         
-        num_samps <- 2000 
+        num_samps <- 650 
 	draws_s <- draws[sample(nrow(draws), num_samps, replace = TRUE), ]
          
         all_pis <- draws_s[, str_detect(colnames(draws), "pi")]
@@ -86,34 +86,36 @@ hosp_data <- read.csv(hosp_loc) %>%
         all_ns <- draws_s$n
         
         
-        
+        #start <- Sys.time() 
         m <- 1
         samp_quantiles <- matrix(NA, nrow = num_samps, ncol = length(probs))
         repeat{
           num <- sample(num_samps, 1)
           mus <- unlist(all_mus[num,])
           sigmas <- unlist(all_sigmas[num,])
-          pi <- unlist(all_pis[num,])
-          pi[which(pi < 0)] <- 0
-          if (sum(pi) < 1) {
-            pi[which.max(pi)] <- pi[which.max(pi)] + (1 - sum(pi))
-          } else if (sum(pi) > 1) {
-            pi[which.min(pi)] <- pi[which.min(pi)] + (1 - sum(pi))
+          pis <- unlist(all_pis[num,])
+          pis[which(pis < 0)] <- 0
+          if (sum(pis) < 1) {
+            pis[which.max(pis)] <- pis[which.max(pis)] + (1 - sum(pis))
+          } else if (sum(pis) > 1) {
+            pis[which.min(pis)] <- pis[which.min(pis)] + (1 - sum(pis))
           }
           n <- unlist(all_ns[num])
-          
+          n <- ceiling(n) 
           normmix <- UnivarMixingDistribution(Norm(mus[1], sigmas[1]),
                                               Norm(mus[2], sigmas[2]), 
                                               Norm(mus[3], sigmas[3]), 
                                               Norm(mus[4], sigmas[4]), 
-                                              mixCoeff = pi)
+                                              mixCoeff = pis)
           samp <- r(normmix)(n)
+
+	  #samp <- rnormm(n, pis, mus, sigmas)
           samp_quantiles[m,] <- quantile(samp, probs = probs)
           
-          m <- m + 1
+          m <- m + 1; print(m)
           if (m > num_samps) {break}
         }
-        
+        #end <- Sys.time()
         
         quant_bounds <- apply(samp_quantiles, MARGIN = 2, 
                               FUN = quantile, 
@@ -147,12 +149,16 @@ hosp_data <- read.csv(hosp_loc) %>%
 	  	 wid30 = `0.65` - `0.35`,
 	  	 wid20 = `0.6` - `0.4`,
 	  	 wid10 = `0.55` - `0.45`)
-	
+	#end1 <- Sys.time()
 		saveRDS(quant_bounds, paste0(mod_loc, mod,
 				 "/coverage/", sub_date, "-", loc,
 				 "-", h, "-", mod, ".rds"))
-
-		
+##
+ #       loop_time <- end - start
+ #       all_time <- end1 - start1
+ #       quant_bounds$loop_time <- loop_time
+ #       quant_bounds$all_time <- all_time
+ #       saveRDS(quant_bounds, "test_cover.rds")
     
      
        }
