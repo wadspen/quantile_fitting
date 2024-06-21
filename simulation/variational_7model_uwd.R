@@ -4,18 +4,26 @@ library(cmdstanr)
 library(distr)
 library(distfromq)
 library(evmix)
+library(dplyr)
+library(VGAM)
+library(EnvStats)
+library(tidyr)
 library(parallel)
 library(doParallel)
 library(doMC)
-#n.cores <- detectCores()
-#my.cluster <- makeCluster(n.cores, type = "PSOCK")
-#doParallel::registerDoParallel(cl = my.cluster)
-#foreach::getDoParRegistered()
-#foreach::getDoParWorkers()
-#registerDoMC(cores = n.cores)
+n.cores <- detectCores()
+my.cluster <- makeCluster(n.cores, type = "PSOCK")
+doParallel::registerDoParallel(cl = my.cluster)
+foreach::getDoParRegistered()
+foreach::getDoParWorkers()
+registerDoMC(cores = n.cores)
 
 args <- commandArgs()
 dist <- args[6]
+p <- as.numeric(args[7])
+nind <- as.numeric(args[8])
+
+print(dist); print(p); print(nind)
 
 
 cltmod <- cmdstan_model(stan_file = 
@@ -41,37 +49,46 @@ metamod <- cmdstan_model(stan_file =
 
 mod_loc <- "../stan_models/"
 
-burn <- 600
-samples <- 700
+burn <- 6000
+samples <- 7000
 #cltnmod <- paste0(mod_loc, "simple_normal_n_quantiles.stan")
 #ordnmod <- paste0(mod_loc, "order_normal_n_quantiles.stan")
 #cltmod <- paste0(mod_loc, "simple_normal_quantiles.stan")
 #ordmod <- paste0(mod_loc, "order_normal_quantiles.stan")
 #indmod <- paste0(mod_loc, "ind_simple_normal_quantiles.stan")
 
-samp_sizes <- c(50, 150, 500)#, 1000, 2000, 5000)
+samp_sizes <- c(50, 150, 500, 1000, 2000, 5000)
 levels <- list(
   seq(.1, .9, by = .1),
-  c(.05, seq(.1, .9, by = .1), .95)#,
-  #seq(.05, .95, by = .05),
-  #c(.025, seq(.05, .95, by = .05), .975),
-  #seq(.01, .99, by = .02)	       
+  c(.05, seq(.1, .9, by = .1), .95),
+  c(.025, .05, seq(.1, .9, by = .1), .95, .975),
+  c(.01, .025, .05, seq(.1, .9, by = .1), .95, .975, .99),
+  seq(.05, .95, by = .05),
+  c(.025, seq(.05, .95, by = .05), .975),
+  c(.01, .025, seq(.05, .95, by = .05), .975, .99),
+  seq(.01, .99, by = .02)	       
 		)
 
 models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern", "meta")
 
 
-reps <- 12
+reps <- 1000
+n <- samp_sizes[nind]
 
+
+#p <- 2
+#n <- 500
+#dist <- "norm"
+#replicate <- 2
 distance <- foreach(replicate = 1:reps,
                     .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
                                   "VGAM", "distr", "dplyr")
-                    #,.errorhandling = "remove"
-                    ,.combine = rbind) %:%
-  foreach(n = samp_sizes, .combine = rbind) %:%
-  foreach(p = 1:length(levels), .combine = rbind) %dopar% {
+                    ,.errorhandling = "remove"
+                    ,.combine = rbind) %dopar% {
+  #foreach(n = samp_sizes, .combine = rbind) %:%
+  #foreach(p = 1:length(levels), .combine = rbind) %dopar% {
     
-    
+   
     source("./simulation_functions.R")
     
     if (dist == "norm") {
@@ -93,7 +110,7 @@ distance <- foreach(replicate = 1:reps,
     }
     
     probs <- levels[[p]]
-    quantiles <- quantile(samp, probs)
+    quantiles <- quantile(samp, probs, type = 2)
     
     data <- data.frame(quantile = quantiles, prob = probs)
     stan_data <- make_stan_data(data, size = n, comps = 4)
@@ -103,33 +120,49 @@ distance <- foreach(replicate = 1:reps,
     fit_cltn <- stan_fit_draws(cltnmod, stan_data, 
                                 sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100) 
-
+	saveRDS(list(draws = fit_cltn[[2]],samp = samp), paste0("sim_draws/", dist, "_cltn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+   print("gets here") 
     fit_ordn <- stan_fit_draws(ordnmod, stan_data, 
                                 sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100) 
 
+   	saveRDS(list(draws = fit_ordn[[2]],samp = samp), paste0("sim_draws/", dist, "_ordn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_clt <- stan_fit_draws(cltmod, stan_data,
                                sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100) 
 
+   	saveRDS(list(draws = fit_clt[[2]],samp = samp), paste0("sim_draws/", dist, "_clt_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_ord <- stan_fit_draws(ordmod, stan_data,
                                 sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100) 
     
+   	saveRDS(list(draws = fit_ord[[2]],samp = samp), paste0("sim_draws/", dist, "_ord_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_ind <- stan_fit_draws(indmod,stan_data,
                                 sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100)
-    
+   
+	saveRDS(list(draws = fit_ind[[2]],samp = samp), paste0("sim_draws/", dist, "_ind_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
     fit_meta <- stan_fit_draws(metamod,stan_data,
                                sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100)
-
+	saveRDS(list(draws = fit_meta[[2]],samp = samp), paste0("sim_draws/", dist, "_meta_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
 #    fit_norm <- stan_fit_draws(normmod,stan_data,
 #			       sampler = "variational",
 #			       elbo = 300, grad = 10,
 #			       out_s = 2000)
     
     
+
+
+    fit_cltn <- fit_cltn[[1]]
+    fit_ordn <- fit_ordn[[1]]
+    fit_clt <- fit_clt[[1]]
+    fit_ord <- fit_ord[[1]]
+    fit_ind <- fit_ind[[1]]
+    fit_meta <- fit_meta[[1]]
+
+
+
     #unit draws
     udraws_cltn <- pdist(fit_cltn$draws)
     udraws_ordn <- pdist(fit_ordn$draws)
@@ -184,13 +217,13 @@ distance <- foreach(replicate = 1:reps,
                model = models, uwd1 = uwd1s, uwd2 = uwd2s)
 
     scores
-  write.csv(scores, "test_scores.csv", row.names = FALSE)  
+  #write.csv(scores, "test_scores.csv", row.names = FALSE)  
     
     
   }
 
 
-write.csv(distance, paste0(dist, "_analysis.csv"), row.names = FALSE)
+write.csv(distance, paste0("sim_scores/", dist, "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 
 
 

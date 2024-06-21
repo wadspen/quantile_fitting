@@ -197,7 +197,7 @@ stan_fit_draws <- function(mod, data_list, burn = 5000, sample = 5000,
                           out_s = out_s)
   
   draws <- isolate_draws(samps, variable = "dist_samp")
-  draws
+  return(list(draws, samps))
 }
 
 
