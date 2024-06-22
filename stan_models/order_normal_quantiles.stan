@@ -34,7 +34,7 @@ parameters {
 transformed parameters {
   vector[N] U;
   for (i in 1:N)
-    U[i] = normal_cdf(Q[i] , mu, sigma);
+    U[i] = normal_cdf(Q[i] | mu, sigma);
 }
 
 model {
@@ -50,7 +50,7 @@ model {
 }
 
 generated quantities {
-  real dist_samps = normal_rng(mu, sigma);
+  real dist_samp = normal_rng(mu, sigma);
   // real log_prob = orderstatistics(n, N, p, U);
   // for (i in 1:N)
   //   log_prob += normal_lpdf(Q[i] | mu, sigma);

@@ -25,29 +25,27 @@ data {
 }
 
 parameters {
-  real mu;
-  real<lower=0> sigma;
+  real<lower=0> lambda;
   
 }
 
 transformed parameters {
   vector[N] U;
   for (i in 1:N)
-    U[i] = normal_cdf(Q[i]| mu, sigma);
+    U[i] = exponential_cdf(Q[i]| lambda);
 }
 
 model {
-  mu ~ normal(m, c);
-  sigma ~ normal(0, sv);
+  lambda ~ normal(0, c);
   
   target += orderstatistics(n , N, p, U);
   
   for (i in 1:N)
-    target += normal_lpdf (Q[i] | mu, sigma);
+    target += exponential_lpdf (Q[i] | lambda);
 }
 
 generated quantities {
-  real dist_samp = normal_rng(mu, sigma);
+  real dist_samp = exponential_rng(lambda);
   // real log_prob = orderstatistics(n, N, p, U);
   // for (i in 1:N)
   //   log_prob += normal_lpdf(Q[i] | mu, sigma);

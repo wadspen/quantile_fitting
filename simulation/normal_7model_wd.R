@@ -16,7 +16,7 @@ cltmod <- cmdstan_model(stan_file =
                        '../stan_models/normal_quantiles.stan')
 
 indmod <- cmdstan_model(stan_file = 
-                          '../stan_models/ind_normal_quantiles.stan')
+                          '../stan_models/normal_ind_quantiles.stan')
 
 ordmod <- cmdstan_model(stan_file = 
                           '../stan_models/order_normal_quantiles.stan')
@@ -34,25 +34,19 @@ mod_loc <- "../stan_models/"
 #ordmod <- paste0(mod_loc, "order_normal_quantiles.stan")
 #indmod <- paste0(mod_loc, "ind_simple_normal_quantiles.stan")
 
-#samp_sizes <- c(25, 50, 100, 500, 1000, 2000)
-samp_sizes <- c(50, 150, 500, 1000)
+samp_sizes <- c(50, 150, 500, 1000, 2000, 5000)
 levels <- list(
-  #c(.2, .3, .4),
-  c(.25, .5, .75),
-  #c(.05, .4, .5, .6, .95),
-  #c(.3, .4, .5, .6, .7),
-  #c(.2, .3, .4, .5, .6, .7, .8),
-  #c(.01, .1, .2, .25, .5, .75, .8, .9, .99),
-  c(.1, .2, .3, .4, .5, .6, .7, .8, .9),
-  #c(.01, .05, .1, .2, .3, .4, .5, .6, .7, .8, .9, .95, .99),
-  #seq(.15, .85, by = .05),
-  #seq(.1, .9, by = .05),
-  #seq(.05, .95, by = .05),
-  c(.025, seq(.05, .95, by = .05), .975))#,
-  #c(.01, .025, seq(.05, .95, by = .05), .975, .99))
+  seq(.1, .9, by = .1),
+  c(.05, seq(.1, .9, by = .1), .95),
+  c(.025, .05, seq(.1, .9, by = .1), .95, .975),
+  c(.01, .025, .05, seq(.1, .9, by = .1), .95, .975, .99),
+  seq(.05, .95, by = .05),
+  c(.025, seq(.05, .95, by = .05), .975),
+  c(.01, .025, seq(.05, .95, by = .05), .975, .99),
+  seq(.01, .99, by = .02)	       
+)
 
-#tails <- c(.5, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1)
-tails <- c(0, 0, 1)
+
 
 mu <- 4
 sigma <- 3.5
@@ -84,7 +78,7 @@ source("./simulation_functions.R")
   quantiles <- quantile(samp, probs)
   
   data <- data.frame(quantile = quantiles, prob = probs)
-  stan_data <- make_stan_data(data, size = n)
+  stan_data <- make_stan_data(data, size = n, cor = "norm")
   
   #fit models
   #if (mod %in% c("cltn", "ordn", "clt", "ord", "ind")) {
@@ -108,11 +102,11 @@ source("./simulation_functions.R")
   fit_ord <- stan_fit_draws(ordmod, stan_data)
   fit_ind <- stan_fit_draws(indmod,stan_data)
   
-  sum_cltn <- fit_cltn$summary
-  sum_ordn <- fit_ordn$summary
-  sum_clt <- fit_clt$summary
-  sum_ord <- fit_ord$summary
-  sum_ind <- fit_ind$summary
+  sum_cltn <- fit_cltn[[2]]$summary()
+  sum_ordn <- fit_ordn[[2]]$summary()
+  sum_clt <- fit_clt[[2]]$summary()
+  sum_ord <- fit_ord[[2]]$summary()
+  sum_ind <- fit_ind[[2]]$summary()
   
   sum_eval <- rbind(eval_sum(sum_cltn, true_params),
                     eval_sum(sum_ordn, true_params),
@@ -120,19 +114,19 @@ source("./simulation_functions.R")
                     eval_sum(sum_ord, true_params),
                     eval_sum(sum_ind, true_params)
                     )
-
+  
   
   #sum_eval$model <- mod
   sum_eval$model <- models[1:5]
+  draws_cltn <- fit_cltn[[1]]$draws
+  draws_ordn <- fit_ordn[[1]]$draws
+  draws_clt <- fit_clt[[1]]$draws
+  draws_ord <- fit_ord[[1]]$draws
+  draws_ind <- fit_ind[[1]]$draws
   
-  draws_cltn <- fit_cltn$draws
-  draws_ordn <- fit_cltn$draws
-  draws_clt <- fit_clt$draws
-  draws_ord <- fit_ord$draws
-  draws_ind <- fit_ind$draws
-  
-  #draws <- fit$draws
-   
+  # true_draws <- rnorm(length(draws_clt), mu, sigma)
+  # 
+  # kldiv(draws_ind, true_draws)
   #unit draws
   udraws_cltn <- pdist(draws_cltn)
   udraws_ordn <- pdist(draws_ordn)
@@ -189,13 +183,13 @@ source("./simulation_functions.R")
   
   uwd1s <- c(uwd1_cltn, uwd1_ordn, uwd1_clt, uwd1_ord, uwd1_ind, uwd1_spline,
              uwd1_kern)
+  
   uwd2s <- c(uwd2_cltn, uwd2_ordn, uwd2_clt, uwd2_ord, uwd2_ind, uwd2_spline,
              uwd2_kern)
   
-  
 
   data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
-             tail = tails[p], model = models, uwd1 = uwd1s, uwd2 = uwd2s) %>% 
+             model = models, uwd1 = uwd1s, uwd2 = uwd2s) %>% 
     left_join(sum_eval, by = "model")
   
   

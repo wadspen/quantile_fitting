@@ -1,5 +1,6 @@
 
 
+
 functions {
   real orderstatistics (real n, int N, vector p, vector U){
     real lpdf = 0;
@@ -16,38 +17,38 @@ functions {
 
 data {
   int N; // number of observed quantiles
-  int n; // sample size
   vector[N] Q; // quantiles
   vector[N] p; // probabilities
   real m; // mean prior mean
   real<lower=0> c; // mean prior sd
   real<lower=0> sv; // sd prior sd
+  real<lower=0> nv; // n prior sd
 }
 
 parameters {
-  real mu;
-  real<lower=0> sigma;
-  
+  real<lower=0> lambda;
+  real<lower=0> n;
 }
 
 transformed parameters {
   vector[N] U;
   for (i in 1:N)
-    U[i] = normal_cdf(Q[i]| mu, sigma);
+    U[i] = exponential_cdf(Q[i] | lambda);
 }
 
 model {
-  mu ~ normal(m, c);
-  sigma ~ normal(0, sv);
+  lambda ~ normal(0, c);
+  n ~ normal(0, nv);
+
   
   target += orderstatistics(n , N, p, U);
   
   for (i in 1:N)
-    target += normal_lpdf (Q[i] | mu, sigma);
+    target += exponential_lpdf (Q[i] | lambda);
 }
 
 generated quantities {
-  real dist_samp = normal_rng(mu, sigma);
+  real dist_samp = exponential_rng(lambda);
   // real log_prob = orderstatistics(n, N, p, U);
   // for (i in 1:N)
   //   log_prob += normal_lpdf(Q[i] | mu, sigma);

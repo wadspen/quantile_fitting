@@ -1,41 +1,11 @@
 
 
-
-
-
-functions {
-  real normal_quantile(real p, real mu, real sigma) {
-    if (is_nan(p) || is_inf(p) || p < 0 || p > 1)
-    reject("normal_quantile: p must be finite and between 0 and 1; ", 
-    "found p = ", p);
-    
-    real q;
-    
-    q = mu + inv_Phi(p)*(sigma);
-    return q;
-    
-  }
-  
-  real lognormal_quantile(real p, real mu, real sigma) {
-    if (is_nan(p) || is_inf(p) || p < 0 || p > 1)
-    reject("normal_quantile: p must be finite and between 0 and 1; ", 
-    "found p = ", p);
-    
-    real q;
-    
-    q = exp(mu + inv_Phi(p)*(sigma));
-    return q;
-    
-  }
-
-}
-
-
 data {
   int<lower=0> N;
-  int<lower=0> n;
+  real<lower=0> n;
   vector[N] Q;
-  vector<lower=0, upper=1>[N] p;
+  vector[N] inv_Phip;
+  cov_matrix[N] QCorr;
   real m; // mean prior mean
   real<lower=0> c; // mean prior sd
   real<lower=0> sv; // sd prior sd
@@ -49,37 +19,27 @@ parameters {
 
 transformed parameters {
   vector[N] xi;
-  matrix<lower=0>[N, N] q_var;
 
   for (i in 1:N) {
-    xi[i] = normal_quantile(p[i], mu, sigma);
+    xi[i] = mu + sigma*inv_Phip[i];
   }
   
-  for (i in 1:N) {
-    for (j in 1:i) {
-      
-      q_var[i, j] = (2*pi()*(sigma^2)*fmin(p[i],p[j])*(1 - fmax(p[i],p[j]))) / 
-                    (n*exp((-.5)*(inv_Phi(p[i])^2 + inv_Phi(p[j])^2)));
-      
-      q_var[j, i] = q_var[i, j];
-      
-    }
-  }
 
 }
+
 
 
 model {
   mu ~ normal(m, c);
   sigma ~ normal(0, sv);
 
-  Q ~ multi_normal(xi, q_var);
+  Q ~ multi_normal(xi, (sigma^2)*(1/n)*QCorr);
 }
 
 generated quantities {
   vector[N] pred_q;
-  real dist_samps;
-  pred_q = multi_normal_rng(xi, q_var);
-  dist_samps = normal_rng(mu, sigma);
+  real dist_samp;
+  pred_q = multi_normal_rng(xi, (sigma^2)*(1/n)*QCorr);
+  dist_samp = normal_rng(mu, sigma);
 }
 

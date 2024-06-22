@@ -95,7 +95,7 @@ unit_wass_dist <- function(ppitd_est, d = 1) {
 
 
 
-psuedo_dist <- function(p1, p2) {
+norm_dist <- function(p1, p2) {
   pi <- min(p1, p2)
   pj <- max(p1, p2)
   num <- pi*(1-pj)
@@ -109,18 +109,32 @@ brownian_corr <- function(p1, p2) {
   return(pi*(1-pj))
 }
 
+exp_dist <- function(p1, p2) {
+  pi <- min(p1, p2)
+  return(pi/(1 - pi))
+}
 
 
-make_qcorr <- function(probs) {
+exp_dist_test <- function(p1, p2) {
+  pi <- min(p1, p2)
+  pj <- max(p1, p2)
+  return(pi/(1 - pi))
+}
+
+
+
+make_qcorr <- function(probs, corr = "brown") {
   qcorr <- matrix(NA, nrow = length(probs), ncol = length(probs))
   for (i in 1:length(probs)) {
     for (j in 1:length(probs)) {
-      # qcorr[i,j] <- psuedo_dist(probs[i], probs[j])
-      qcorr[i,j] <- brownian_corr(probs[i], probs[j])
-    }
+      if (corr == "norm") 
+        {qcorr[i,j] <- norm_dist(probs[i], probs[j])}
+      else if (corr == "brown") {qcorr[i,j] <- brownian_corr(probs[i], probs[j])}
+      else if (corr == "exp") {qcorr[i,j] <- exp_dist(probs[i], probs[j])}
+    } 
   }
   
-  # return(2*pi*qcorr)
+  if (corr == "norm") {qcorr <- 2*pi*qcorr}
   return(qcorr)
   
 }
@@ -129,7 +143,7 @@ make_qcorr <- function(probs) {
 
 make_stan_data <- function(data, size, comps = 4, m = 5, c = 7, sv = 6,
                            nv = 3000,
-                           pv = 3, alpha = 1) {
+                           pv = 3000, alpha = 1, cor = "brown") {
   quantiles <- data$quantile
   probs <- data$prob
 
@@ -138,8 +152,9 @@ make_stan_data <- function(data, size, comps = 4, m = 5, c = 7, sv = 6,
     n = size,
     Q = quantiles,
     inv_Phip = qnorm(probs),
-    QCorr = make_qcorr(probs),
+    QCorr = make_qcorr(probs, corr = cor),
     p = probs,
+    expp = -log(1-probs),
     n_components = comps,
     m = m,
     c = c,
@@ -206,6 +221,7 @@ eval_sum <- function(summary, true_params) {
     left_join(true_params, by = "variable") %>% 
     mutate(cover90 = between(truth, q5, q95)) %>% 
     mutate(cover90 = as.numeric(cover90)) %>%
+    mutate(width = q95 - q5) %>% 
     select(variable, width, cover90) %>% 
     t() %>% 
     row_to_names(1) %>% 
@@ -227,8 +243,9 @@ eval_sum <- function(summary, true_params) {
     params_res <- cbind(params_res, blank_n)
   }
   
-  params_res <- params_res %>% 
-    select(width_mu, width_sigma, width_n, cover90_mu, cover90_sigma, cover90_n)
+  params_res <- params_res %>% select(contains(true_params[,1])) %>% 
+    select(-contains("rho"))
+    # select(width_mu, width_sigma, width_n, cover90_mu, cover90_sigma, cover90_n)
 
   return(params_res)
   
