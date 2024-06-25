@@ -13,17 +13,22 @@ foreach::getDoParRegistered()
 foreach::getDoParWorkers()
 registerDoMC(cores = n.cores)
 
+args <- commandArgs()
+p <- as.numeric(args[6])
+nind <- as.numeric(args[7])
+
+
 cltmod <- cmdstan_model(stan_file = 
-                          '../stan_models/exponential_quantiles.stan')
+                          '../stan_models/cdf_exponential_quantiles.stan')
 
 indmod <- cmdstan_model(stan_file = 
-                          '../stan_models/exponential_ind_quantiles.stan')
+                          '../stan_models/cdf_exponential_ind_quantiles.stan')
 
 ordmod <- cmdstan_model(stan_file = 
                           '../stan_models/order_exponential_quantiles.stan')
 
 cltnmod <- cmdstan_model(stan_file = 
-                           '../stan_models/exponential_n_quantiles.stan')
+                           '../stan_models/cdf_exponential_n_quantiles.stan')
 
 ordnmod <- cmdstan_model(stan_file = 
                            '../stan_models/order_exponential_n_quantiles.stan')
@@ -37,6 +42,9 @@ mod_loc <- "../stan_models/"
 
 samp_sizes <- c(50, 150, 500, 1000, 2000, 5000)
 levels <- list(
+  c(.25, .5, .75),
+  c(.1, .25, .5, .75, .9),
+  c(.05, .1, .25, .5, .75, .9, .95),
   seq(.1, .9, by = .1),
   c(.05, seq(.1, .9, by = .1), .95),
   c(.025, .05, seq(.1, .9, by = .1), .95, .975),
@@ -56,7 +64,7 @@ models <- c("cltn", "ordn", "clt", "ord", "ind", "kern", "spline")
 
 reps <- 1000
 set.seed(92)
-
+n <- samp_sizes[nind]
 seeds <- sample(999999999, reps)
 pdist <- function(x) {pexp(x, lambda)} 
 
@@ -64,9 +72,9 @@ distance <- foreach(replicate = 1:reps,
                     .packages = c("cmdstanr", "evmix", "distfromq", "dplyr", "tidyr",
                                   "janitor")
                     ,.errorhandling = "remove"
-                    ,.combine = rbind) %:%
-  foreach(n = samp_sizes, .combine = rbind) %:%
-  foreach(p = 1:length(levels), .combine = rbind) %dopar% {
+                    ,.combine = rbind) %dopar% {
+  #foreach(n = samp_sizes, .combine = rbind) %:%
+  #foreach(p = 1:length(levels), .combine = rbind) %dopar% {
     
     true_params <- data.frame(variable = c("lambda", "n"),
                               truth = c(lambda, n))
@@ -78,7 +86,7 @@ distance <- foreach(replicate = 1:reps,
     quantiles <- quantile(samp, probs, type = 2)
     
     data <- data.frame(quantile = quantiles, prob = probs)
-    stan_data <- make_stan_data(data, size = n, cor = "exp")
+    stan_data <- make_stan_data(data, size = n)
     
     #fit models
     #if (mod %in% c("cltn", "ordn", "clt", "ord", "ind")) {
@@ -207,7 +215,8 @@ distance <- foreach(replicate = 1:reps,
   }
 
 
-write.csv(distance, "results2.csv", row.names = FALSE)
+
+write.csv(distance, paste0("sim_scores/exp/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 
 
 
