@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --time=23:59:00
+#SBATCH --time=1-23:59:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=64
 #SBATCH --mem=0
@@ -13,4 +13,6 @@ module load r-rgdal
 module load proj
 module load r gsl
 
-Rscript ./variational_7model_uwd.R "$1" $2 $3
+#Rscript ./variational_7model_uwd.R "$1" $2 $3
+#Rscript ./normal_7model_wd.R "$1" "$2"
+Rscript ./normal_7model_wd.R "$1" "$2"

@@ -19,16 +19,16 @@ nind <- as.numeric(args[7])
 
 
 cltmod <- cmdstan_model(stan_file = 
-                          '../stan_models/cdf_exponential_quantiles.stan')
+                          '../stan_models/exponential_quantiles.stan')
 
 indmod <- cmdstan_model(stan_file = 
-                          '../stan_models/cdf_exponential_ind_quantiles.stan')
+                          '../stan_models/exponential_ind_quantiles.stan')
 
 ordmod <- cmdstan_model(stan_file = 
                           '../stan_models/order_exponential_quantiles.stan')
 
 cltnmod <- cmdstan_model(stan_file = 
-                           '../stan_models/cdf_exponential_n_quantiles.stan')
+                           '../stan_models/exponential_n_quantiles.stan')
 
 ordnmod <- cmdstan_model(stan_file = 
                            '../stan_models/order_exponential_n_quantiles.stan')
@@ -86,7 +86,7 @@ distance <- foreach(replicate = 1:reps,
     quantiles <- quantile(samp, probs, type = 2)
     
     data <- data.frame(quantile = quantiles, prob = probs)
-    stan_data <- make_stan_data(data, size = n)
+    stan_data <- make_stan_data(data, size = n, cor = "exp")
     
     #fit models
     #if (mod %in% c("cltn", "ordn", "clt", "ord", "ind")) {
@@ -216,7 +216,7 @@ distance <- foreach(replicate = 1:reps,
 
 
 
-write.csv(distance, paste0("sim_scores/exp/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
+write.csv(distance, paste0("sim_scores/exp2/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 
 
 
