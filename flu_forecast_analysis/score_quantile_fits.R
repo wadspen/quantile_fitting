@@ -62,14 +62,14 @@ locations <- unique(get_loc_forc$location)
 print(locations)
 hosp_data <- read.csv(hosp_loc) %>% 
   mutate(location = as.character(location)) %>%
-  mutate(location = ifelse(nchar(location) < 2, paste0(0 location),
+  mutate(location = ifelse(nchar(location) < 2, paste0(0, location),
 			   location)) %>%
   #select(-X) %>% 
   filter(year(date) >= 2023)
-#
+
 #mod <- "CEPH-Rtrend_fluH"
 #h <- 2
-#loc <- "17"
+#loc <- "US"
 #sub_date <- "2023-10-14"
 
 all_scores <- foreach(sub_date = sub_dates,
@@ -185,7 +185,7 @@ all_scores <- foreach(sub_date = sub_dates,
 			     logs = logs, crps = crps, scores, scores0) #, cover)
         
 	scores    
-     
+         
        }
 
         saveRDS(all_scores, paste0(mod_loc, mod, 
