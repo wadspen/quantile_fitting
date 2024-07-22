@@ -19,16 +19,16 @@ nind <- as.numeric(args[7])
 
 
 cltmod <- cmdstan_model(stan_file = 
-                          '../stan_models/exponential_quantiles.stan')
+                          '../stan_models/cdf_exponential_quantiles.stan')
 
 indmod <- cmdstan_model(stan_file = 
-                          '../stan_models/exponential_ind_quantiles.stan')
+                          '../stan_models/cdf_exponential_ind_quantiles.stan')
 
 ordmod <- cmdstan_model(stan_file = 
                           '../stan_models/order_exponential_quantiles.stan')
 
 cltnmod <- cmdstan_model(stan_file = 
-                           '../stan_models/exponential_n_quantiles.stan')
+                           '../stan_models/cdf_exponential_n_quantiles.stan')
 
 ordnmod <- cmdstan_model(stan_file = 
                            '../stan_models/order_exponential_n_quantiles.stan')
@@ -86,7 +86,7 @@ distance <- foreach(replicate = 1:reps,
     quantiles <- quantile(samp, probs, type = 2)
     
     data <- data.frame(quantile = quantiles, prob = probs)
-    stan_data <- make_stan_data(data, size = n, cor = "exp")
+    stan_data <- make_stan_data(data, size = n)
     
     #fit models
     #if (mod %in% c("cltn", "ordn", "clt", "ord", "ind")) {
@@ -110,24 +110,47 @@ distance <- foreach(replicate = 1:reps,
     # mcmc_trace(samp$draws(), pars = "lambda")
     #sum <- fit$summary
     #sum_eval <- eval_sum(sum, true_params)	
-    fit_cltn <- stan_fit_draws(cltnmod, stan_data)
-    fit_ordn <- stan_fit_draws(ordnmod, stan_data)
-    fit_clt <- stan_fit_draws(cltmod, stan_data)
-    fit_ord <- stan_fit_draws(ordmod, stan_data)
-    fit_ind <- stan_fit_draws(indmod,stan_data)
-    
-    sum_cltn <- fit_cltn[[2]]$summary()
-    sum_ordn <- fit_ordn[[2]]$summary()
-    sum_clt <- fit_clt[[2]]$summary()
-    sum_ord <- fit_ord[[2]]$summary()
-    sum_ind <- fit_ind[[2]]$summary()
-    
-    sum_eval <- rbind(eval_sum(sum_cltn, true_params),
-                      eval_sum(sum_ordn, true_params),
-                      eval_sum(sum_clt, true_params),
-                      eval_sum(sum_ord, true_params),
-                      eval_sum(sum_ind, true_params)
-    )
+    start <- Sys.time()
+  fit_cltn <- stan_fit_draws(cltnmod, stan_data)
+  end <- Sys.time()
+  cltn_time <- difftime(end, start, units = "min")[[1]]
+
+  start <- Sys.time()
+  fit_ordn <- stan_fit_draws(ordnmod, stan_data)
+  end <- Sys.time()
+  ordn_time <- difftime(end, start, units = "min")[[1]] 
+  
+  start <- Sys.time()
+  fit_clt <- stan_fit_draws(cltmod, stan_data)
+  end <- Sys.time()
+  clt_time <- difftime(end, start, units = "min")[[1]]
+  
+  start <- Sys.time()
+  fit_ord <- stan_fit_draws(ordmod, stan_data)
+  end <- Sys.time()
+  ord_time <- difftime(end, start, units = "min")[[1]]
+  
+  start <- Sys.time()
+  fit_ind <- stan_fit_draws(indmod,stan_data)
+  end <- Sys.time()
+  ind_time <- difftime(end, start, units = "min")[[1]]
+
+  times <- c(cltn_time, ordn_time, clt_time, ord_time, ind_time)
+  
+  sum_cltn <- fit_cltn[[2]]$summary()
+  sum_ordn <- fit_ordn[[2]]$summary()
+  sum_clt <- fit_clt[[2]]$summary()
+  sum_ord <- fit_ord[[2]]$summary()
+  sum_ind <- fit_ind[[2]]$summary()
+  
+  sum_eval <- rbind(eval_sum(sum_cltn, true_params),
+                    eval_sum(sum_ordn, true_params),
+                    eval_sum(sum_clt, true_params),
+                    eval_sum(sum_ord, true_params),
+                    eval_sum(sum_ind, true_params)
+                    )
+  
+  sum_eval$time <- times
     
     
     sum_eval$model <- models[1:5]
@@ -157,7 +180,7 @@ distance <- foreach(replicate = 1:reps,
     puind <- function(x) {ecdf(udraws_ind)(x)}
     qspline <- make_q_fn(probs, quantiles)
     puspline <- function(x) {pdist(qspline(x))}
-    qkern <- function(p) {qkden(p, quantiles, kernel = "gaussian")}
+    qkern <- function(p) {qkden(p, quantiles, kernel = "epanechnikov")}
     pukern <- function(x) {pdist(qkern(x))}
     
     #pu <- function(x) {ecdf(udraws)(x)}
@@ -216,7 +239,7 @@ distance <- foreach(replicate = 1:reps,
 
 
 
-write.csv(distance, paste0("sim_scores/exp2/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
+write.csv(distance, paste0("sim_scores/exp/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 
 
 

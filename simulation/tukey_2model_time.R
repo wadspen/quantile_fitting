@@ -72,7 +72,7 @@ pdist <- function(x) {pexp(x, lambda)}
 
 distance <- foreach(replicate = 1:reps,
                     .packages = c("cmdstanr", "evmix", "distfromq", "dplyr", "tidyr",
-                                  "janitor")
+                                  "janitor", "extraDistr")
                     ,.errorhandling = "remove"
                     ,.combine = rbind) %dopar% {
                       #foreach(n = samp_sizes, .combine = rbind) %:%
@@ -236,7 +236,7 @@ distance <- foreach(replicate = 1:reps,
 
 
 
-write.csv(distance, paste0("sim_scores/exp2/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
+write.csv(distance, paste0("sim_scores/tuk/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 
 
 

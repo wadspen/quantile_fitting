@@ -114,11 +114,32 @@ source("./simulation_functions.R")
   
   #sum <- fit$summary
   #sum_eval <- eval_sum(sum, true_params)	
+  start <- Sys.time()
   fit_cltn <- stan_fit_draws(cltnmod, stan_data)
+  end <- Sys.time()
+  cltn_time <- difftime(end, start, units = "min")[[1]]
+
+  start <- Sys.time()
   fit_ordn <- stan_fit_draws(ordnmod, stan_data)
+  end <- Sys.time()
+  ordn_time <- difftime(end, start, units = "min")[[1]] 
+  
+  start <- Sys.time()
   fit_clt <- stan_fit_draws(cltmod, stan_data)
+  end <- Sys.time()
+  clt_time <- difftime(end, start, units = "min")[[1]]
+  
+  start <- Sys.time()
   fit_ord <- stan_fit_draws(ordmod, stan_data)
+  end <- Sys.time()
+  ord_time <- difftime(end, start, units = "min")[[1]]
+  
+  start <- Sys.time()
   fit_ind <- stan_fit_draws(indmod,stan_data)
+  end <- Sys.time()
+  ind_time <- difftime(end, start, units = "min")[[1]]
+
+  times <- c(cltn_time, ordn_time, clt_time, ord_time, ind_time)
   
   sum_cltn <- fit_cltn[[2]]$summary()
   sum_ordn <- fit_ordn[[2]]$summary()
@@ -133,7 +154,7 @@ source("./simulation_functions.R")
                     eval_sum(sum_ind, true_params)
                     )
   
-  
+  sum_eval$time <- times
   #sum_eval$model <- mod
   sum_eval$model <- models[1:5]
   draws_cltn <- fit_cltn[[1]]$draws
@@ -162,7 +183,7 @@ source("./simulation_functions.R")
   puind <- function(x) {ecdf(udraws_ind)(x)}
   qspline <- make_q_fn(probs, quantiles)
   puspline <- function(x) {pdist(qspline(x))}
-  qkern <- function(p) {qkden(p, quantiles, kernel = "gaussian")}
+  qkern <- function(p) {qkden(p, quantiles, kernel = "epanechnikov")}
   pukern <- function(x) {pdist(qkern(x))}
   
   #pu <- function(x) {ecdf(udraws)(x)}
