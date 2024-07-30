@@ -27,19 +27,19 @@ print(dist); print(p); print(nind)
 
 
 cltmod <- cmdstan_model(stan_file = 
-                          '../stan_models/cdf_quantile_normal_mix4.stan')
+                          '../stan_models/cdf_quantile_normal_mix5.stan')
 
 indmod <- cmdstan_model(stan_file = 
-                          '../stan_models/cdf_ind_quantile_normal_mix4.stan')
+                          '../stan_models/cdf_ind_quantile_normal_mix5.stan')
 
 ordmod <- cmdstan_model(stan_file = 
-                          '../stan_models/order_normal_mix4_quantiles.stan')
+                          '../stan_models/order_normal_mix5_quantiles.stan')
 
 cltnmod <- cmdstan_model(stan_file =
-                           '../stan_models/cdf_quantile_normal_n_mix4.stan')
+                           '../stan_models/cdf_quantile_normal_n_mix5.stan')
 
 ordnmod <- cmdstan_model(stan_file =
-                           '../stan_models/order_normal_n_mix4_quantiles.stan')
+                           '../stan_models/order_normal_n_mix5_quantiles.stan')
 
 metamod <- cmdstan_model(stan_file = 
                            "../stan_models/metanorm_quantiles.stan")
@@ -72,7 +72,7 @@ levels <- list(
 models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern", "meta")
 
 
-reps <- 1000
+reps <- 50
 n <- samp_sizes[nind]
 
 
@@ -113,39 +113,39 @@ distance <- foreach(replicate = 1:reps,
     quantiles <- quantile(samp, probs, type = 2)
     
     data <- data.frame(quantile = quantiles, prob = probs)
-    stan_data <- make_stan_data(data, size = n, comps = 4)
+    stan_data <- make_stan_data(data, size = n, comps = 5)
     
     
     #fit models
     fit_cltn <- stan_fit_draws(cltnmod, stan_data, 
                                 sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100) 
-	saveRDS(list(draws = fit_cltn[[2]],samp = samp), paste0("sim_draws/", dist, "_cltn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+	saveRDS(list(draws = fit_cltn[[2]],samp = samp), paste0("sim_draws5/", dist, "_cltn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
    print("gets here") 
     fit_ordn <- stan_fit_draws(ordnmod, stan_data, 
                                 sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100) 
 
-   	saveRDS(list(draws = fit_ordn[[2]],samp = samp), paste0("sim_draws/", dist, "_ordn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+   	saveRDS(list(draws = fit_ordn[[2]],samp = samp), paste0("sim_draws5/", dist, "_ordn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_clt <- stan_fit_draws(cltmod, stan_data,
                                sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100) 
 
-   	saveRDS(list(draws = fit_clt[[2]],samp = samp), paste0("sim_draws/", dist, "_clt_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+   	saveRDS(list(draws = fit_clt[[2]],samp = samp), paste0("sim_draws5/", dist, "_clt_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_ord <- stan_fit_draws(ordmod, stan_data,
                                 sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100) 
     
-   	saveRDS(list(draws = fit_ord[[2]],samp = samp), paste0("sim_draws/", dist, "_ord_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+   	saveRDS(list(draws = fit_ord[[2]],samp = samp), paste0("sim_draws5/", dist, "_ord_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_ind <- stan_fit_draws(indmod,stan_data,
                                 sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100)
    
-	saveRDS(list(draws = fit_ind[[2]],samp = samp), paste0("sim_draws/", dist, "_ind_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
+	saveRDS(list(draws = fit_ind[[2]],samp = samp), paste0("sim_draws5/", dist, "_ind_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
     fit_meta <- stan_fit_draws(metamod,stan_data,
                                sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100)
-	saveRDS(list(draws = fit_meta[[2]],samp = samp), paste0("sim_draws/", dist, "_meta_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
+	saveRDS(list(draws = fit_meta[[2]],samp = samp), paste0("sim_draws5/", dist, "_meta_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
 #    fit_norm <- stan_fit_draws(normmod,stan_data,
 #			       sampler = "variational",
 #			       elbo = 300, grad = 10,
@@ -223,7 +223,7 @@ distance <- foreach(replicate = 1:reps,
   }
 
 
-write.csv(distance, paste0("sim_scores/", dist, "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
+write.csv(distance, paste0("sim_scores/", dist, "5/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 
 
 
