@@ -182,6 +182,7 @@ distance <- foreach(replicate = 1:reps,
     pumeta <- function(x) {ecdf(udraws_meta)(x)}
     #punorm <- function(x) {ecdf(udraws_norm)(x)}
     qspline <- make_q_fn(probs, quantiles)
+    rspline <- make_r_fn(probs, quantiles)
     puspline <- function(x) {pdist(qspline(x))}
     qkern <- function(p) {qkden(p, quantiles, kernel = "epanechnikov")}
     pukern <- function(x) {pdist(qkern(x))}
@@ -207,14 +208,27 @@ distance <- foreach(replicate = 1:reps,
     uwd2_spline <- unit_wass_dist(puspline, d = 2)
     uwd2_kern <- unit_wass_dist(pukern, d = 2)
     
+    
+    ks_cltn <- ks.test(udraws_cltn, "punif")$statistic
+    ks_ordn <- ks.test(udraws_ordn, "punif")$statistic
+    ks_clt <- ks.test(udraws_clt, "punif")$statistic
+    ks_ord <- ks.test(udraws_clt, "punif")$statistic
+    ks_ind <- ks.test(udraws_ind, "punif")$statistic
+    ks_meta <- ks.test(udraws_meta, "punif")$statistic
+    ks_spline <- ks.test(pdist(rspline(out_s)), "punif")$statistic
+    ks_kern <- ks.test(rqden(out_s, quantiles), "punif")$statistic
+    
     uwd1s <- c(uwd1_cltn, uwd1_ordn, uwd1_clt, uwd1_ord, uwd1_ind, uwd1_spline,
                uwd1_kern, uwd1_meta)
     uwd2s <- c(uwd2_cltn, uwd2_ordn, uwd2_clt, uwd2_ord, uwd2_ind, uwd2_spline,
                uwd2_kern, uwd2_meta)
     
+    kss <- c(ks_cltn, ks_ordn, ks_clt, ks_ord, ks_ind, ks_spline, ks_kern,
+             ks_meta)
+    
      
     scores <- data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
-               model = models, uwd1 = uwd1s, uwd2 = uwd2s)
+               model = models, uwd1 = uwd1s, uwd2 = uwd2s, ks = kss)
 
     scores
   #write.csv(scores, "test_scores.csv", row.names = FALSE)  
