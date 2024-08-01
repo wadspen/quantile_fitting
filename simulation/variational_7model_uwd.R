@@ -97,14 +97,17 @@ distance <- foreach(replicate = 1:reps,
       samp <- rnorm(n)
       pdist <- function(x) {pnorm(x)}
       ddist <- function(x) {dnorm(x)}
+      rdist <- function(n) {rnorm(n)}
     } else if (dist == "evd") {
       samp <- revd(n)
       pdist <- function(x) {pevd(x)}
       ddist <- function(x) {devd(x)}
+      ridst <- function(n) {revd(n)}
     } else if (dist == "lp") {
       samp <- rlaplace(n)
       pdist <- function(x) {plaplace(x)}
       ddist <- function(x) {dlaplace(x)}
+      rdist <- function(n) {rlaplace(n)}
     } else if (dist == "gmix") {
       pars <- data.frame(mu = c(-1, 1.2),
                          sigma = c(.9, .6),
@@ -113,6 +116,7 @@ distance <- foreach(replicate = 1:reps,
       samp <- r(mdist)(n)
       pdist <- function(x) {p(mdist)(x)}
       ddist <- function(x) {d(mdist)(x)}
+      rdist <- function(n) {r(mdist)(n)}
     }
     
     probs <- levels[[p]]
@@ -124,7 +128,7 @@ distance <- foreach(replicate = 1:reps,
     
     #fit models
     fit_cltn <- stan_fit_draws(cltnmod, stan_data, 
-                                sampler = "variational", burn = burn, samp = samples,
+                                sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
 	# saveRDS(list(draws = fit_cltn[[2]],samp = samp), paste0("sim_draws5/", dist, "_cltn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
    # print("gets here") 
@@ -149,11 +153,11 @@ distance <- foreach(replicate = 1:reps,
    
 	# saveRDS(list(draws = fit_ind[[2]],samp = samp), paste0("sim_draws5/", dist, "_ind_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
     # fit_meta <- stan_fit_draws(metamod,stan_data,
-    #                            sampler = "variational", burn = burn, samp = samples,
+    #                            sampler = "MCMC", burn = burn, samp = samples,
     #                             refresh = 100, out_s = 5000)
 	# saveRDS(list(draws = fit_meta[[2]],samp = samp), paste0("sim_draws5/", dist, "_meta_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
 #    fit_norm <- stan_fit_draws(normmod,stan_data,
-#			       sampler = "variational",
+#			       sampler = "MCMC",
 #			       elbo = 300, grad = 10,
 #			       out_s = 2000)
     
@@ -322,25 +326,31 @@ distance <- foreach(replicate = 1:reps,
     ks_kern <- ks.test(rkern(out_s), "punif")$statistic
     
     
-    unifs <- runif(5000)
-    cltnx <- dcltn(unifs)
-    ordnx <- dordn(unifs)
-    cltx <- dclt(unifs)
-    ordx <- dord(unifs)
-    indx <- dind(unifs)
-    splinex <- dspline(unifs)
-    kernx <- dkern(unifs)
-    py <- ddist(unifs)
+    kls <- rdist(samples)
+    cltnx <- dcltn(kls)
+    ordnx <- dordn(kls)
+    cltx <- dclt(kls)
+    ordx <- dord(kls)
+    indx <- dind(kls)
+    splinex <- dspline(kls)
+    kernx <- dkern(kls)
+    py <- ddist(kls)
     
-    cltn_kl <- KLD(py, cltnx)$intrinsic.discrepancy
-    ordn_kl <- KLD(py, ordnx)$intrinsic.discrepancy
-    clt_kl <- KLD(py, cltx)$intrinsic.discrepancy
-    ord_kl <- KLD(py, ordx)$intrinsic.discrepancy
-    ind_kl <- KLD(py, indx)$intrinsic.discrepancy
-    spline_kl <- KLD(py, splinex)$intrinsic.discrepancy
-    kern_kl <- KLD(py, kernx)$intrinsic.discrepancy
+    cltn_kl <- mean(log(py) - log(cltnx))
+    ordn_kl <- mean(log(py) - log(ordnx))
+    clt_kl <- mean(log(py) - log(cltx))
+    ord_kl <- mean(log(py) - log(ordx))
+    ind_kl <- mean(log(py) - log(indx))
+    spline_kl <- mean(log(py) - log(splinex))
+    kern_kl <- mean(log(py) - log(kernx))
     
-    
+    cltn_tv <- dens_dist(dcltn, ddist)
+    ordn_tv <- dens_dist(dordn, ddist)
+    clt_tv <- dens_dist(dclt, ddist)
+    ord_tv <- dens_dist(dord, ddist)
+    ind_tv <- dens_dist(dind, ddist)
+    spline_tv <- dens_dist(dspline, ddist)
+    kern_tv <- dens_dist(dkern, ddist)
     
     
     
@@ -354,9 +364,12 @@ distance <- foreach(replicate = 1:reps,
     
     klds <- c(cltn_kl, ordn_kl, clt_kl, ord_kl, ind_kl, spline_kl, kern_kl)
     
+    tvs <- c(cltn_tv, ordn_tv, clt_tv, ord_tv, ind_tv, spline_tv, kern_tv)
+    
      
     scores <- data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
-               model = models, uwd1 = uwd1s, uwd2 = uwd2s, ks = kss, kld = klds)
+               model = models, uwd1 = uwd1s, uwd2 = uwd2s, ks = kss, kld = klds,
+               tv = tvs)
 
     scores
   #write.csv(scores, "test_scores.csv", row.names = FALSE)  

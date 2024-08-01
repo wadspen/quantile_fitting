@@ -97,8 +97,8 @@ abs_d <- function(x, ddist_est, ddist, d = 1) {
   abs(ddist_est(x) - ddist(x))^d
 }
 
-dens_dist <- function(ddist_est, ddist, d = 1) {
-  (d + 1)*integrate(abs_d, lower = -Inf, upper = Inf, ddist_est, ddist, d = d,
+dens_dist <- function(ddist_est, ddist) {
+  (1/2)*integrate(abs_d, lower = -Inf, upper = Inf, ddist_est, ddist, d = 1,
                     subdivisions = 3000)$value
 }
 
