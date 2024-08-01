@@ -74,7 +74,7 @@ levels <- list(
 models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
 
 
-reps <- 50
+reps <- 1000
 n <- samp_sizes[nind]
 
 
@@ -129,22 +129,22 @@ distance <- foreach(replicate = 1:reps,
 	# saveRDS(list(draws = fit_cltn[[2]],samp = samp), paste0("sim_draws5/", dist, "_cltn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
    # print("gets here") 
     fit_ordn <- stan_fit_draws(ordnmod, stan_data, 
-                                sampler = "variational", burn = burn, samp = samples,
+                                sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
 
    	# saveRDS(list(draws = fit_ordn[[2]],samp = samp), paste0("sim_draws5/", dist, "_ordn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_clt <- stan_fit_draws(cltmod, stan_data,
-                               sampler = "variational", burn = burn, samp = samples,
+                               sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
 
    	# saveRDS(list(draws = fit_clt[[2]],samp = samp), paste0("sim_draws5/", dist, "_clt_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_ord <- stan_fit_draws(ordmod, stan_data,
-                                sampler = "variational", burn = burn, samp = samples,
+                                sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
     
    	# saveRDS(list(draws = fit_ord[[2]],samp = samp), paste0("sim_draws5/", dist, "_ord_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_ind <- stan_fit_draws(indmod,stan_data,
-                                sampler = "variational", burn = burn, samp = samples,
+                                sampler = "MCMC", burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000)
    
 	# saveRDS(list(draws = fit_ind[[2]],samp = samp), paste0("sim_draws5/", dist, "_ind_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
@@ -365,7 +365,7 @@ distance <- foreach(replicate = 1:reps,
   }
 
 
-write.csv(distance, paste0("sim_scores/", dist, "5/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
+write.csv(distance, paste0("sim_scores/", dist, "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 
 
 
