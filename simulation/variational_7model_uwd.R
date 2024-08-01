@@ -8,6 +8,7 @@ library(dplyr)
 library(VGAM)
 library(EnvStats)
 library(tidyr)
+library(LaplacesDemon)
 library(parallel)
 library(doParallel)
 library(doMC)
@@ -82,7 +83,7 @@ n <- samp_sizes[nind]
 #replicate <- 2
 distance <- foreach(replicate = 1:reps,
                     .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
-                                  "VGAM", "distr", "dplyr")
+                                  "VGAM", "distr", "dplyr", "LaplacesDemon")
                     ,.errorhandling = "remove"
                     ,.combine = rbind) %dopar% {
   #foreach(n = samp_sizes, .combine = rbind) %:%
