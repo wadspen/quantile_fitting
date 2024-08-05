@@ -74,10 +74,12 @@ levels <- list(
 models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
 
 
-reps <- 1000
+reps <- 1010
 n <- samp_sizes[nind]
 
-
+#p <- 7
+#n <- 1000
+#replicate <- 4
 #p <- 2
 #n <- 500
 #dist <- "norm"
@@ -102,7 +104,7 @@ distance <- foreach(replicate = 1:reps,
       samp <- revd(n)
       pdist <- function(x) {pevd(x)}
       ddist <- function(x) {devd(x)}
-      ridst <- function(n) {revd(n)}
+      rdist <- function(n) {revd(n)}
     } else if (dist == "lp") {
       samp <- rlaplace(n)
       pdist <- function(x) {plaplace(x)}
@@ -128,30 +130,30 @@ distance <- foreach(replicate = 1:reps,
     
     #fit models
     fit_cltn <- stan_fit_draws(cltnmod, stan_data, 
-                                sampler = "MCMC", burn = burn, samp = samples,
+                                sampler = "variational", burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
-	# saveRDS(list(draws = fit_cltn[[2]],samp = samp), paste0("sim_draws5/", dist, "_cltn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+	 saveRDS(list(draws = fit_cltn[[2]],samp = samp), paste0("sim_draws_v/", dist, "_cltn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
    # print("gets here") 
     fit_ordn <- stan_fit_draws(ordnmod, stan_data, 
-                                sampler = "MCMC", burn = burn, samp = samples,
+                                sampler = "variational", burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
 
-   	# saveRDS(list(draws = fit_ordn[[2]],samp = samp), paste0("sim_draws5/", dist, "_ordn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+   	 saveRDS(list(draws = fit_ordn[[2]],samp = samp), paste0("sim_draws_v/", dist, "_ordn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_clt <- stan_fit_draws(cltmod, stan_data,
-                               sampler = "MCMC", burn = burn, samp = samples,
+                               sampler = "variational", burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
 
-   	# saveRDS(list(draws = fit_clt[[2]],samp = samp), paste0("sim_draws5/", dist, "_clt_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+   	 saveRDS(list(draws = fit_clt[[2]],samp = samp), paste0("sim_draws_v/", dist, "_clt_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_ord <- stan_fit_draws(ordmod, stan_data,
-                                sampler = "MCMC", burn = burn, samp = samples,
+                                sampler = "variational", burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
     
-   	# saveRDS(list(draws = fit_ord[[2]],samp = samp), paste0("sim_draws5/", dist, "_ord_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+   	 saveRDS(list(draws = fit_ord[[2]],samp = samp), paste0("sim_draws_v/", dist, "_ord_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
     fit_ind <- stan_fit_draws(indmod,stan_data,
-                                sampler = "MCMC", burn = burn, samp = samples,
+                                sampler = "variational", burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000)
    
-	# saveRDS(list(draws = fit_ind[[2]],samp = samp), paste0("sim_draws5/", dist, "_ind_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
+	 saveRDS(list(draws = fit_ind[[2]],samp = samp), paste0("sim_draws_v/", dist, "_ind_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
     # fit_meta <- stan_fit_draws(metamod,stan_data,
     #                            sampler = "MCMC", burn = burn, samp = samples,
     #                             refresh = 100, out_s = 5000)
@@ -177,7 +179,7 @@ distance <- foreach(replicate = 1:reps,
                                     mixCoeff = cltn_wts)
     
     dcltn <- function(x) {d(cltn_mix)(x)}
-    
+    qcltn <- function(p) {q(cltn_mix)(p)} 
     
     params <- fit_ordn[[2]]$draws(variables = c("mus", "sigmas", "pi"), 
                                   format = "df")               
@@ -195,7 +197,7 @@ distance <- foreach(replicate = 1:reps,
                                     mixCoeff = ordn_wts)
     
     dordn <- function(x) {d(ordn_mix)(x)}
-    
+    qordn <- function(p) {q(ordn_mix)(p)} 
     
     
     
@@ -216,7 +218,7 @@ distance <- foreach(replicate = 1:reps,
                                     mixCoeff = clt_wts)
     
     dclt <- function(x) {d(clt_mix)(x)}
-    
+    qclt <- function(p) {q(clt_mix)(p)} 
     
     params <- fit_ord[[2]]$draws(variables = c("mus", "sigmas", "pi"), 
                                   format = "df")               
@@ -234,7 +236,7 @@ distance <- foreach(replicate = 1:reps,
                                     mixCoeff = ord_wts)
     
     dord <- function(x) {d(ord_mix)(x)}
-    
+    qord <- function(p) {q(ord_mix)(p)} 
     
     
     
@@ -254,7 +256,7 @@ distance <- foreach(replicate = 1:reps,
                                     mixCoeff = ind_wts)
     
     dind <- function(x) {d(ind_mix)(x)}
-    
+    qind <- function(p) {q(ind_mix)(p)} 
     
 
 
@@ -293,7 +295,11 @@ distance <- foreach(replicate = 1:reps,
     puspline <- function(x) {pdist(qspline(x))}
     qkern <- function(p) {qkden(p, quantiles, kernel = "epanechnikov")}
     pukern <- function(x) {pdist(qkern(x))}
-    
+    pucltno <- function(x) {pdist(qcltn(x))}
+    puordno <- function(x) {pdist(qordn(x))}
+    puclto <- function(x) {pdist(qclt(x))}
+    puordo <- function(x) {pdist(qord(x))}
+    puindo <- function(x) {pdist(qind(x))}
     
     uwd1_cltn <- unit_wass_dist(pucltn, d = 1)
     uwd1_ordn <- unit_wass_dist(puordn, d = 1)
@@ -305,6 +311,12 @@ distance <- foreach(replicate = 1:reps,
     uwd1_spline <- unit_wass_dist(puspline, d = 1)
     uwd1_kern <- unit_wass_dist(pukern, d = 1)
     
+    uwd1_cltno <- unit_wass_dist(pucltno, d = 1)
+    uwd1_ordno <- unit_wass_dist(puordno, d = 1)
+    uwd1_clto <- unit_wass_dist(puclto, d = 1)
+    uwd1_ordo <- unit_wass_dist(puordo, d = 1)
+    uwd1_indo <- unit_wass_dist(puindo, d = 1)
+
     uwd2_cltn <- unit_wass_dist(pucltn, d = 2)
     uwd2_ordn <- unit_wass_dist(puordn, d = 2)
     uwd2_clt <- unit_wass_dist(puclt, d = 2)
@@ -359,6 +371,9 @@ distance <- foreach(replicate = 1:reps,
                uwd1_kern)
     uwd2s <- c(uwd2_cltn, uwd2_ordn, uwd2_clt, uwd2_ord, uwd2_ind, uwd2_spline,
                uwd2_kern)
+
+    uwd1os <- c(uwd1_cltno, uwd1_ordno, uwd1_clto, uwd1_ordo, uwd1_indo, uwd1_spline,
+                uwd1_kern) 
     
     kss <- c(ks_cltn, ks_ordn, ks_clt, ks_ord, ks_ind, ks_spline, ks_kern)
     
@@ -368,14 +383,15 @@ distance <- foreach(replicate = 1:reps,
     
      
     scores <- data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
-               model = models, uwd1 = uwd1s, uwd2 = uwd2s, ks = kss, kld = klds,
+               model = models, uwd1 = uwd1s, uwd1os, uwd2 = uwd2s, ks = kss, kld = klds,
                tv = tvs)
 
     scores
   #write.csv(scores, "test_scores.csv", row.names = FALSE)  
     
     
-  }
+
+}
 
 
 write.csv(distance, paste0("sim_scores/", dist, "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
