@@ -331,7 +331,7 @@ distance <- foreach(replicate = 1:reps,
     ks_cltn <- ks.test(udraws_cltn, "punif")$statistic
     ks_ordn <- ks.test(udraws_ordn, "punif")$statistic
     ks_clt <- ks.test(udraws_clt, "punif")$statistic
-    ks_ord <- ks.test(udraws_clt, "punif")$statistic
+    ks_ord <- ks.test(udraws_ord, "punif")$statistic
     ks_ind <- ks.test(udraws_ind, "punif")$statistic
     # ks_meta <- ks.test(udraws_meta, "punif")$statistic
     ks_spline <- ks.test(pdist(rspline(out_s)), "punif")$statistic
@@ -383,7 +383,8 @@ distance <- foreach(replicate = 1:reps,
     
      
     scores <- data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
-               model = models, uwd1 = uwd1s, uwd1os, uwd2 = uwd2s, ks = kss, kld = klds,
+               model = models, uwd1 = uwd1s, uwd1o = uwd1os, 
+               uwd2 = uwd2s, ks = kss, kld = klds,
                tv = tvs)
 
     scores

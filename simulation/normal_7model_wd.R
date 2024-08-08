@@ -2,6 +2,9 @@ source("./simulation_functions.R")
 library(cmdstanr)
 library(distfromq)
 library(evmix)
+library(janitor)
+library(distr)
+library(tidyr)
 library(parallel)
 library(doParallel)
 library(doMC)
@@ -13,8 +16,9 @@ foreach::getDoParWorkers()
 registerDoMC(cores = n.cores)
 
 args <- commandArgs()
-p <- as.numeric(args[6])
-nind <- as.numeric(args[7])
+sample_type = args[6]
+p <- as.numeric(args[7])
+nind <- as.numeric(args[8])
 print(p); print(nind)
 
 cltmod <- cmdstan_model(stan_file = 
@@ -69,9 +73,12 @@ levels <- list(
 mu <- 4
 sigma <- 3.5
 qtrue <- function(p) {qnorm(p, mu, sigma)}
-
+ddist <- function(x) {dnorm(x, mu, sigma)}
+rdist <- function(n) {rnorm(n, mu, sigma)}
+out_s <- 5000
+samples <- 5000
 models <- c("cltn", "ordn", "clt", "ord", "ind", "kern", "spline")
-
+sample_type = "variational"
 reps <- 1000
 set.seed(92)
 n <- samp_sizes[nind]
@@ -115,27 +122,27 @@ source("./simulation_functions.R")
   #sum <- fit$summary
   #sum_eval <- eval_sum(sum, true_params)	
   start <- Sys.time()
-  fit_cltn <- stan_fit_draws(cltnmod, stan_data)
+  fit_cltn <- stan_fit_draws(cltnmod, stan_data, sampler = sample_type)
   end <- Sys.time()
   cltn_time <- difftime(end, start, units = "min")[[1]]
 
   start <- Sys.time()
-  fit_ordn <- stan_fit_draws(ordnmod, stan_data)
+  fit_ordn <- stan_fit_draws(ordnmod, stan_data, sampler = sample_type)
   end <- Sys.time()
   ordn_time <- difftime(end, start, units = "min")[[1]] 
   
   start <- Sys.time()
-  fit_clt <- stan_fit_draws(cltmod, stan_data)
+  fit_clt <- stan_fit_draws(cltmod, stan_data, sampler = sample_type)
   end <- Sys.time()
   clt_time <- difftime(end, start, units = "min")[[1]]
   
   start <- Sys.time()
-  fit_ord <- stan_fit_draws(ordmod, stan_data)
+  fit_ord <- stan_fit_draws(ordmod, stan_data, sampler = sample_type)
   end <- Sys.time()
   ord_time <- difftime(end, start, units = "min")[[1]]
   
   start <- Sys.time()
-  fit_ind <- stan_fit_draws(indmod,stan_data)
+  fit_ind <- stan_fit_draws(indmod,stan_data, sampler = sample_type)
   end <- Sys.time()
   ind_time <- difftime(end, start, units = "min")[[1]]
 
@@ -163,6 +170,62 @@ source("./simulation_functions.R")
   draws_ord <- fit_ord[[1]]$draws
   draws_ind <- fit_ind[[1]]$draws
   
+  params <- fit_cltn[[2]]$draws(variables = c("mu", "sigma"), 
+                                format = "df")               
+  m_params <- apply(params, MARGIN = 2, FUN = mean)
+  cltn_mu <- m_params[1]
+  cltn_sigma <- m_params[2]
+  
+  dcltn <- function(x) {dnorm(x, cltn_mu, cltn_sigma)}
+  qcltn <- function(p) {qnorm(p, cltn_mu, cltn_sigma)}
+  
+  ######ordn#######
+  
+  params <- fit_ordn[[2]]$draws(variables = c("mu", "sigma"), 
+                                format = "df")               
+  m_params <- apply(params, MARGIN = 2, FUN = mean)
+  ordn_mu <- m_params[1]
+  ordn_sigma <- m_params[2]
+  
+  dordn <- function(x) {dnorm(x, ordn_mu, ordn_sigma)}
+  qordn <- function(p) {qnorm(p, ordn_mu, ordn_sigma)}
+  
+  
+  ######clt#######
+  
+  params <- fit_clt[[2]]$draws(variables = c("mu", "sigma"), 
+                                format = "df")               
+  m_params <- apply(params, MARGIN = 2, FUN = mean)
+  clt_mu <- m_params[1]
+  clt_sigma <- m_params[2]
+  
+  dclt <- function(x) {dnorm(x, clt_mu, clt_sigma)}
+  qclt <- function(p) {qnorm(p, clt_mu, clt_sigma)}
+  
+  ######ord#######
+  
+  params <- fit_ord[[2]]$draws(variables = c("mu", "sigma"), 
+                                format = "df")               
+  m_params <- apply(params, MARGIN = 2, FUN = mean)
+  ord_mu <- m_params[1]
+  ord_sigma <- m_params[2]
+  
+  dord <- function(x) {dnorm(x, ord_mu, ord_sigma)}
+  qord <- function(p) {qnorm(p, ord_mu, ord_sigma)}
+  
+  
+  
+  ######ind#######
+  
+  params <- fit_ind[[2]]$draws(variables = c("mu", "sigma"), 
+                               format = "df")               
+  m_params <- apply(params, MARGIN = 2, FUN = mean)
+  ind_mu <- m_params[1]
+  ind_sigma <- m_params[2]
+  
+  dind <- function(x) {dnorm(x, ind_mu, ind_sigma)}
+  qind <- function(p) {qnorm(p, ind_mu, ind_sigma)}
+  
   # true_draws <- rnorm(length(draws_clt), mu, sigma)
   # 
   # kldiv(draws_ind, true_draws)
@@ -185,6 +248,15 @@ source("./simulation_functions.R")
   puspline <- function(x) {pdist(qspline(x))}
   qkern <- function(p) {qkden(p, quantiles, kernel = "epanechnikov")}
   pukern <- function(x) {pdist(qkern(x))}
+  rspline <- make_r_fn(probs, quantiles)
+  dspline <- make_d_fn(probs, quantiles)
+  rkern <- function(n) {rkden(n, quantiles, kernel = "epanechnikov")}
+  dkern <- function(x) {dkden(x, quantiles, kernel = "epanechnikov")}
+  pucltno <- function(x) {pdist(qcltn(x))}
+  puordno <- function(x) {pdist(qordn(x))}
+  puclto <- function(x) {pdist(qclt(x))}
+  puordo <- function(x) {pdist(qord(x))}
+  puindo <- function(x) {pdist(qind(x))}
   
   #pu <- function(x) {ecdf(udraws)(x)}
   #uwd1 <- unit_wass_dist(pu, d = 1)
@@ -220,15 +292,74 @@ source("./simulation_functions.R")
   uwd2_spline <- unit_wass_dist(puspline, d = 2)
   uwd2_kern <- unit_wass_dist(pukern, d = 2)
   
+  uwd1_cltno <- unit_wass_dist(pucltno, d = 1)
+  uwd1_ordno <- unit_wass_dist(puordno, d = 1)
+  uwd1_clto <- unit_wass_dist(puclto, d = 1)
+  uwd1_ordo <- unit_wass_dist(puordo, d = 1)
+  uwd1_indo <- unit_wass_dist(puindo, d = 1)
+  
+  
+  ks_cltn <- ks.test(udraws_cltn, "punif")$statistic
+  ks_ordn <- ks.test(udraws_ordn, "punif")$statistic
+  ks_clt <- ks.test(udraws_clt, "punif")$statistic
+  ks_ord <- ks.test(udraws_ord, "punif")$statistic
+  ks_ind <- ks.test(udraws_ind, "punif")$statistic
+  # ks_meta <- ks.test(udraws_meta, "punif")$statistic
+  ks_spline <- ks.test(pdist(rspline(out_s)), "punif")$statistic
+  ks_kern <- ks.test(rkern(out_s), "punif")$statistic
+  
+  
+  kls <- rdist(samples)
+  cltnx <- dcltn(kls)
+  ordnx <- dordn(kls)
+  cltx <- dclt(kls)
+  ordx <- dord(kls)
+  indx <- dind(kls)
+  splinex <- dspline(kls)
+  kernx <- dkern(kls)
+  py <- ddist(kls)
+  
+  
+  cltn_kl <- mean(log(py) - log(cltnx))
+  ordn_kl <- mean(log(py) - log(ordnx))
+  clt_kl <- mean(log(py) - log(cltx))
+  ord_kl <- mean(log(py) - log(ordx))
+  ind_kl <- mean(log(py) - log(indx))
+  spline_kl <- mean(log(py) - log(splinex))
+  kern_kl <- mean(log(py) - log(kernx))
+  
+  
+  
+  cltn_tv <- dens_dist(dcltn, ddist)
+  ordn_tv <- dens_dist(dordn, ddist)
+  clt_tv <- dens_dist(dclt, ddist)
+  ord_tv <- dens_dist(dord, ddist)
+  ind_tv <- dens_dist(dind, ddist)
+  spline_tv <- dens_dist(dspline, ddist)
+  kern_tv <- dens_dist(dkern, ddist)
+  
   uwd1s <- c(uwd1_cltn, uwd1_ordn, uwd1_clt, uwd1_ord, uwd1_ind, uwd1_spline,
              uwd1_kern)
   
   uwd2s <- c(uwd2_cltn, uwd2_ordn, uwd2_clt, uwd2_ord, uwd2_ind, uwd2_spline,
              uwd2_kern)
   
+  uwd1os <- c(uwd1_cltno, uwd1_ordno, uwd1_clto, uwd1_ordo, uwd1_indo, uwd1_spline,
+              uwd1_kern) 
+  
+  kss <- c(ks_cltn, ks_ordn, ks_clt, ks_ord, ks_ind, ks_spline, ks_kern)
+  
+  klds <- c(cltn_kl, ordn_kl, clt_kl, ord_kl, ind_kl, spline_kl, kern_kl)
+  
+  tvs <- c(cltn_tv, ordn_tv, clt_tv, ord_tv, ind_tv, spline_tv, kern_tv)
+  
+  
+  
 
   data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
-             model = models, uwd1 = uwd1s, uwd2 = uwd2s) %>% 
+             model = models, uwd1 = uwd1s, uwd1o = uwd1os, 
+             uwd2 = uwd2s, ks = kss, kld = klds,
+             tv = tvs) %>% 
     left_join(sum_eval, by = "model")
   
   
@@ -236,7 +367,9 @@ source("./simulation_functions.R")
 }
 
 
-write.csv(distance, paste0("sim_scores/norm/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
+write.csv(distance, paste0("sim_scores/norm_", sample_type, "/", 
+                           "size", n, "_probs", length(levels[[p]]), 
+                           "_scores.csv"), row.names = FALSE)
 
 
 
