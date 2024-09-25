@@ -7,6 +7,7 @@ library(parallel)
 library(doParallel)
 library(doMC)
 n.cores <- detectCores()
+#n.cores <- 1
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -20,14 +21,14 @@ print(mod)
 qgp_stan <- cmdstan_model(stan_file = 
                           './stan_models/cdf_quantile_normal_mix4.stan')
 
-burn <- 6000
-sample <- 7000
+burn <- 20000; # burn <- 150
+sample <- 60000;# sample <- 100
 
 mod_loc <- "../FluSight-forecast-hub/model-output/"
 #models <- list.files(mod_loc)
 #models <- models[models != "README.md"]
 sub_dates <- substr(list.files(paste0(mod_loc, "FluSight-baseline")), 1, 10)
-horizons <- -1:3
+horizons <- 0:3
 get_loc_file <- list.files(paste0(mod_loc, "FluSight-baseline/"))[4]
 get_loc_forc <- read.csv(paste0(mod_loc, "FluSight-baseline/", get_loc_file))
 locations <- unique(get_loc_forc$location)
@@ -37,6 +38,10 @@ locations <- unique(get_loc_forc$location)
 #horizons <- 1:2
 #models <- models[6:7]
 
+
+sub_dates <- "2023-11-18"
+locations <- "US"
+horizons <- 0
 all_forecasts <- forecasts <- foreach(date = sub_dates,
         .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
                       "VGAM", "distr", "dplyr")
@@ -67,8 +72,6 @@ all_forecasts <- forecasts <- foreach(date = sub_dates,
           dir.create(paste0("model-fits/", mod, "/summary_diagnostics"))
         }
        
-        print(mod)
-        print(paste0(mod_loc, mod))	
         forc_file <- list.files(paste0(mod_loc, mod), pattern = date)
         forecasts <- read.csv(paste0(mod_loc, mod, "/", forc_file))
         
@@ -88,6 +91,25 @@ all_forecasts <- forecasts <- foreach(date = sub_dates,
           filter(quantile != 0)
     
         stan_data <- make_stan_data(dat, size = 1, comps = 4)
+        if (loc == "US" & date == "2023-11-18" & as.numeric(h) == 0) {
+	   
+	    stan_samp <- qgp_stan$sample(data = stan_data,
+                            iter_warmup = burn,
+                            iter_sampling = sample,
+                            chains = 4,
+                            adapt_delta = .999,
+                            refresh = 100)    
+	    draws <- stan_samp$draws(format = "df")
+
+	    summary <- stan_samp$summary() %>% filter(variable == "dist_samp")
+	    diag_list <- lapply(stan_samp$diagnostic_summary(), FUN = mean)
+	    diag <- diag_list %>% data.frame()
+	    diag$max_rhat <- max(summary$rhat, na.rm = TRUE)
+	    diag$min_ess <- min(summary$ess_bulk, na.rm = TRUE)
+	    diag$min_esst <- min(summary$ess_tail, na.rm = TRUE)
+	    
+	    saveRDS(diag, paste0("model-fits/all_diags/", mod, "diagnostics.rds"))
+    } else {
         stan_samp <- qgp_stan$sample(data = stan_data,
                             iter_warmup = burn,
                             iter_sampling = sample,
@@ -97,21 +119,22 @@ all_forecasts <- forecasts <- foreach(date = sub_dates,
         
         
         draws <- stan_samp$draws(format = "df")
-        saveRDS(draws, paste0("model-fits/", mod, "/draws/", date, "-", loc,
+     }
+	saveRDS(draws, paste0("model-fits/", mod, "/draws/", date, "-", loc,
 			      "-", h, "-", mod,
                               ".rds"))
         
-        summary <- stan_samp$summary()
-        saveRDS(summary, paste0("model-fits/", mod, 
-                                "/summary_diagnostics/", date, "-", loc,
-				"-", h, "-", mod, "_",
-                              "summary.rds"))
-        
-        diagnostics <- stan_samp$diagnostic_summary()
-        saveRDS(diagnostics, paste0("model-fits/", mod, 
-                                "/summary_diagnostics/", date, "-", loc,
-				"-", h, "-", mod, "_",
-                                "diagnostics.rds"))
+        #summary <- stan_samp$summary()
+        #saveRDS(summary, paste0("model-fits/", mod, 
+        #                        "/summary_diagnostics/", date, "-", loc,
+	#			"-", h, "-", mod, "_",
+        #                      "summary.rds"))
+        #
+        #diagnostics <- stan_samp$diagnostic_summary()
+        #saveRDS(diagnostics, paste0("model-fits/", mod, 
+        #                        "/summary_diagnostics/", date, "-", loc,
+	#			"-", h, "-", mod, "_",
+        #                        "diagnostics.rds"))
         
         dist_samp <- draws$dist_samp
         
