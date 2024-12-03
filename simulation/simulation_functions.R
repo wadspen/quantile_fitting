@@ -211,7 +211,7 @@ isolate_draws <- function(stan_samps, variable = "dist_samp") {
   return(list(draws = draws, summary = summary))
 }
 
-stan_fit_draws <- function(mod, data_list, burn = 5000, sample = 5000,
+stan_fit_draws <- function(mod, data_list, burn = 10000, sample = 50000,
                       num_chain = 1, variable = "dist_samp", refresh = 0,
                       sampler = "MCMC", elbo = 1000, grad = 30, out_s = 1000) {
 	

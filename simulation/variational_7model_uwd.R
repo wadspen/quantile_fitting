@@ -13,6 +13,7 @@ library(parallel)
 library(doParallel)
 library(doMC)
 n.cores <- detectCores()
+#n.cores <- 1
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -50,9 +51,10 @@ ordnmod <- cmdstan_model(stan_file =
 
 mod_loc <- "../stan_models/"
 
-burn <- 6000
-samples <- 7000
-out_s <- samples
+burn <- 20000
+samples <- 60000
+out_s <- 5000
+sample_type <- "MCMC"
 #cltnmod <- paste0(mod_loc, "simple_normal_n_quantiles.stan")
 #ordnmod <- paste0(mod_loc, "order_normal_n_quantiles.stan")
 #cltmod <- paste0(mod_loc, "simple_normal_quantiles.stan")
@@ -74,7 +76,7 @@ levels <- list(
 models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
 
 
-reps <- 1010
+reps <- 500
 n <- samp_sizes[nind]
 
 #p <- 7
@@ -130,30 +132,36 @@ distance <- foreach(replicate = 1:reps,
     
     #fit models
     fit_cltn <- stan_fit_draws(cltnmod, stan_data, 
-                                sampler = "variational", burn = burn, samp = samples,
+                                sampler = sample_type, burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
-	 saveRDS(list(draws = fit_cltn[[2]],samp = samp), paste0("sim_draws_v/", dist, "_cltn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+	 if (sample_type == "MCMC") {saveRDS(list(draws = fit_cltn[[2]],samp = samp), paste0("sim_draws/", dist, "_cltn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
    # print("gets here") 
+        }
     fit_ordn <- stan_fit_draws(ordnmod, stan_data, 
-                                sampler = "variational", burn = burn, samp = samples,
+                                sampler = sample_type, burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
 
-   	 saveRDS(list(draws = fit_ordn[[2]],samp = samp), paste0("sim_draws_v/", dist, "_ordn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+   	 if (sample_type == "MCMC") {saveRDS(list(draws = fit_ordn[[2]],samp = samp), 
+						paste0("sim_draws/", dist, "_ordn_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+    	 }
     fit_clt <- stan_fit_draws(cltmod, stan_data,
-                               sampler = "variational", burn = burn, samp = samples,
+                               sampler = sample_type, burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
 
-   	 saveRDS(list(draws = fit_clt[[2]],samp = samp), paste0("sim_draws_v/", dist, "_clt_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+   	 if (sample_type == "MCMC") {saveRDS(list(draws = fit_clt[[2]],samp = samp), paste0("sim_draws/", dist, "_clt_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+    	 }
     fit_ord <- stan_fit_draws(ordmod, stan_data,
-                                sampler = "variational", burn = burn, samp = samples,
+                                sampler = sample_type, burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
     
-   	 saveRDS(list(draws = fit_ord[[2]],samp = samp), paste0("sim_draws_v/", dist, "_ord_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+   	 if (sample_type == "MCMC") {saveRDS(list(draws = fit_ord[[2]],samp = samp), paste0("sim_draws/", dist, "_ord_rep", replicate, "_size", n, "_probs", length(probs), ".rds")) 
+    	 }
     fit_ind <- stan_fit_draws(indmod,stan_data,
-                                sampler = "variational", burn = burn, samp = samples,
+                                sampler = sample_type, burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000)
    
-	 saveRDS(list(draws = fit_ind[[2]],samp = samp), paste0("sim_draws_v/", dist, "_ind_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
+	 if (sample_type == "MCMC") {saveRDS(list(draws = fit_ind[[2]],samp = samp), paste0("sim_draws/", dist, "_ind_rep", replicate, "_size", n, "_probs", length(probs), ".rds"))
+    	 }
     # fit_meta <- stan_fit_draws(metamod,stan_data,
     #                            sampler = "MCMC", burn = burn, samp = samples,
     #                             refresh = 100, out_s = 5000)
@@ -290,10 +298,10 @@ distance <- foreach(replicate = 1:reps,
     qspline <- make_q_fn(probs, quantiles)
     rspline <- make_r_fn(probs, quantiles)
     dspline <- make_d_fn(probs, quantiles)
-    rkern <- function(n) {rkden(n, quantiles, kernel = "epanechnikov")}
-    dkern <- function(x) {dkden(x, quantiles, kernel = "epanechnikov")}
+    rkern <- function(n) {rkden(n, quantiles, kernel = "gaussian")}
+    dkern <- function(x) {dkden(x, quantiles, kernel = "gaussian")}
     puspline <- function(x) {pdist(qspline(x))}
-    qkern <- function(p) {qkden(p, quantiles, kernel = "epanechnikov")}
+    qkern <- function(p) {qkden(p, quantiles, kernel = "gaussian")}
     pukern <- function(x) {pdist(qkern(x))}
     pucltno <- function(x) {pdist(qcltn(x))}
     puordno <- function(x) {pdist(qordn(x))}
@@ -394,8 +402,9 @@ distance <- foreach(replicate = 1:reps,
 
 }
 
-
-write.csv(distance, paste0("sim_scores/", dist, "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
+#print(paste0("sim_scores/", dist, "_", sample_type, "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
+#write.csv(distance, "test_distance.csv")
+write.csv(distance, paste0("sim_scores/", dist, "_", sample_type, "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 
 
 

@@ -17,8 +17,8 @@ args <- commandArgs()
 sample_type = args[6]
 p <- as.numeric(args[7])
 nind <- as.numeric(args[8])
-out_s <- 5000
-samples <- 5000
+out_s <- 10000
+samples <- 50000
 
 
 cltmod <- cmdstan_model(stan_file = 
@@ -65,9 +65,9 @@ qtrue <- function(p) {qexp(p, lambda)}
 ddist <- function(x) {dexp(x, lambda)}
 rdist <- function(n) {rexp(n, lambda)}
 
-models <- c("cltn", "ordn", "clt", "ord", "ind", "kern", "spline")
+models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
 
-reps <- 1000
+reps <- 500
 set.seed(92)
 n <- samp_sizes[nind]
 seeds <- sample(999999999, reps)
@@ -238,12 +238,12 @@ distance <- foreach(replicate = 1:reps,
     puind <- function(x) {ecdf(udraws_ind)(x)}
     qspline <- make_q_fn(probs, quantiles)
     puspline <- function(x) {pdist(qspline(x))}
-    qkern <- function(p) {qkden(p, quantiles, kernel = "epanechnikov")}
+    qkern <- function(p) {qkden(p, quantiles, kernel = "gaussian")}
     pukern <- function(x) {pdist(qkern(x))}
     rspline <- make_r_fn(probs, quantiles)
     dspline <- make_d_fn(probs, quantiles)
-    rkern <- function(n) {rkden(n, quantiles, kernel = "epanechnikov")}
-    dkern <- function(x) {dkden(x, quantiles, kernel = "epanechnikov")}
+    rkern <- function(n) {rkden(n, quantiles, kernel = "gaussian")}
+    dkern <- function(x) {dkden(x, quantiles, kernel = "gaussian")}
     pucltno <- function(x) {pdist(qcltn(x))}
     puordno <- function(x) {pdist(qordn(x))}
     puclto <- function(x) {pdist(qclt(x))}

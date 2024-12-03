@@ -8,6 +8,7 @@ library(parallel)
 library(doParallel)
 library(doMC)
 n.cores <- detectCores()
+#n.cores <- 1
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -17,7 +18,8 @@ registerDoMC(cores = n.cores)
 args <- commandArgs()
 p <- as.numeric(args[6])
 nind <- as.numeric(args[7])
-
+print(paste("p = ", p))
+print(paste("n = ", nind))
 
 cltmod <- cmdstan_model(stan_file = 
                           '../stan_models/tukey_quantiles.stan')
@@ -64,7 +66,7 @@ qtrue <- function(p) {qexp(p, lambda)}
 # models <- c("cltn", "ordn", "clt", "ord", "ind", "kern", "spline")
 models <- c("clt", "ord")
 
-reps <- 1000
+reps <- 500
 set.seed(92)
 n <- samp_sizes[nind]
 seeds <- sample(999999999, reps)
