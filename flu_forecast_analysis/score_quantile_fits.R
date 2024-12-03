@@ -10,13 +10,13 @@ library(StereoMorph)
 library(parallel)
 library(doParallel)
 library(doMC)
-#n.cores <- detectCores()
-#my.cluster <- makeCluster(n.cores, type = "PSOCK")
-#doParallel::registerDoParallel(cl = my.cluster)
-#foreach::getDoParRegistered()
-#foreach::getDoParWorkers()
-#registerDoMC(cores = n.cores)
-#
+n.cores <- detectCores()
+my.cluster <- makeCluster(n.cores, type = "PSOCK")
+doParallel::registerDoParallel(cl = my.cluster)
+foreach::getDoParRegistered()
+foreach::getDoParWorkers()
+registerDoMC(cores = n.cores)
+
 
 args <- commandArgs()
 mod <- args[6]
