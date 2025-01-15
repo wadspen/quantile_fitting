@@ -513,13 +513,16 @@ Where the distribution family is known, one goal of QM may be to estimate and ma
 
 \subsubsection{Normal parameter estimation}
 In this simulation study we fit the ORD and IND models to quantiles estimated from independent samples from a normal distribution and compare parameter estimation with fits from the QGP model. Quantiles were simulated by first drawing a sample of size $n$ from a known distribution then estimating $K$ quantiles given probabilities $\{p_1, ..., p_K\}$. The ORD, IND, and QGP models were then fit to the quantiles where $F$ was set to be the CDF of a normal distribution. For each combination of $n \in \{50, 150, 500, 1{,}000, 5{,}000\}$ and $K \in \{3,7,15,50\}$, there were 500 simulation replicates. The data were simulated from a normal distribution with mean $\mu = 4$ and standard deviation $\sigma = 3.5$.
-For each of QGP, ORD, and IND models, we assigned the same prior distributions to $\mu$ and $\sigma$. When $n$ is unknown, we also assigned it a prior distribution. The prior distributions were
-
-\begin{align*}
-    \mu &\sim N(5,7^2) \\
-    \sigma &\sim N(0, 6^2) \vmathbb{1}\{\sigma > 0\}\\
-    n &\sim N(0,3000^2)\vmathbb{1}\{n > 0\}.
-\end{align*}
+For each of QGP, ORD, and IND models, we assigned the same prior distributions 
+to $\mu$ and $\sigma$. When $n$ is unknown, we also assigned it a prior 
+distribution. The prior distributions were $\mu \sim N(5,7^2)$, 
+$\sigma \sim N(0, 6^2) \vmathbb{1}\{\sigma > 0\}$, and
+$n \sim N(0,3000^2)\vmathbb{1}\{n > 0\}$.
+% \begin{align*}
+%     \mu &\sim N(5,7^2) \\
+%     \sigma &\sim N(0, 6^2) \vmathbb{1}\{\sigma > 0\}\\
+%     n &\sim N(0,3000^2)\vmathbb{1}\{n > 0\}.
+% \end{align*}
 For the IND model the prior on the independent parameter $\sigma_{\rho}\vmathbb{1}\{n > 0\}$ from model (\ref{eq:ind_quantile}) is $1/\sigma_{\rho} \sim N(0, 3000^2)$, which is similar to the prior on $n$ for the QGP and ORD models. For each fit, the HMC chain was run for 60,000 draws with the first 10,000 discarded as a burn-in.
 
 Figure \ref{fig:normal_densities} shows examples of marginal posterior densities for $\mu$, $\sigma$, and unknown $n$ where the true $n \in \{50,\,150,\,500,\,1,000\}$ and $K \in \{7,\,15,\,23\}$. 
@@ -606,7 +609,7 @@ The GLD is reviewed in section \ref{sec:quant_def_dist}, and a simulation carrie
 
 \begin{figure}[hbt!]
     \centering
-    \includegraphics[scale=.6]{Images/tukey_time_log10.png}
+    \includegraphics[scale=.32]{Images/tukey_time_log10.png}
     \caption{Boxplots of time to fit a model in seconds ($y$-axis) for the 500 replicates in the simulation study for QM of the generalized lambda distribution (GLD) for $K \in \{3, 7, 15, 23, 50\}$ ($x$-axis). Boxplots are separated by QM methods QGP (red) and ORD (blue). The $y$-axis is on the $\text{log}_{10}$ scale.}
     \label{fig:tuk_time}
 \end{figure}
@@ -625,16 +628,31 @@ With the true distribution family being unknown, we made the modeling decision t
 
 
 
-The three distributions from which data were simulated and sample quantiles estimated and to which QM methods were fit were the extreme value (EV) distribution with location 0 and scale 1 $EV(0,1)$, Laplace (LA) with location 0 and scale 1 $La(0,1)$, and a two component normal mixture (MIX) $w N(-1, 0.9) + (1-w)N(1.2, 0.6)$ where $w = 0.35$. From the three distributions, 500 replicates of $K$ quantiles were simulated for each of 
-$K \in \{9, 13, 23, 50\}$ and sample size $n \in \{50, 150, 500, 1{,}000, 2{,}000, 5{,}000\}$. QM for each replicate of simulated quantiles was done using QGP, ORD, IND, SPL, and KDE. For the QGP, ORD, and IND models, $\theta = \{\theta_1, \theta_2, \theta_3, \theta_4\}$ where $\theta_c = (\mu_c, \sigma_c)$ for $c \in \{1,2,3,4\}$. The prior distributions assigned were as below where $\nu = n$ for the QGP and ORD models and $\nu = 1/\sigma_{\rho}$ for the IND model. 
+The three distributions from which data were simulated and sample quantiles 
+estimated and to which QM methods were fit were the extreme value (EV) 
+distribution with location 0 and scale 1 $EV(0,1)$, Laplace (LA) with location 
+0 and scale 1 $La(0,1)$, and a two component normal mixture (MIX) 
+$w N(-1, 0.9) + (1-w)N(1.2, 0.6)$ where $w = 0.35$. From the three 
+distributions, 500 replicates of $K$ quantiles were simulated for each of 
+$K \in \{9, 13, 23, 50\}$ and sample size 
+$n \in \{50, 150, 500, 1{,}000, 2{,}000, 5{,}000\}$. QM for each replicate of 
+simulated quantiles was done using QGP, ORD, IND, SPL, and KDE. For the QGP, 
+ORD, and IND models, $\theta = \{\theta_1, \theta_2, \theta_3, \theta_4\}$ 
+where $\theta_c = (\mu_c, \sigma_c)$ for $c \in \{1,2,3,4\}$. The prior 
+distributions assigned were $\mu_c \overset{ind}{\sim} N(5, 7^2)$,
+$\sigma_c \overset{ind}{\sim} N(0, 6^2)\vmathbb{1}\{\sigma_c > 0\}$,
+$w \sim Dir(\boldsymbol{\alpha}), \quad \alpha_c = 1$, and
+$\nu \sim N(0, 3000^2)\vmathbb{1}\{\nu > 0\}$
+% as below 
+where $\nu = n$ for the QGP and ORD models 
+and $\nu = 1/\sigma_{\rho}$ for the IND model. 
 % (cite an example of using dirichlet prior ??). 
-
-    \begin{align*}
-        \mu_c &\overset{ind}{\sim} N(5, 7^2) \\
-        \sigma_c &\overset{ind}{\sim} N(0, 6^2)\vmathbb{1}\{\sigma_c > 0\} \\ 
-        w &\sim Dir(\boldsymbol{\alpha}), \quad \alpha_c = 1 \\
-        \nu &\sim N(0, 3000^2)\vmathbb{1}\{\nu > 0\}
-    \end{align*}
+    % \begin{align*}
+    %     \mu_c &\overset{ind}{\sim} N(5, 7^2) \\
+    %     \sigma_c &\overset{ind}{\sim} N(0, 6^2)\vmathbb{1}\{\sigma_c > 0\} \\ 
+    %     w &\sim Dir(\boldsymbol{\alpha}), \quad \alpha_c = 1 \\
+    %     \nu &\sim N(0, 3000^2)\vmathbb{1}\{\nu > 0\}
+    % \end{align*}
  %the problem with $\nu$ is that for the QGP and ORD the prior is on the variance whereas for IND it is on the sd.
 Often when implementing posterior sampling for a mixture distribution model, one deals with an issue called the label-switching problem. This is where for a mixture distribution parameter $\theta = \{\theta_1,...,\theta_C\}$, the model likelihood is the same for different permutations of $\theta$. This lack of identifiability for elements of $\theta$ makes parameter inference useless, but the predictive distribution may still be close to the true distribution \cite[]{stephens2000dealing}.
 Because of this, the HMC posterior sampling chain was run longer than in the studies in the previous section. The chain was run for 80,000 steps where the first 20,000 draws were discarded as a burn-in. For this study, we were concerned only with QM and not with parameter inference, so the fact that the parameters are unidentifiable was not considered critical. However, when assessing the TV and KLD between the QM and true distributions, variational Bayes (VB) in \texttt{Stan} was used instead of HMC for fitting the models \cite[]{kucukelbir2015automatic}. This decision was made because of the lack of parameter identifiability and because the marginal parameter means are used to estimate the PDF. While MCMC methods perform better on parameter inference, VB methods have been shown to have predictive performance comparable to MCMC \cite[]{blei2017variational}.
@@ -667,44 +685,44 @@ The estimated PDF plots (right) show the true PDF (black) with either a the QM e
 \label{fig:evd_fits}
 \end{figure}
 
-\begin{figure}[hbt!]
-\centering
-%\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.49\linewidth]{Images/quants_lp.png}
-  % \caption{A subfigure}
-  % \label{fig:sub1}
-%\end{subfigure}%
-%\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.49\linewidth]{Images/dens_lp.png}
-  % \caption{A subfigure}
-  % \label{fig:sub2}
-%\end{subfigure}
-\caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the Laplace distribution $La(0,1)$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
-The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink).}
-\label{fig:lp_fits}
-\end{figure}
+% \begin{figure}[hbt!]
+% \centering
+% %\begin{subfigure}{.5\textwidth}
+%   \centering
+%   \includegraphics[width=.49\linewidth]{Images/quants_lp.png}
+%   % \caption{A subfigure}
+%   % \label{fig:sub1}
+% %\end{subfigure}%
+% %\begin{subfigure}{.5\textwidth}
+%   \centering
+%   \includegraphics[width=.49\linewidth]{Images/dens_lp.png}
+%   % \caption{A subfigure}
+%   % \label{fig:sub2}
+% %\end{subfigure}
+% \caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the Laplace distribution $La(0,1)$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
+% The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink).}
+% \label{fig:lp_fits}
+% \end{figure}
 
 
-\begin{figure}[hbt!]
-\centering
-%\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.49\linewidth]{Images/quants_gmix.png}
-  % \caption{A subfigure}
-  % \label{fig:sub1}
-%\end{subfigure}%
-%\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.49\linewidth]{Images/dens_gmix.png}
-  % \caption{A subfigure}
-  % \label{fig:sub2}
-%\end{subfigure}
-\caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the two component normal mixture distribution $w N(-1, 0.9) + (1-w)N(1.2, .6)$ where $w = 0.35$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
-The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink). }
-\label{fig:gmix_fits}
-\end{figure}
+% \begin{figure}[hbt!]
+% \centering
+% %\begin{subfigure}{.5\textwidth}
+%   \centering
+%   \includegraphics[width=.49\linewidth]{Images/quants_gmix.png}
+%   % \caption{A subfigure}
+%   % \label{fig:sub1}
+% %\end{subfigure}%
+% %\begin{subfigure}{.5\textwidth}
+%   \centering
+%   \includegraphics[width=.49\linewidth]{Images/dens_gmix.png}
+%   % \caption{A subfigure}
+%   % \label{fig:sub2}
+% %\end{subfigure}
+% \caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the two component normal mixture distribution $w N(-1, 0.9) + (1-w)N(1.2, .6)$ where $w = 0.35$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
+% The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink). }
+% \label{fig:gmix_fits}
+% \end{figure}
 
 
 
