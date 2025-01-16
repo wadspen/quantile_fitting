@@ -168,6 +168,7 @@ mu_plot <- all_draws %>%
   scale_linetype_manual(name= "",
                         values=c("solid", "dashed", "longdash"),
                         labels=c("QGP", "IND","ORD")) +
+  scale_x_continuous(n.breaks=3) +
   ylab("") +
   xlab(expression(mu)) +
   theme_bw() +
@@ -179,6 +180,7 @@ mu_plot <- all_draws %>%
     axis.title=element_text(size=17),
     # strip.text = element_text(size = 8),
     strip.text = element_text(margin = margin(0,0,0,0, "cm")),
+    axis.ticks.y = element_blank()
     # legend.title = element_text(size = 13),
     # legend.text = element_text(size = 11)
   )#, legend.position="none")
@@ -212,6 +214,7 @@ sigma_plot <- all_draws %>%
   scale_linetype_manual(name= "Model",
                         values=c("solid", "dashed", "longdash"),
                         labels=c("QGP", "IND","ORD")) +
+  scale_x_continuous(n.breaks=3) +
   ylab("") +
   xlab(expression(sigma)) +
   theme_bw() +
@@ -223,6 +226,7 @@ sigma_plot <- all_draws %>%
     axis.title=element_text(size=17),
     # strip.text = element_text(size = 8),
     strip.text = element_text(margin = margin(0,0,0,0, "cm")),
+    axis.ticks.y = element_blank()
     # legend.title = element_text(size = 13),
     # legend.text = element_text(size = 11)
   )
@@ -259,6 +263,7 @@ n_plot <- all_draws %>%
   scale_linetype_manual(name= "",
                         values=c("solid", "longdash"),
                         labels=c("QGP","ORD")) +
+  scale_x_continuous(n.breaks=3) +
   ylab("") +
   xlab("n") +
   theme_bw() +
@@ -270,6 +275,7 @@ n_plot <- all_draws %>%
     axis.title=element_text(size=17),
     # strip.text = element_text(size = 8),
     strip.text = element_text(margin = margin(0,0,0,0, "cm")),
+    axis.ticks.y = element_blank()
     # legend.title = element_text(size = 13),
     # legend.text = element_text(size = 11)
     )
@@ -277,49 +283,7 @@ n_plot <- all_draws %>%
 
 
 cowplot::plot_grid(mu_plot, sigma_plot, n_plot, nrow = 2)
-all_draws %>% 
-  pivot_longer(1:3, names_to = "param", values_to = "draw") %>% 
-  dplyr::select(-c(".chain", ".iteration", ".draw")) %>% 
-  filter(!(model %in% c("cltn", "ordn"))) %>% 
-  filter(quant %in% c(7, 15, 23)) %>% 
-  ggplot() + 
-  # geom_vline(xintercept = mu, size = 1.1) +
-  # geom_density(aes(x = mu, group = model,
-  #                  colour = model,
-  #                  linetype = model), 
-  #              trim = TRUE, show_guide = FALSE,
-  #              size = 1.2
-  #              # , linetype = c("solid", "dashed", "dotdash")
-  #              ) +
-  stat_density(aes(x = draw, colour = model, linetype = model),
-               geom="line",position="identity", size = 1.3) +
-  
-  
-  # coord_cartesian(xlim = c(3.3, 3.8)) +
-  ggh4x::facet_grid2(N~quant, 
-                     scales = "free", independent = "all") +
-  facet_wrap(~param) +
-  # labs(colour = "Model") +
-  # scale_colour_hue(name = "Model",
-  #                  labels = c("QGP", "IND", "ORD")) +
-  scale_colour_manual(name = "",
-                      labels = c("QGP", "IND", "ORD")
-                      ,values = c("#0072B2", "#009E73", "#E69F00")) +
-  scale_linetype_manual(name= "",
-                        values=c("solid", "dashed", "longdash"),
-                        labels=c("QGP", "IND","ORD")) +
-  ylab("") +
-  xlab(expression(mu)) +
-  theme_bw() +
-  theme(
-    # legend.position = "none",
-    legend.position = c(1,1),
-    axis.text=element_text(size=13),
-    axis.text.y = element_blank(),
-    axis.title=element_text(size=23),
-    strip.text = element_text(size = 13),
-    legend.title = element_text(size = 13),
-    legend.text = element_text(size = 11))
+
 
 all_draws %>% 
   # filter(quant == 15, n == 50) %>% 
@@ -466,8 +430,8 @@ for (i in c(3, 7, 10)) {
     
     
     clt_fit <- cltmod$sample(data = stan_data, 
-                             iter_warmup = 5000,
-                             iter_sampling = 5000,
+                             iter_warmup = 10000,
+                             iter_sampling = 50000,
                              chains = 1)
     
     clt_draws <- clt_fit$draws(variables = c("lambda", "n"), format = "df")
@@ -475,8 +439,8 @@ for (i in c(3, 7, 10)) {
     
     
     ord_fit <- ordmod$sample(data = stan_data, 
-                             iter_warmup = 5000,
-                             iter_sampling = 5000,
+                             iter_warmup = 10000,
+                             iter_sampling = 50000,
                              chains = 1)
     
     ord_draws <- ord_fit$draws(variables = c("lambda", "n"), format = "df")
@@ -484,8 +448,8 @@ for (i in c(3, 7, 10)) {
     
     
     cltn_fit <- cltnmod$sample(data = stan_data, 
-                               iter_warmup = 5000,
-                               iter_sampling = 5000,
+                               iter_warmup = 10000,
+                               iter_sampling = 50000,
                                chains = 1)
     
     cltn_draws <- cltn_fit$draws(variables = c("lambda"), format = "df")
@@ -494,8 +458,8 @@ for (i in c(3, 7, 10)) {
     
     
     ordn_fit <- ordnmod$sample(data = stan_data, 
-                               iter_warmup = 5000,
-                               iter_sampling = 5000,
+                               iter_warmup = 10000,
+                               iter_sampling = 50000,
                                chains = 1)
     
     ordn_draws <- ordn_fit$draws(variables = c("lambda"), format = "df")
@@ -504,8 +468,8 @@ for (i in c(3, 7, 10)) {
     
     
     ind_fit <- indmod$sample(data = stan_data, 
-                             iter_warmup = 5000,
-                             iter_sampling = 5000,
+                             iter_warmup = 10000,
+                             iter_sampling = 50000,
                              chains = 1)
     
     ind_draws <- ind_fit$draws(variables = c("lambda"), format = "df")
@@ -525,66 +489,91 @@ for (i in c(3, 7, 10)) {
 }
 
 
-all_draws %>% 
+lambda_plot <- all_draws %>% 
   # filter(quant == 15, n == 50) %>% 
   filter(!(model %in% c("cltn", "ordn"))) %>% 
   filter(quant %in% c(7, 15, 23)) %>% 
   ggplot() + 
-  geom_vline(xintercept = lambda, size = .8) +
+  geom_vline(xintercept = lambda, size = .6) +
   # geom_density(aes(x = lambda, colour = model), trim = TRUE, show_guide = FALSE,
   #              size = 1) +
   stat_density(aes(x = lambda, colour = model, linetype = model),
-               geom="line",position="identity", size = 1.2) +
+               geom="line",position="identity", size = .7) +
   
   # coord_cartesian(xlim = c(3.3, 3.8)) +
   ggh4x::facet_grid2(N~quant, 
                      scales = "free", independent = "all") +
   # labs(colour = "Model") +
-  scale_colour_hue(name = "Model",
-                   labels = c("QGP", "IND", "ORD")) +
+  scale_colour_manual(name = "Model",
+                      labels = c("QGP", "IND", "ORD")
+                      ,values = c("#0072B2", "#009E73", "#E69F00")) +
   scale_linetype_manual(name= "Model",
-                        values=c("solid", "dotdash", "dashed"),
+                        values=c("solid", "dashed", "longdash"),
                         labels=c("QGP", "IND","ORD")) +
+  scale_x_continuous(n.breaks=3) +
   ylab("") +
   xlab(expression(lambda)) +
   theme_bw() +
-  theme(axis.text=element_text(size=13),
-        axis.text.x = element_text(size=13),
-        axis.title=element_text(size=23),
-        strip.text = element_text(size = 15),
-        legend.title = element_text(size = 18),
-        legend.text = element_text(size = 14))#, legend.position="none")
+  theme(
+    # legend.position = "none",
+    legend.position = c(.96,.95),
+    axis.text=element_text(size=8),
+    axis.text.y = element_blank(),
+    axis.title=element_text(size=17),
+    legend.key.height = unit(.3, 'cm'), 
+    legend.key.width = unit(.4, 'cm'),
+    # strip.text = element_text(size = 8),
+    strip.text = element_text(margin = margin(0,0,0,0, "cm")),
+    axis.ticks.y = element_blank(),
+    legend.title = element_text(size = 7),
+    legend.text = element_text(size = 7)
+  )#, legend.position="none")
 
 
-all_draws %>% 
+
+
+n_plot <- all_draws %>% 
   # filter(quant == 15, n == 50) %>% 
   filter(!(model %in% c("cltn", "ordn"))) %>% 
   filter(quant %in% c(7, 15, 23)) %>% 
   ggplot() + 
-  geom_vline(aes(xintercept = N), size = .8) +
+  geom_vline(aes(xintercept = N), size = .6) +
   # geom_density(aes(x = lambda, colour = model), trim = TRUE, show_guide = FALSE,
   #              size = 1) +
   stat_density(aes(x = n, colour = model, linetype = model),
-               geom="line",position="identity", size = 1.2) +
+               geom="line",position="identity", size = .7) +
   
   # coord_cartesian(xlim = c(3.3, 3.8)) +
   ggh4x::facet_grid2(N~quant, 
                      scales = "free", independent = "all") +
   # labs(colour = "Model") +
-  scale_colour_hue(name = "Model",
-                   labels = c("QGP", "ORD")) +
-  scale_linetype_manual(name= "Model",
-                        values=c("solid", "dashed"),
+  scale_colour_manual(name = "",
+                      labels = c("QGP", "ORD")
+                      ,values = c("#0072B2", "#E69F00")) +
+  scale_linetype_manual(name= "",
+                        values=c("solid", "longdash"),
                         labels=c("QGP","ORD")) +
+  scale_x_continuous(n.breaks=3) +
   ylab("") +
   xlab("n") +
+  # ggtitle("yourmom") +
   theme_bw() +
-  theme(axis.text=element_text(size=13),
-        axis.text.x = element_text(size=13, angle = 30),
-        axis.title=element_text(size=23),
-        strip.text = element_text(size = 15),
-        legend.title = element_text(size = 18),
-        legend.text = element_text(size = 14))
+  theme(
+    legend.position = "none",
+    # legend.position = c(1,1),
+    axis.text=element_text(size=8),
+    axis.text.y = element_blank(),
+    axis.title=element_text(size=17),
+    # strip.text = element_text(size = 8),
+    strip.text = element_text(margin = margin(0,0,0,0, "cm")),
+    axis.ticks.y = element_blank()
+    # legend.title = element_text(size = 13),
+    # legend.text = element_text(size = 11)
+  )#, legend.position="none")
+
+
+
+cowplot::plot_grid(lambda_plot, n_plot, nrow = 1)
 
 
                       
