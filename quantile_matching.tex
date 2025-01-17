@@ -40,9 +40,9 @@
 %% The amsmath package provides various useful equation environments.
 % \usepackage{amsmath}
 \usepackage{amsmath,amsthm,amssymb,scrextend,mathtools}
-\usepackage{hyperref}
+% \usepackage{hyperref}
 % \usepackage{newtxmath} %for making indicator function
-% \RequirePackage[colorlinks,citecolor=blue,urlcolor=blue,backref=page,backref=page]{hyperref}
+\RequirePackage[colorlinks,citecolor=blue,urlcolor=blue]{hyperref}
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
 
@@ -1354,7 +1354,6 @@ quantiles faceted by the true EV, La, and normal mixture distributions.
 The plots shows percent coverage for the 95\% credible intervals. The models 
 included are QGP, ORD, and IND. The vertical bar (black) shows the nominal 
 coverage level.
-
 (bottom) Distance between the true distribution and the QM estimated 
 distribution 
 averaged over 500 simulation replicates and measured by KLD, TV and UWD1. 
