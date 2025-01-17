@@ -4,49 +4,66 @@ library(stringr)
 library(tidyr)
 
 all_sum_scores <- data.frame()
-for (true in c("gmix", "evd", "lp")) {
-  name <- paste0("./simulation/comb_res/scores_", true, "_VI.rds")
-  score <- readRDS(name)
+for (type in c("VI", "MCMC")) {
+  for (true in c("gmix", "evd", "lp")) {
+    name <- paste0("../simulation/comb_res/scores_", true, "_", type, ".rds")
+    score <- readRDS(name)
+    
+   
+    true <- ifelse(true == "gmix", "MIX", 
+                   ifelse(true == "lp", "La", "EV"))
+    sum_score <- score %>% 
+      group_by(n, quants, model) %>% 
+      summarise(mwd1 = mean(uwd1),
+                sdwd1 = sd(uwd1),
+                mtv = mean(tv),
+                mkld = mean(kld)) %>% 
+      mutate(upp95 = mwd1 + 1.96*sdwd1/sqrt(n), 
+             low95 = mwd1 - 1.96*sdwd1/sqrt(n)) %>% 
+      mutate(tru_mod = true)
+    
+    sum_score$samp_type <- type 
+    
+    all_sum_scores <- rbind(all_sum_scores, sum_score)
+  }
   
- 
-  true <- ifelse(true == "gmix", "MIX", 
-                 ifelse(true == "lp", "LA", "EV"))
-  sum_score <- score %>% 
-    group_by(n, quants, model) %>% 
-    summarise(mwd1 = mean(uwd1),
-              sdwd1 = sd(uwd1),
-              mtv = mean(tv),
-              mkld = mean(kld)) %>% 
-    mutate(upp95 = mwd1 + 1.96*sdwd1/sqrt(n), 
-           low95 = mwd1 - 1.96*sdwd1/sqrt(n)) %>% 
-    mutate(tru_mod = true)
-  
-  all_sum_scores <- rbind(all_sum_scores, sum_score)
 }
 
+models <- c("QGP", "ORD", "IND", "QGP-n", "ORD-n", "SPL", "KDE")
+ltypes <- c("solid", "longdash", "dashed")
+colours <- c("#0072B2", "#E69F00", "#009E73", "#56B4E9", "#D55E00",
+             "#CC79A7", "#F0E442")
 
-all_sum_scores %>% 
+dist_plot <- all_sum_scores %>% 
   filter(quants %in% c(9,13,23,50)) %>%
-  filter(!(model %in% c("cltn", "ordn", "meta"))) %>% 
-  # filter(n > 500) %>%  
+  filter(quants == 23) %>% 
+  filter(!(model %in% c("cltn", "ordn", "meta"))) %>%
+  pivot_longer(cols = c("mwd1", "mtv", "mkld"), names_to = "measure",
+               values_to = "dist") %>% 
+  filter((measure %in% c("mtv", "mkld") & samp_type == "VI") |
+           (measure == "mwd1" & samp_type == "MCMC")) %>% 
+  mutate(measure = ifelse(measure == "mwd1", "UWD1",
+                          ifelse(measure == "mtv", "TV", "KLD"))) %>% 
   ggplot() +
-  geom_path(aes(x = n, y = mkld, group = model, 
-                colour = model, linetype = model), size = 1.3) +
-  facet_grid(quants~tru_mod, scale = "free") +
-  scale_colour_hue(name = "Model",
-                   labels = c("QGP", "IND","KDE", "ORD", "SPL")) +
+  geom_path(aes(x = n, y = dist, group = model, 
+                colour = model, linetype = model), size = .8, alpha = .9) +
+  facet_grid(measure~tru_mod, scale = "free") +
+  scale_colour_manual(name = "Model",
+                   labels = c("QGP", "IND","KDE", "ORD", "SPL"),
+                   values = c("#0072B2", "#009E73", "darkgrey", "#E69F00",
+                              "#CC79A7")) +
   scale_linetype_manual(name= "Model",
                         values=1:5,
                         labels=c("QGP", "IND","KDE", "ORD", "SPL")) +
-  ylab("KLD") +
+  ylab("") +
   xlab("n") +
   theme_bw() +
   theme(axis.text.y=element_text(size=12),
         axis.text.x=element_text(size = 12, angle = 30),
-        axis.title=element_text(size=18),
+        axis.title=element_text(size=14),
         strip.text.y = element_text(size = 12,),
-        strip.text.x = element_text(size = 16),
-        legend.title = element_text(size = 13),
+        strip.text.x = element_text(size = 12),
+        legend.title = element_text(size = 11),
         legend.text = element_text(size = 11))
   
   
@@ -56,12 +73,12 @@ all_sum_scores %>%
 # cover <- readRDS("./simulation/comb_res/coverage_evd.rds")
 all_cover <- data.frame()
 for (true in c("gmix", "evd", "lp")) {
-  name <- paste0("./simulation/comb_res/coverage_", true, ".rds")
+  name <- paste0("../simulation/comb_res/coverage_", true, ".rds")
   cover <- readRDS(name)
   
   
   true <- ifelse(true == "gmix", "MIX", 
-                 ifelse(true == "lp", "LA", "EV"))
+                 ifelse(true == "lp", "La", "EV"))
   sum_cover <- cover %>% 
     group_by(n, quants, model) %>% 
     summarise(mc95 = mean(cover95),
@@ -78,37 +95,39 @@ for (true in c("gmix", "evd", "lp")) {
 
 
 
-all_cover %>% 
+cover_plot <- all_cover %>% 
   mutate(quants = as.numeric(quants), n = as.numeric(n)) %>% 
   filter(quants %in% c(9,13,23,50)) %>%
+  filter(quants == 23) %>% 
     filter(!(model %in% c("cltn", "ordn", "meta"))) %>% 
     # filter(n > 500) %>%  
     ggplot() +
-    geom_hline(yintercept = .5, size = .72) +
-    geom_line(aes(x = n, y = mc50, group = model, 
-                  colour = model, linetype = model), size = 1.3) +
-    facet_grid(quants~tru_mod, scale = "free") +
+    geom_hline(yintercept = .95*100, size = .72) +
+    geom_line(aes(x = n, y = mc95*100, group = model, 
+                  colour = model, linetype = model), size = .8, alpha = .9) +
+    # facet_grid(quants~tru_mod, scale = "free") +
+  facet_wrap(~tru_mod) +
     # geom_hline(yintercept = .5, size = .72) +
   scale_x_continuous(breaks=seq(0, 5000, 2500)) +
-  scale_colour_hue(name = "Model",
-                   labels = c("QGP", "IND", "ORD")) +
+  scale_colour_manual(name = "Model",
+                   labels = c("QGP", "IND", "ORD")
+                   ,values = c("#0072B2", "#009E73", "#E69F00")) +
   scale_linetype_manual(name= "Model",
-                        values=c("solid", "dotdash", "dashed"),
+                        values=c("solid", "dashed", "longdash"),
                         labels=c("QGP", "IND","ORD")) +
     ylab("% Coverage") +
     xlab("") +
     theme_bw() +
     theme(axis.text.y=element_text(size=12),
-          axis.text.x=element_text(size = 12, angle = 40),
-          axis.title=element_text(size=18),
-          strip.text.y = element_text(size = 15),
-          strip.text.x = element_text(size = 16),
-          legend.title = element_text(size = 13),
-          legend.text = element_text(size = 11),
-          legend.position = "none")
+        axis.text.x=element_text(size = 12, angle = 30),
+        axis.title=element_text(size=14),
+        strip.text.y = element_text(size = 12,),
+        strip.text.x = element_text(size = 12),
+        legend.title = element_text(size = 11),
+        legend.text = element_text(size = 11))
 
 
-
+cowplot::plot_grid(dist_plot, cover_plot, nrow = 2, rel_heights = c(2,1))
 
 
 all_cover %>% 
@@ -288,9 +307,15 @@ norm_sum <- norm_score %>%
 
 
 
+models <- c("QGP", "ORD", "IND", "QGP-n", "ORD-n", "SPL", "KDE")
+ltypes <- c("solid", "longdash", "dashed")
+colours <- c("#0072B2", "#E69F00", "#009E73", "#56B4E9", "#D55E00",
+             "#CC79A7", "#F0E442")
 
-norm_sum %>% 
+
+cover_plot <- norm_sum %>% 
   filter(n %in% c(50, 150, 500, 1000, 5000), quants %in% c(3,7,15,23,50)) %>% 
+  filter(quants == 23) %>% 
   dplyr::select(model, n, quants, mcm, mcs, mcn) %>% 
   pivot_longer(4:6, names_to = "param", values_to = "mean_param") %>% 
   # filter(param != "mcn") %>% 
@@ -298,32 +323,41 @@ norm_sum %>%
                         ifelse(param == "mcs", "sigma", "n"))) %>% 
   mutate(facet = factor(facet, levels = c("mu", "sigma", "n"))) %>% 
   ggplot() +
-  geom_hline(yintercept = 90, size = .9) +
+  geom_hline(yintercept = 90, size = .7) +
   geom_path(aes(x = n, y = mean_param*100, group = model, 
-                colour = model, linetype = model), size = 1.3) +
+                colour = model, linetype = model), size = .7, alpha = .9, 
+            lineend = "round") +
+  # scale_x_discrete(labels=c('label1', 'label2', 'label3', 'label4', 'label5')) +
   # geom_path(aes(x = n, y = mcs, linetype = model, colour = model), 
   #           size = 1.3) +
   facet_grid(quants~facet, labeller = label_parsed, scale = "free") +
   xlab("n") +
   ylab("% Coverage") +
+  # xlim(c(50, 5000)) +
   # expand_limits(y=100) +
   ylim(c(10,100)) +
   # labs(colour = "Model") +
-  scale_colour_hue(name = "Model", 
-                   labels = c("QGP", "QGPN","IND", "ORD", "ORDN")) +
+  scale_colour_manual(name = "Model", 
+                   labels = c("QGP", "QGP-n","IND", "ORD", "ORD-n"),
+                   values = c("#0072B2", "#56B4E9", "#009E73",
+                              "#E69F00", "#D55E00")) +
   scale_linetype_manual(name= "Model", 
                         values=c("solid", "dashed", "dotdash", 
                                  "solid", "dashed"),
-                        labels = c("QGP", "QGPN","IND", "ORD", "ORDN")) +
+                        labels = c("QGP", "QGP-n","IND", "ORD", "ORD-n")) +
   # guides(linetype = FALSE) +
   theme_bw() +
-  theme(axis.text.y=element_text(size=12),
-        axis.text.x=element_text(size=12, angle=30),
-        axis.title=element_text(size=18),
+  theme(axis.text.y=element_text(size=10),
+        axis.text.x=element_text(size=10, angle=35),
+        axis.title=element_text(size=15),
         strip.text.y = element_text(size = 12),
-        strip.text.x = element_text(size = 22),
+        strip.text.x = element_text(size = 15),
         legend.title = element_text(size = 13),
-        legend.text = element_text(size = 11))
+        strip.text = element_text(margin = margin(0,0,0,0, "cm")),
+        legend.text = element_text(size = 11),
+        
+        legend.key.height = unit(.3, 'cm'), 
+        legend.key.width = unit(.4, 'cm'))
 
 
 
@@ -341,32 +375,44 @@ norm_dist <- norm_score %>%
   pivot_longer(4:7, names_to = "metric", values_to = "dist")
 
 
-norm_dist %>% 
+dist_plot <- norm_dist %>% 
   filter(quants %in% c(3,7,15,23,50), metric != "mwd2") %>% 
+  filter(quants == 23) %>% 
   filter(!(model %in% c("cltn", "ordn"))) %>% 
   mutate(facet = ifelse(metric == "mwd1", "UWD1", 
                         ifelse(metric == "mtv", "TV", "KLD"))) %>% 
   mutate(facet = factor(facet, levels = c("UWD1", "TV", "KLD"))) %>% 
   ggplot() +
   geom_path(aes(x = n, y = dist, group = model, 
-                colour = model, linetype = model), size = 1.3) +
+                colour = model, linetype = model), size = .7, alpha = .9) +
   facet_grid(quants~facet, scale = "free") +
-  scale_colour_hue(name = "Model", 
-                   labels = c("QGP", "IND","KDE", "ORD", "SPL")) +
-  scale_linetype_manual(name= "Model", 
-                        values=1:5,
-                        labels=c("QGP", "IND","KDE", "ORD", "SPL")) +
+  scale_colour_manual(name = "Model", 
+                   labels = c("QGP", "IND","KDE", "ORD", "SPL"),
+                   values = c("#0072B2", "#009E73", "darkgrey",
+                     "#E69F00", "#CC79A7")) +
+  scale_linetype_manual(name= "Model",
+                        labels=c("QGP", "IND","KDE", "ORD", "SPL"),
+                        values=c("solid", "dashed", "dotdash", 
+                                 "longdash", "dotdash")) +
+  scale_y_continuous(n.breaks = 3) +
   ylab("") +
   xlab("n") +
   # facet_wrap(~metric) +
   theme_bw() +
-  theme(axis.text.y=element_text(size=12),
-        axis.text.x=element_text(size=12, angle=30),
+  theme(axis.text.y=element_text(size=10),
+        axis.text.x=element_text(size=10, angle=35),
         axis.title=element_text(size=18),
         strip.text.y = element_text(size = 12),
-        strip.text.x = element_text(size = 18),
+        strip.text.x = element_text(size = 12),
         legend.title = element_text(size = 13),
-        legend.text = element_text(size = 11))
+        strip.text = element_text(margin = margin(0,0,0,0, "cm")),
+        legend.text = element_text(size = 11),
+        
+        legend.key.height = unit(.3, 'cm'), 
+        legend.key.width = unit(.4, 'cm'))
+
+cowplot::plot_grid(cover_plot, dist_plot, ncol = 1,
+                   align = "hv")
   
 
 norm_score %>% 
