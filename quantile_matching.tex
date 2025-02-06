@@ -59,6 +59,8 @@
 \usepackage{dsfont}
 \newcommand{\1}[1]{\mathds{1}\left[#1\right]}
 
+\newcommand{\jarad}[1]{{\color{red} ?? Jarad: #1}}
+
 \journal{Computational Statistics and Data Analysis}
 
 \begin{document}
@@ -128,16 +130,16 @@ and quantiles are generally straightforward to estimate using standard
 statistical and machine learning methods. However, compared to a distribution 
 defined by a probability density or cumulative distribution function, a set of 
 quantiles has less distributional information. When given estimated 
-quantiles it may be desirable to estimate a fully defined continuous 
-distribution function, and many researchers do so to make evaluation or 
+quantiles, it may be desirable to estimate a fully defined continuous 
+distribution function. Many researchers do so to make evaluation or 
 ensemble modeling simpler. Most existing methods for fitting a distribution to 
 quantiles lack accurate representation of the inherent uncertainty from 
-quantile estimation or are limited in their applications. In this manuscript we 
+quantile estimation or are limited in their applications. In this manuscript, we 
 present a Gaussian process model, the quantile Gaussian process, which is based 
 on established theory of quantile functions and sample quantiles, to construct 
 a probability distribution given estimated quantiles. A Bayesian application of 
-the quantile Gaussian process is evaluated for parameter inference, and 
-distribution approximation in simulation studies and the quantile Gaussian 
+the quantile Gaussian process is evaluated for parameter inference and 
+distribution approximation in simulation studies. The quantile Gaussian 
 process is used to approximate the distributions of quantile forecasts from the 
 2023-24 US Centers for Disease Control collaborative flu forecasting 
 initiative. The simulation studies and data analysis show that the quantile 
@@ -212,7 +214,7 @@ and medians
 collaborative forecast initiatives and competitions, probabilistic forecasts 
 are often submitted as a set of predictive quantiles 
 % for given probabilities 
-\cite[]{gneiting2023model,hong2016probabilistic}. In recent years disease 
+\cite[]{gneiting2023model,hong2016probabilistic}. In recent years, disease 
 outbreak forecast hubs require that all forecasts submitted by outside 
 participants be represented by  several predictive intervals or quantiles. 
 This standardized representation allows for straightforward forecast scoring 
@@ -228,10 +230,8 @@ information --information for values below the smallest quantile or above the
 largest quantile. Another drawback for using quantiles to define a distribution 
 is that many tools for evaluating or scoring continuous distributions require 
 a CDF or PDF
-% \jarad{what does 'fully defined' mean?} 
 \cite[]{gneiting2007strictly,gneiting2014probabilistic}. Likewise combining 
 distributions into an ensemble distribution is commonly 
-% \jarad{most often? perhaps use commonly}
 done by aggregating multiple QFs or 
 CDFs/PDFs, the latter being possible only when a CDF/PDF is available 
 \cite[]{gneiting2005calibrated,wang2023forecast}.
@@ -415,7 +415,7 @@ distribution family which was designed specifically for modeling quantiles
 
 \subsubsection{Quantile density function}
 
-Besides the CDF, PDF, and QF a  fourth infrequently mentioned defining function 
+Besides the CDF, PDF, and QF, a  fourth infrequently mentioned defining function 
 of a continuous random variable is the quantile density function (QDF). As the 
 PDF is the derivative of the CDF, the QDF $q:[0,1] \rightarrow \mathbb{R}$ is 
 the derivative of the QF defined as
@@ -538,8 +538,12 @@ The asymptotic distribution of a set of sample quantiles is given in
 random variable with CDF $F$, PDF $f$, and QF $Q$, and with a set of sample 
 quantiles calculated by (\ref{eq:quant_df}), theorem \ref{thm:qclt} holds. 
 Note that in (\ref{eq:qclt}), $N_K(\cdot, \cdot)$ refers to a multivariate 
-normal distribution with $K$ dimensions, and in (\ref{eq:qclt_covariance}) the 
+normal distribution with $K$ dimensions, 
+\jarad{Include the mean and covariance matrix in this definition? I think we should.}
+and in (\ref{eq:qclt_covariance}) the 
 operator $a \wedge b$ is the minimum of the values $a$ and $b$.
+\jarad{Do we need to be concerned about the order of operations when using $\wedge$? I believe $p_i \wedge p_j - p_i p_j = (p_i \wedge p_j) - p_i p_j$, but it could be $p_i \wedge p_j - p_i p_j = p_i \wedge (p_j - p_i p_j)$.
+Using the $()$ would make it clear without having to define the order of operations.}
 
 \begin{theorem}{\emph{Sample quantile central limit theorem}}
 \label{thm:qclt}
@@ -557,11 +561,12 @@ increasing, then
     N_K(0, \boldsymbol{\mathcal{K}})
 \end{equation}
 where $\boldsymbol{\mathcal{K}}$ is a $K\times K$ with the $ij^{th}$ 
-entry $\kappa_{ij}$ where
+entry 
+% $\kappa_{ij}$ where
 
 \begin{equation}
     \label{eq:qclt_covariance}
-    \kappa_{ij} = \frac{p_i \wedge p_j - p_i p_j}{f(Q(p_i)) f(Q(p_j))}
+    \kappa_{ij} = \frac{p_i \wedge p_j - p_i p_j}{f(Q(p_i)) f(Q(p_j))}.
 \end{equation}
 \end{theorem}
 
@@ -610,7 +615,7 @@ in (\ref{eq:qclt}) is in (\ref{eq:qgp}).
     \label{eq:qgp}
 \hat{\boldsymbol{Q}}_n(\boldsymbol{p}) \sim N_K(\boldsymbol{Q}_{\theta}(\boldsymbol{p}), n^{-1} \boldsymbol{\mathcal{K}}_{\theta})
 \end{equation}
-Here $\theta$ is an unknown parameter to be estimated from the data. The 
+Here $\theta$ is an unknown parameter vector to be estimated from the data. The 
 covariance matrix $\boldsymbol{\mathcal{K}}_{\theta}$ has entries from the 
 covariance function $\kappa_{\theta}(\cdot, \cdot)$ where 
 \[
@@ -676,8 +681,8 @@ $\gamma^2$ separately and proceed to fit a standard linear regression model.
 All frequentist and Bayesian results of the linear regression model apply, 
 including the existence of conditionally conjugate prior distributions. The 
 positive constraint on $\sigma$ can also be dealt with without adding much 
-complication (see \cite{gelman2013bayesian} pgs. 377-378). If for a certain 
-problem it is important to make inference on the unknown $n$, or $\sigma$ and 
+complication (see \cite{gelman2013bayesian} pgs. 377-378). 
+If, for a certain problem it is important to make inference on the unknown $n$, or $\sigma$ and 
 $\gamma^2$ cannot treated as separate, then one may estimate the two parameters 
 by assigning appropriate prior distributions to $\sigma$ and $n$ and reverting 
 back to (\ref{eq:norm_qgp}). In section \ref{sec:simulation_analyses}, we 
@@ -864,8 +869,9 @@ $F_{X,\xi}$ be the CDF of the random variable $F_X(\xi)$. Then the measure in
 a standard uniform distribution, noting that by the PIT, if 
 $\xi \overset{D}{=} X$, $F_X(\xi)$ is the random variable of a standard uniform 
 distribution. Multiplying the integral in (\ref{eq:pit_wass_dist}) by two 
-ensures the measure takes values between 0 and 1 \cite[]{645854} where a value 
-near 0 means $\xi$ and $X$ are "near" each other.
+ensures the measure takes values between 0 and 1 
+\cite[]{645854} \jarad{I think the URL should be in the citation not here. Also, is this mentioned anywhere else so that we don't have to cite stackexchange?}
+where a value near 0 means $\xi$ and $X$ are ``near'' each other.
 
 \begin{equation}
     \label{eq:pit_wass_dist}
@@ -930,14 +936,14 @@ ORD, SPL, and KDE, and we include a comparison of the QGP and ORD models
 where the true distribution is a quantile defined distribution.
 
 \subsubsection{Normal parameter estimation}
-In this simulation study we fit the ORD and IND models to quantiles estimated 
+In this simulation study, we fit the ORD and IND models to quantiles estimated 
 from independent samples from a normal distribution and compare parameter 
 estimation with fits from the QGP model. Quantiles were simulated by first 
 drawing a sample of size $n$ from a known distribution then estimating $K$ 
 quantiles given probabilities $\{p_1, ..., p_K\}$. The ORD, IND, and QGP models 
 were then fit to the quantiles where $F$ was set to be the CDF of a normal 
 distribution. For each of 
-$n \in \{50, 150, 500, 1{,}000, 5{,}000\}$ and 
+$n \in \{50; 150; 500; 1{,}000; 5{,}000\}$ and 
 % $K \in \{3,7,15,50\}$
 $K = 23$, there 
 were 500 simulation replicates. The data were simulated from a normal 
@@ -954,7 +960,9 @@ $n \sim N(0,3000^2)\mathds{1}\{n > 0\}$.
 % \end{align*}
 For the IND model the prior on the independent parameter 
 $\sigma_{\rho}\mathds{1}\{n > 0\}$ from model (\ref{eq:ind_quantile}) is 
-$1/\sigma_{\rho} \sim N(0, 3000^2)$, which is similar to the prior on $n$ for 
+$1/\sigma_{\rho} \sim N(0, 3000^2)$, 
+\jarad{Shouldn't this prior be strictly positive?}
+which is similar to the prior on $n$ for 
 the QGP and ORD models. For each fit, the HMC chain was run for 60,000 draws 
 with the first 10,000 discarded as a burn-in.
 
@@ -989,7 +997,8 @@ with the first 10,000 discarded as a burn-in.
 The top of figure \ref{fig:normal_cov_dists} shows the 90\% coverage of 
 the posterior distribution credible intervals as $n$ increases for 
 $\mu$, $\sigma$ and $n$ for five models. QGP-n and ORD-n models where $n$ is 
-known are included along with QGP, ORD, and IND. 90\% credible intervals of the 
+known are included along with QGP, ORD, and IND. 
+The 90\% credible intervals of the 
 parameters were calculated by computing the $0.05^{th}$ and $0.95^{th}$ 
 quantiles from the posterior distribution samples. The coverage percentage is 
 calculated as the percentage of the 500 replicates which the true parameter 
@@ -1031,7 +1040,7 @@ only two models which
 estimate an unknown $n$.
 Distance between the true distribution and the estimated QM predictive 
 distribution (bottom) averaged over the 500 replications. Distances include the 
-UWD1, TV, and KLD for by increasing sample 
+UWD1, TV, and KLD for increasing sample 
 size ($x$-axis).}
 \label{fig:normal_cov_dists}
 \end{figure}
