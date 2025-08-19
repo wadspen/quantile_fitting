@@ -1,7 +1,7 @@
 get_quantile_samps <- function(samps, quantiles, n, n_known = FALSE, n_modeled = FALSE,
                                ind = TRUE, samp_quant = FALSE, order = TRUE,
                                dens_probs = c(.025, .25, .5, .75, .975),
-                               true_dist = "lp", model = "cdf") {
+                               true_dist = "lp") {
   
   
   draws <- samps$draws(format = "df")
@@ -30,12 +30,11 @@ get_quantile_samps <- function(samps, quantiles, n, n_known = FALSE, n_modeled =
     
     pi <- unlist(all_pis[m,])
     pi[which(pi < 0)] <- 0
-    pi <- pi/sum(pi)
-    # if (sum(pi) < 1) {
-    #   pi[which.max(pi)] <- pi[which.max(pi)] + (1 - sum(pi))
-    # } else if (sum(pi) > 1) {
-    #   pi[which.min(pi)] <- pi[which.min(pi)] + (1 - sum(pi))
-    # }
+    if (sum(pi) < 1) {
+      pi[which.max(pi)] <- pi[which.max(pi)] + (1 - sum(pi))
+    } else if (sum(pi) > 1) {
+      pi[which.min(pi)] <- pi[which.min(pi)] + (1 - sum(pi))
+    }
     if (n_modeled == TRUE) {n <- unlist(all_ns[m])}
     if (ind == TRUE) {sigma <- all_sigma[m]}
     normmix <- UnivarMixingDistribution(Norm(mus[1], sigmas[1]),
@@ -88,7 +87,6 @@ get_quantile_samps <- function(samps, quantiles, n, n_known = FALSE, n_modeled =
   else if (true_dist == "evd") {dens_bounds$y <- devd(dx)}
   else if (true_dist == "gmix") {dens_bounds$y <- ddist(dx)}
   dens_bounds$x <- dx
-  dens_bounds$model <- model
   
   
   quant_bounds <- apply(samp_quantiles, MARGIN = 2, 
@@ -113,8 +111,6 @@ get_quantile_samps <- function(samps, quantiles, n, n_known = FALSE, n_modeled =
       cover30 = between(quantile, `0.35`, `0.65`),
       cover20 = between(quantile, `0.4`, `0.6`),
       cover10 = between(quantile, `0.45`, `0.55`))
-  
-  quant_bounds$model <- model
   
   return(list(dens_bounds, quant_bounds))
 }
