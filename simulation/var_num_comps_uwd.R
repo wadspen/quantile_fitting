@@ -76,7 +76,7 @@ cltnmod1 <- cmdstan_model(stan_file =
 mod_loc <- "../stan_models/"
 
 burn <- 20000
-samples <- 60000
+samples <- 50000
 out_s <- 5000
 sample_type <- "MCMC"
 #cltnmod <- paste0(mod_loc, "simple_normal_n_quantiles.stan")

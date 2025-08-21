@@ -8,7 +8,7 @@ do
     for n in "${ns[@]}"
 	do
 	  #sbatch ./var_sim_fit.sh "$1" $p $n
-	  sbatch ./var_sim_fit.sh $p $n
+	  sbatch ./var_sim_fit.sh "$1" $p $n
 	  #echo "$1" $p $n
 	done
 	

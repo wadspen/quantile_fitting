@@ -6,14 +6,11 @@
 #SBATCH --mem=0
 #SBATCH --exclusive
 #SBATCH --constraint=intel
-module load gcc
-module load r
-module load udunits
-module load r-rgdal
-module load proj
-module load r gsl
+
+module purge
+module load r/4.4.1 gcc udunits proj gsl r-rgdal
 
 #Rscript ./variational_7model_uwd.R "$1" $2 $3
 #Rscript ./normal_7model_wd.R "$1" "$2" "$3"
 #Rscript ./exponential_7model_wd.R "$1" "$2" "$3"
-Rscript ./tukey_2model_time.R "$1" "$2"
+Rscript ./var_num_comps_uwd.R "$1" "$2" "$3"
