@@ -27,6 +27,13 @@ nind <- as.numeric(args[8])
 
 print(dist); print(p); print(nind)
 
+cltmod6 <- cmdstan_model(stan_file = 
+                           '../stan_models/cdf_quantile_normal_mix6.stan')
+
+
+cltnmod6 <- cmdstan_model(stan_file =
+                            '../stan_models/cdf_quantile_normal_n_mix6.stan')
+
 
 cltmod5 <- cmdstan_model(stan_file = 
                           '../stan_models/cdf_quantile_normal_mix5.stan')
@@ -97,10 +104,10 @@ levels <- list(
   seq(.01, .99, by = .02)	       
 		)
 
-models <- c("cltn5", "clt5", "cltn4", "clt4", "cltn3", 
+models <- c("cltn6", "clt6", "cltn5", "clt5", "cltn4", "clt4", "cltn3", 
             "clt3", "cltn2", "clt2", "cltn1", "clt1")
 
-comps <- rep(5:1, each = 2)
+comps <- rep(6:1, each = 2)
 
 
 reps <- 500
@@ -154,6 +161,67 @@ distance <- foreach(replicate = 1:reps,
     quantiles <- quantile(samp, probs, type = 2)
     
     data <- data.frame(quantile = quantiles, prob = probs)
+    stan_data6 <- make_stan_data(data, size = n, comps = 6)
+    
+    
+    #fit models
+    fit_cltn6 <- stan_fit_draws(cltnmod6, stan_data6, 
+                                sampler = sample_type, burn = burn, samp = samples,
+                                refresh = 100, out_s = 5000) 
+
+    fit_clt6 <- stan_fit_draws(cltmod6, stan_data6,
+                               sampler = sample_type, burn = burn, samp = samples,
+                                refresh = 100, out_s = 5000)
+    
+    
+    
+    
+    params <- fit_cltn6[[2]]$draws(variables = c("mus", "sigmas", "pi"), 
+                                  format = "df")               
+    m_params <- apply(params, MARGIN = 2, FUN = mean)
+    cltn_mus <- m_params[1:6]
+    cltn_sigmas <- m_params[7:12]
+    wts <- m_params[13:18] 
+    wts[wts < 0] <- 0
+    cltn_wts <- wts/sum(wts)
+    
+    cltn_mix6 <- UnivarMixingDistribution(Norm(cltn_mus[1], cltn_sigmas[1]),
+                                         Norm(cltn_mus[2], cltn_sigmas[2]),
+                                         Norm(cltn_mus[3], cltn_sigmas[3]),
+                                         Norm(cltn_mus[4], cltn_sigmas[4]),
+                                         Norm(cltn_mus[5], cltn_sigmas[5]),
+                                         Norm(cltn_mus[6], cltn_sigmas[6]),
+                                         mixCoeff = cltn_wts)
+    
+    dcltn6 <- function(x) {d(cltn_mix6)(x)}
+    qcltn6 <- function(p) {q(cltn_mix6)(p)} 
+    
+    
+    
+    
+    
+    
+    params <- fit_clt6[[2]]$draws(variables = c("mus", "sigmas", "pi"), 
+                                 format = "df")               
+    m_params <- apply(params, MARGIN = 2, FUN = mean)
+    clt_mus <- m_params[1:6]
+    clt_sigmas <- m_params[7:12]
+    wts <- m_params[13:18] 
+    wts[wts < 0] <- 0
+    clt_wts <- wts/sum(wts)
+    
+    clt_mix6 <- UnivarMixingDistribution(Norm(clt_mus[1], clt_sigmas[1]),
+                                        Norm(clt_mus[2], clt_sigmas[2]),
+                                        Norm(clt_mus[3], clt_sigmas[3]),
+                                        Norm(clt_mus[4], clt_sigmas[4]),
+                                        Norm(clt_mus[5], clt_sigmas[5]),
+                                        Norm(clt_mus[6], clt_sigmas[6]),
+                                        mixCoeff = clt_wts)
+    
+    dclt6 <- function(x) {d(clt_mix6)(x)}
+    qclt6 <- function(p) {q(clt_mix6)(p)}
+    
+    ####5 components
     stan_data5 <- make_stan_data(data, size = n, comps = 5)
     
     
@@ -161,16 +229,16 @@ distance <- foreach(replicate = 1:reps,
     fit_cltn5 <- stan_fit_draws(cltnmod5, stan_data5, 
                                 sampler = sample_type, burn = burn, samp = samples,
                                 refresh = 100, out_s = 5000) 
-
+    
     fit_clt5 <- stan_fit_draws(cltmod5, stan_data5,
                                sampler = sample_type, burn = burn, samp = samples,
-                                refresh = 100, out_s = 5000)
+                               refresh = 100, out_s = 5000)
     
     
     
     
     params <- fit_cltn5[[2]]$draws(variables = c("mus", "sigmas", "pi"), 
-                                  format = "df")               
+                                   format = "df")               
     m_params <- apply(params, MARGIN = 2, FUN = mean)
     cltn_mus <- m_params[1:5]
     cltn_sigmas <- m_params[6:10]
@@ -179,11 +247,11 @@ distance <- foreach(replicate = 1:reps,
     cltn_wts <- wts/sum(wts)
     
     cltn_mix5 <- UnivarMixingDistribution(Norm(cltn_mus[1], cltn_sigmas[1]),
-                                         Norm(cltn_mus[2], cltn_sigmas[2]),
-                                         Norm(cltn_mus[3], cltn_sigmas[3]),
-                                         Norm(cltn_mus[4], cltn_sigmas[4]),
-                                         Norm(cltn_mus[5], cltn_sigmas[5]),
-                                         mixCoeff = cltn_wts)
+                                          Norm(cltn_mus[2], cltn_sigmas[2]),
+                                          Norm(cltn_mus[3], cltn_sigmas[3]),
+                                          Norm(cltn_mus[4], cltn_sigmas[4]),
+                                          Norm(cltn_mus[5], cltn_sigmas[5]),
+                                          mixCoeff = cltn_wts)
     
     dcltn5 <- function(x) {d(cltn_mix5)(x)}
     qcltn5 <- function(p) {q(cltn_mix5)(p)} 
@@ -194,7 +262,7 @@ distance <- foreach(replicate = 1:reps,
     
     
     params <- fit_clt5[[2]]$draws(variables = c("mus", "sigmas", "pi"), 
-                                 format = "df")               
+                                  format = "df")               
     m_params <- apply(params, MARGIN = 2, FUN = mean)
     clt_mus <- m_params[1:5]
     clt_sigmas <- m_params[6:10]
@@ -203,14 +271,14 @@ distance <- foreach(replicate = 1:reps,
     clt_wts <- wts/sum(wts)
     
     clt_mix5 <- UnivarMixingDistribution(Norm(clt_mus[1], clt_sigmas[1]),
-                                        Norm(clt_mus[2], clt_sigmas[2]),
-                                        Norm(clt_mus[3], clt_sigmas[3]),
-                                        Norm(clt_mus[4], clt_sigmas[4]),
-                                        Norm(clt_mus[5], clt_sigmas[5]),
-                                        mixCoeff = clt_wts)
+                                         Norm(clt_mus[2], clt_sigmas[2]),
+                                         Norm(clt_mus[3], clt_sigmas[3]),
+                                         Norm(clt_mus[4], clt_sigmas[4]),
+                                         Norm(clt_mus[5], clt_sigmas[5]),
+                                         mixCoeff = clt_wts)
     
     dclt5 <- function(x) {d(clt_mix5)(x)}
-    qclt5 <- function(p) {q(clt_mix5)(p)} 
+    qclt5 <- function(p) {q(clt_mix5)(p)}
     
     
     ####4 components
@@ -453,6 +521,9 @@ distance <- foreach(replicate = 1:reps,
 
 
     #unit draws
+    udraws_cltn6 <- pdist(fit_cltn6[[1]]$draws)
+    udraws_clt6 <- pdist(fit_clt6[[1]]$draws)
+    
     udraws_cltn5 <- pdist(fit_cltn5[[1]]$draws)
     udraws_clt5 <- pdist(fit_clt5[[1]]$draws)
     
@@ -470,6 +541,9 @@ distance <- foreach(replicate = 1:reps,
     
     
     #make unit ecdfs
+    pucltn6 <- function(x) {ecdf(udraws_cltn6)(x)}
+    puclt6 <- function(x) {ecdf(udraws_clt6)(x)}
+    
     pucltn5 <- function(x) {ecdf(udraws_cltn5)(x)}
     puclt5 <- function(x) {ecdf(udraws_clt5)(x)}
     
@@ -490,6 +564,10 @@ distance <- foreach(replicate = 1:reps,
     
     
     
+    
+    pucltno6 <- function(x) {pdist(qcltn6(x))}
+    puclto6 <- function(x) {pdist(qclt6(x))}
+    
     pucltno5 <- function(x) {pdist(qcltn5(x))}
     puclto5 <- function(x) {pdist(qclt5(x))}
     
@@ -507,6 +585,11 @@ distance <- foreach(replicate = 1:reps,
     
     
     
+    
+    
+    
+    uwd1_cltn6 <- unit_wass_dist(pucltn6, d = 1)
+    uwd1_clt6 <- unit_wass_dist(puclt6, d = 1)
     
     uwd1_cltn5 <- unit_wass_dist(pucltn5, d = 1)
     uwd1_clt5 <- unit_wass_dist(puclt5, d = 1)
@@ -528,6 +611,8 @@ distance <- foreach(replicate = 1:reps,
     
     
     
+    uwd1_cltno6 <- unit_wass_dist(pucltno6, d = 1)
+    uwd1_clto6 <- unit_wass_dist(puclto6, d = 1)
     
     uwd1_cltno5 <- unit_wass_dist(pucltno5, d = 1)
     uwd1_clto5 <- unit_wass_dist(puclto5, d = 1)
@@ -547,6 +632,8 @@ distance <- foreach(replicate = 1:reps,
 
     
     
+    uwd2_cltn6 <- unit_wass_dist(pucltn6, d = 2)
+    uwd2_clt6 <- unit_wass_dist(puclt6, d = 2)
     
     uwd2_cltn5 <- unit_wass_dist(pucltn5, d = 2)
     uwd2_clt5 <- unit_wass_dist(puclt5, d = 2)
@@ -564,7 +651,8 @@ distance <- foreach(replicate = 1:reps,
     uwd2_clt1 <- unit_wass_dist(puclt1, d = 2)
     
     
-    
+    ks_cltn6 <- ks.test(udraws_cltn6, "punif")$statistic
+    ks_clt6 <- ks.test(udraws_clt6, "punif")$statistic
     
     ks_cltn5 <- ks.test(udraws_cltn5, "punif")$statistic
     ks_clt5 <- ks.test(udraws_clt5, "punif")$statistic
@@ -584,6 +672,9 @@ distance <- foreach(replicate = 1:reps,
     
     
     kls <- rdist(samples)
+    cltnx6 <- dcltn6(kls)
+    cltx6 <- dclt6(kls)
+    
     cltnx5 <- dcltn5(kls)
     cltx5 <- dclt5(kls)
     
@@ -600,6 +691,9 @@ distance <- foreach(replicate = 1:reps,
     cltx1 <- dclt1(kls)
     
     py <- ddist(kls)
+    
+    cltn_kl6 <- mean(log(py) - log(cltnx6))
+    clt_kl6 <- mean(log(py) - log(cltx6))
     
     cltn_kl5 <- mean(log(py) - log(cltnx5))
     clt_kl5 <- mean(log(py) - log(cltx5))
@@ -619,6 +713,11 @@ distance <- foreach(replicate = 1:reps,
     
     
     
+    
+    
+    cltn_tv6 <- dens_dist(dcltn6, ddist)
+    clt_tv6 <- dens_dist(dclt6, ddist)
+    
     cltn_tv5 <- dens_dist(dcltn5, ddist)
     clt_tv5 <- dens_dist(dclt5, ddist)
     
@@ -637,25 +736,31 @@ distance <- foreach(replicate = 1:reps,
     
     
     
-    uwd1s <- c(uwd1_cltn5, uwd1_clt5, uwd1_cltn4, uwd1_clt4, uwd1_cltn3, 
+    uwd1s <- c(uwd1_cltn6, uwd1_clt6,
+               uwd1_cltn5, uwd1_clt5, uwd1_cltn4, uwd1_clt4, uwd1_cltn3, 
                uwd1_clt3,
                uwd1_cltn2, uwd1_clt2, uwd1_cltn1, uwd1_clt1)
     
-    uwd2s <- c(uwd2_cltn5, uwd2_clt5, uwd2_cltn4, uwd2_clt4, 
+    uwd2s <- c(uwd2_cltn6, uwd2_clt6,
+               uwd2_cltn5, uwd2_clt5, uwd2_cltn4, uwd2_clt4, 
                uwd2_cltn3, uwd2_clt3, uwd2_cltn2, uwd2_clt2,
                uwd2_cltn1, uwd2_clt1)
 
-    uwd1os <- c(uwd1_cltno5, uwd1_clto5, uwd1_cltno4, uwd1_clto4,
+    uwd1os <- c(uwd1_cltno6, uwd1_clto6,
+                uwd1_cltno5, uwd1_clto5, uwd1_cltno4, uwd1_clto4,
                 uwd1_cltno3, uwd1_clto3, uwd1_cltno2, uwd1_clto2,
                 uwd1_cltno1, uwd1_clto1) 
     
-    kss <- c(ks_cltn5, ks_clt5, ks_cltn4, ks_clt4, ks_cltn3, ks_clt3,
+    kss <- c(ks_cltn6, ks_clt6,
+             ks_cltn5, ks_clt5, ks_cltn4, ks_clt4, ks_cltn3, ks_clt3,
              ks_cltn2, ks_clt2, ks_cltn1, ks_clt1)
     
-    klds <- c(cltn_kl5, clt_kl5, cltn_kl4, clt_kl4, cltn_kl3, clt_kl3,
+    klds <- c(cltn_kl6, clt_kl6,
+              cltn_kl5, clt_kl5, cltn_kl4, clt_kl4, cltn_kl3, clt_kl3,
               cltn_kl2, clt_kl2, cltn_kl1, clt_kl1)
     
-    tvs <- c(cltn_tv5, clt_tv5, cltn_tv4, clt_tv4, cltn_tv3, clt_tv3,
+    tvs <- c(cltn_tv6, clt_tv6,
+             cltn_tv5, clt_tv5, cltn_tv4, clt_tv4, cltn_tv3, clt_tv3,
              cltn_tv2, clt_tv2, cltn_tv1, clt_tv1)
     
      
