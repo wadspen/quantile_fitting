@@ -29,7 +29,7 @@ print(dist); print(p); print(nind)
 
 
 cltmod <- cmdstan_model(stan_file = 
-                          '../stan_models/cdf_quantile_normal_mix5.stan')
+                          '../stan_models/cdf_quantile_normal_mix3.stan')
 
 #indmod <- cmdstan_model(stan_file = 
 #                          '../stan_models/cdf_ind_quantile_normal_mix5.stan')
@@ -38,7 +38,7 @@ cltmod <- cmdstan_model(stan_file =
 #                          '../stan_models/order_normal_mix5_quantiles.stan')
 
 cltnmod <- cmdstan_model(stan_file =
-                           '../stan_models/cdf_quantile_normal_n_mix5.stan')
+                           '../stan_models/cdf_quantile_normal_n_mix3.stan')
 
 #ordnmod <- cmdstan_model(stan_file =
 #                           '../stan_models/order_normal_n_mix5_quantiles.stan')
@@ -351,7 +351,7 @@ distance <- foreach(replicate = 1:reps,
     # ks_kern <- ks.test(rkern(out_s), "punif")$statistic
     
     
-    # kls <- rdist(samples)
+    kls <- rdist(samples)
     cltnx <- dcltn(kls)
     # ordnx <- dordn(kls)
     cltx <- dclt(kls)
@@ -359,7 +359,7 @@ distance <- foreach(replicate = 1:reps,
     # indx <- dind(kls)
     # splinex <- dspline(kls)
     # kernx <- dkern(kls)
-    # py <- ddist(kls)
+    py <- ddist(kls)
     
     cltn_kl <- mean(log(py) - log(cltnx))
     # ordn_kl <- mean(log(py) - log(ordnx))

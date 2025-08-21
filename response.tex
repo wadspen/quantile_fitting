@@ -1,0 +1,114 @@
+\documentclass{article}
+
+\usepackage{enumerate}
+\usepackage{hyperref}
+\usepackage{amsmath}
+% \usepackage{amsfonts}
+
+\usepackage{xcolor}
+\newcommand{\jarad}[1]{{\color{red} Jarad: #1}}
+\newcommand{\spencer}[1]{{\color{blue} Spencer: #1}}
+
+\begin{document}
+  
+  
+\section*{Reviewer 1}
+
+
+The paper presents a Gaussian process model for quantiles, called quantile GP, which is based on
+quantile functions and sample quantiles. The QGP is estimated from a Bayesian perspective in
+both simulation studies and a real data application. In particular, the authors employ the QGP to
+approximate the distributions of quantile forecasts from the 2023-24 US Centers for Disease Control
+collaborative flu forecasting initiative.
+
+
+Below, you find my detailed comments.
+
+
+\subsection*{Major Comments}
+
+\begin{itemize}
+  \item The introduction is weak and does not clearly communicate the contribution of the paper relative
+  to the existing literature. It is difficult to understand the motivation for using a Quantile Gaussian
+  process (QGP) over other methods such as an order statistics based model. I strongly recommend
+  to completely rewrite the introduction to clearly explain the novelty of the paper and the key
+  results.
+  
+  \item On page 10, when defining $\psi_{i,j}$ , should the subscript i and j enter in the right-hand side of the
+  formula, particularly in $p$ and $p'$?
+  
+  \spencer{Fixed}
+
+  \item In both the inferential and empirical parts, the authors refer to an unknown n. In what context
+  is the sample size considered unknown?
+
+  \item In Equation 16, what does $L$ represent? Moreover, what should $UWD1$ tells to the reader in
+  comparison to $W_D$ or $p -W_D$?
+  
+  \spencer{Fixed}
+
+  \item Regarding the different distance measures used, there seems to be redundancy. It may be better to
+  avoid including all of them and instead consider incorporating other relevant metrics for evaluating
+  quantiles and densities, such as the quantile CRPS (qCRPS, Gneiting, T., and Ranjan, R. (2011,
+  JBES)) or the ACPS (Iacopini et al, (2023, JBES)).
+  
+  \spencer{Ignore}
+
+  \item In Section 4.1.1, the choice of a truncated normal prior for $\sigma$ is unclear. Why did the authors not
+  consider an Inverse Gamma or a Gamma prior? Moreover, how do the authors justify the choice
+  of a prior center near the real data ($\mu = 4$ and prior $\mu \sim N(5, 7^2)$? For the prior on $n$, which
+  appears to represent the sample size (assumed to be an integer), why is a Normal distribution
+  used instead of a Uniform or Categorical distribution?
+  
+  \spencer{Responded}
+
+  \item Although, the authors state that Bayesian inference is employed, it is unclear how $n$ estimated
+  within the QGP framework. It would also be interested to present trace plots for the parameters
+  and provide some convergence diagnostics.
+  
+  \spencer{Ignore}
+
+  \item On page 17, what is $\theta^*_m$?
+  
+  \spencer{Clarified}
+  
+  \item When defining $\widehat{KLD}$, what does S denote?
+  
+  \spencer{Clarified}
+
+  \item What is the main takeaway from Section 4.1.1? It appears that a simpler model (ORD) yields
+  better results that the proposed QGP across different sample size and parameters estimators.
+  
+  \spencer{Responded}
+  
+  \item In Section 4.2, did the authors run some robustness check for different choices of C? Similarly to
+  my previous point, why were the prior distribution not chosen as an inverse Gamma and centered
+  differently? I assume that $\alpha$ = ($\alpha_1, . . . , \alpha_C$), is this correct? Furthermore, why are the results not
+  compared with the best performing model from Section 4.1.1. i.e. the ORD model?
+  
+  \item In the real data application, what is the value of $n$? Figure 5 and 6 are quite difficult to interpret.
+  I was expecting a comparison with other methods, as done in the simulation study, potentially
+  using metrics such as the qCRPS. Instead, only two metrics are compared, without explaining
+  well what is happening to the dots and what are they referring to.
+  \end{itemize}
+
+
+\subsection*{Minor Comments}
+
+  \begin{itemize}
+  \item The writing is still conversational and the English is really poor and full of mistakes. For example,
+  the authors use intensively the word “this” along the paper. Moreover, page 5 “the CDF and
+  PDF are more used often for modeling and inference”; end of page 9, what does the sentence
+  “But when these functions belong...” mean? Page 13, “to assess the how well...”; or “the the
+  CDF ...”. On page 16 ,“decrase”
+  
+  \item Please include the formula along the text and not between dots. F.e. “the p-WD in terms of the
+  corresponding QFs is defined in (15)”. should become “ the $p-WD$ in terms of the corresponding
+  QFs is defined as...”. It is an example, but mainly all the equation needs to follow a similar
+  specification.
+
+  \end{itemize}
+
+  
+
+\end{document}

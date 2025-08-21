@@ -29,19 +29,19 @@ print(dist); print(p); print(nind)
 
 
 cltmod <- cmdstan_model(stan_file = 
-                          '../stan_models/cdf_quantile_normal_mix5.stan')
+                          '../stan_models/cdf_quantile_normal_mix2.stan')
 
-indmod <- cmdstan_model(stan_file = 
-                          '../stan_models/cdf_ind_quantile_normal_mix5.stan')
-
-ordmod <- cmdstan_model(stan_file = 
-                          '../stan_models/order_normal_mix5_quantiles.stan')
+# indmod <- cmdstan_model(stan_file = 
+#                           '../stan_models/cdf_ind_quantile_normal_mix5.stan')
+# 
+# ordmod <- cmdstan_model(stan_file = 
+#                           '../stan_models/order_normal_mix5_quantiles.stan')
 
 cltnmod <- cmdstan_model(stan_file =
-                           '../stan_models/cdf_quantile_normal_n_mix5.stan')
+                           '../stan_models/cdf_quantile_normal_n_mix2.stan')
 
-ordnmod <- cmdstan_model(stan_file =
-                           '../stan_models/order_normal_n_mix5_quantiles.stan')
+# ordnmod <- cmdstan_model(stan_file =
+#                            '../stan_models/order_normal_n_mix2_quantiles.stan')
 
 # metamod <- cmdstan_model(stan_file = 
 #                            "../stan_models/metanorm_quantiles.stan")
@@ -174,17 +174,17 @@ distance <- foreach(replicate = 1:reps,
     params <- fit_cltn[[2]]$draws(variables = c("mus", "sigmas", "pi"), 
                                   format = "df")               
     m_params <- apply(params, MARGIN = 2, FUN = mean)
-    cltn_mus <- m_params[1:5]
-    cltn_sigmas <- m_params[6:10]
-    wts <- m_params[11:15] 
+    cltn_mus <- m_params[1:2]
+    cltn_sigmas <- m_params[3:4]
+    wts <- m_params[5:6] 
     wts[wts < 0] <- 0
     cltn_wts <- wts/sum(wts)
     
     cltn_mix <- UnivarMixingDistribution(Norm(cltn_mus[1], cltn_sigmas[1]),
                                     Norm(cltn_mus[2], cltn_sigmas[2]),
-                                    Norm(cltn_mus[3], cltn_sigmas[3]),
-                                    Norm(cltn_mus[4], cltn_sigmas[4]),
-				    Norm(cltn_mus[5], cltn_sigmas[5]),
+#                                     Norm(cltn_mus[3], cltn_sigmas[3]),
+#                                     Norm(cltn_mus[4], cltn_sigmas[4]),
+# 				    Norm(cltn_mus[5], cltn_sigmas[5]),
                                     mixCoeff = cltn_wts)
     
     dcltn <- function(x) {d(cltn_mix)(x)}
@@ -215,17 +215,17 @@ distance <- foreach(replicate = 1:reps,
     params <- fit_clt[[2]]$draws(variables = c("mus", "sigmas", "pi"), 
                                   format = "df")               
     m_params <- apply(params, MARGIN = 2, FUN = mean)
-    clt_mus <- m_params[1:5]
-    clt_sigmas <- m_params[6:10]
-    wts <- m_params[11:15] 
+    clt_mus <- m_params[1:2]
+    clt_sigmas <- m_params[3:4]
+    wts <- m_params[5:6] 
     wts[wts < 0] <- 0
     clt_wts <- wts/sum(wts)
     
     clt_mix <- UnivarMixingDistribution(Norm(clt_mus[1], clt_sigmas[1]),
                                     Norm(clt_mus[2], clt_sigmas[2]),
-                                    Norm(clt_mus[3], clt_sigmas[3]),
-                                    Norm(clt_mus[4], clt_sigmas[4]),
-				    Norm(clt_mus[5], clt_sigmas[5]),
+#                                     Norm(clt_mus[3], clt_sigmas[3]),
+#                                     Norm(clt_mus[4], clt_sigmas[4]),
+# 				    Norm(clt_mus[5], clt_sigmas[5]),
                                     mixCoeff = clt_wts)
     
     dclt <- function(x) {d(clt_mix)(x)}
@@ -406,7 +406,7 @@ distance <- foreach(replicate = 1:reps,
 
 #print(paste0("sim_scores/", dist, "_", sample_type, "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 #write.csv(distance, "test_distance.csv")
-write.csv(distance, paste0("sim_scores/", dist, "5_", sample_type, "/", "size", n, "_probs", length(levels[[p]]), "_5comp_scores.csv"), row.names = FALSE)
+write.csv(distance, paste0("sim_scores/", dist, "2_", sample_type, "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 
 
 

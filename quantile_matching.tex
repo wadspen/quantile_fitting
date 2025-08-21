@@ -537,13 +537,15 @@ The asymptotic distribution of a set of sample quantiles is given in
 \ref{sec:qgp_model}. For independent draws $Y_1, ..., Y_n$ from a continuous 
 random variable with CDF $F$, PDF $f$, and QF $Q$, and with a set of sample 
 quantiles calculated by (\ref{eq:quant_df}), theorem \ref{thm:qclt} holds. 
-Note that in (\ref{eq:qclt}), $N_K(\cdot, \cdot)$ refers to a multivariate 
-normal distribution with $K$ dimensions, 
-\jarad{Include the mean and covariance matrix in this definition? I think we should.}
-and in (\ref{eq:qclt_covariance}) the 
-operator $a \wedge b$ is the minimum of the values $a$ and $b$.
-\jarad{Do we need to be concerned about the order of operations when using $\wedge$? I believe $p_i \wedge p_j - p_i p_j = (p_i \wedge p_j) - p_i p_j$, but it could be $p_i \wedge p_j - p_i p_j = p_i \wedge (p_j - p_i p_j)$.
-Using the $()$ would make it clear without having to define the order of operations.}
+Note that in (\ref{eq:qclt}), 
+$N_K(\boldsymbol{\mu}, \boldsymbol{\Sigma})$ refers to a 
+multivariate 
+normal distribution with $K$ dimensions where $\boldsymbol{\mu}$ is the mean
+vector and $\boldsymbol{\Sigma}$ is the covariance matrix. 
+In (\ref{eq:qclt_covariance}) the 
+operator $a \wedge b$ is the minimum of $a$ and $b$, with order of operations
+such that $a \wedge b - ab = (a \wedge b) - ab$. 
+
 
 \begin{theorem}{\emph{Sample quantile central limit theorem}}
 \label{thm:qclt}
@@ -655,7 +657,7 @@ Here $\boldsymbol{\Phi}^{-1}(\boldsymbol{p}) = (\Phi^{-1}(p_1), ...,
 $\boldsymbol{\Psi}$ is a known $K\times K$ matrix with $ij^{th}$ entry
 
 \[
-    \Psi_{ij} = \frac{2 \pi (p\wedge p' - p p')}{\text{exp}\{-\frac{1}{2}[\Phi^{-1}(p)^2 + \Phi^{-1}(p')^2]\}}.
+    \Psi_{ij} = \frac{2 \pi (p_i\wedge p_j - p_i p_j)}{\text{exp}\{-\frac{1}{2}[\Phi^{-1}(p_i)^2 + \Phi^{-1}(p_j)^2]\}}.
 \]
 Model (\ref{eq:norm_qgp}) can then be viewed as an atypical normal linear 
 regression model. Two aspects that make this model atypical relative to the 
@@ -857,7 +859,7 @@ terms of the corresponding QFs is defined in (\ref{eq:wass_dist_quant}).
 
 \begin{equation}
     \label{eq:wass_dist_quant}
-    WD_p (F, G) = \left( \int_0^1 |F^{-1}_X(t) - G^{-1}_Y(t)|^p dt \right)^{1/p}
+    WD_p (F_X, F_Y) = \left( \int_0^1 |F^{-1}_X(t) - F^{-1}_Y(t)|^p dt \right)^{1/p}
 \end{equation}
 
 We define a modified version of the WD, the uniform 1-WD (UWD1) in 
@@ -865,17 +867,20 @@ We define a modified version of the WD, the uniform 1-WD (UWD1) in
 random variable $X$. For a different continuous random variable $\xi$ with CDF 
 $F_{\xi}$, $F_X(\xi)$ is a random variable with support on $[0,1]$. We let 
 $F_{X,\xi}$ be the CDF of the random variable $F_X(\xi)$. Then the measure in 
-(\ref{eq:pit_wass_dist}) is a measure of how close $F_X(\xi)$ is the the CDF of 
-a standard uniform distribution, noting that by the PIT, if 
+(\ref{eq:pit_wass_dist}) measures how close $F_X(\xi)$ is the the CDF of 
+a standard uniform distribution with CDF $\mathcal{U}$, 
+noting that by the PIT, if 
 $\xi \overset{D}{=} X$, $F_X(\xi)$ is the random variable of a standard uniform 
-distribution. Multiplying the integral in (\ref{eq:pit_wass_dist}) by two 
-ensures the measure takes values between 0 and 1 
-\cite[]{645854} \jarad{I think the URL should be in the citation not here. Also, is this mentioned anywhere else so that we don't have to cite stackexchange?}
-where a value near 0 means $\xi$ and $X$ are ``near'' each other.
+distribution. The integral in (\ref{eq:pit_wass_dist}) takes values between
+0 and 1/2 \cite[]{645854}, and multiplying by two 
+ensures the measure takes values between 0 and 1. This makes the UWD1 more
+interpretable than the WD
+where a value near 0 suggests $\xi$ and $X$ are ``near'' each other, and a value
+near 1 suggests they are far apart.   
 
 \begin{equation}
     \label{eq:pit_wass_dist}
-    UWD_1(F, \mathcal{L}) = 2\int_0^1 |F_{X,\xi} (x) - x|dx
+    UWD_1(F_{X,\xi}, \mathcal{U}) = 2\int_0^1 |F_{X,\xi} (u) - x|du
 \end{equation}
 
 
@@ -950,7 +955,13 @@ were 500 simulation replicates. The data were simulated from a normal
 distribution with mean $\mu = 4$ and standard deviation $\sigma = 3.5$.
 For each of QGP, ORD, and IND models, we assigned the same prior distributions 
 to $\mu$ and $\sigma$. When $n$ is unknown, we also assigned it a prior 
-distribution. The prior distributions were $\mu \sim N(5,7^2)$, 
+distribution. 
+As one will generally have access to the quantiles being fit, 
+it is reasonable that a informative prior $\mu$ centered near where the data is
+centered be assigned. We took this approach herein, and for spread parameters,
+we assigned normal priors truncated at 0 as recommended by
+\cite{gelman2006prior}.
+The prior distributions were $\mu \sim N(5,7^2)$,
 $\sigma \sim N(0, 6^2) \mathds{1} \{\sigma > 0\}$, and
 $n \sim N(0,3000^2)\mathds{1}\{n > 0\}$.
 % \begin{align*}
@@ -959,9 +970,8 @@ $n \sim N(0,3000^2)\mathds{1}\{n > 0\}$.
 %     n &\sim N(0,3000^2)\mathds{1}\{n > 0\}.
 % \end{align*}
 For the IND model the prior on the independent parameter 
-$\sigma_{\rho}\mathds{1}\{n > 0\}$ from model (\ref{eq:ind_quantile}) is 
-$1/\sigma_{\rho} \sim N(0, 3000^2)$, 
-\jarad{Shouldn't this prior be strictly positive?}
+$\sigma_{\rho}$ from model (\ref{eq:ind_quantile}) is 
+$1/\sigma_{\rho} \sim N(0, 3000^2)\mathds{1}\{\sigma_{\rho} > 0\}$,
 which is similar to the prior on $n$ for 
 the QGP and ORD models. For each fit, the HMC chain was run for 60,000 draws 
 with the first 10,000 discarded as a burn-in.
@@ -1056,7 +1066,8 @@ distribution. The distances were measured via the UWD1, TV, and KLD metrics.
 The UWD1 for each of QGP, ORD, QGP-n, ORD-n, and IND were calculated as 
 follows. For $\{\theta_m\}^M$ being $M$ draws from the posterior distribution
 of $\theta$ where $\theta_m = (\mu_m, \sigma_m)$, the QM posterior predictive 
-distribution was simulated by repeatedly sampling a $\theta_m^*$, then sampling 
+distribution was simulated by repeatedly sampling a $\theta_m^*$ from 
+$\{\theta_m\}^M$, then sampling 
 $X_m$ from a distribution with CDF $F_{\theta_m^*}$. Repeating this for 
 $M = 50,000$ times gives a QM posterior predictive sample. For the CDF 
 $F_{\theta}$ where $\theta$ is the true parameter, $\xi_m = F_{\theta}(X_m)$ 
@@ -1082,7 +1093,8 @@ That is (\ref{eq:kld}) was estimated by
     \frac{1}{S}\sum_{s = 1}^S \text{log} 
     \left(\frac{f_{\theta}(Y_s)}{f_{\Bar{\theta}_M}(Y_s)}\right)
 \]
-where $Y_s \overset{iid}{\sim} F_{\theta}$. For both SPL and KDE, 
+where $S$ is the total number of Monte Carlo samples and
+$Y_s \overset{iid}{\sim} F_{\theta}$. For both SPL and KDE, 
 $f_{\Bar{\theta}_M}$ is the estimated PDF.
 
 
@@ -1099,7 +1111,9 @@ also shows the QGP's ability to produce a posterior predictive distribution
 which closely matches a true distribution, according to several metrics, 
 relative to other QM methods. Between parameter inference and predicting the 
 true distribution, QGP is superior to all methods we compared it with except 
-for the ORD model which has similar results to the QGP. 
+for the ORD model which has similar results to --or for small sample size
+slighty better than-- the QGP. However, we feel the QGP's linear model form is
+easier to understand than the ORD model and thus preferable for interpretation.
 Additional plots for this study and for a similar simulation 
 study where the data was simulated from an exponential family distribution are 
 in the supplementary materials.
@@ -1123,8 +1137,11 @@ estimation and in QM when given sample quantiles. In the normal case, the QGP
 showed improved parameter inference over the IND model and allows for making 
 inference on the sample size $n$. Compared to the SPL and KDE QM methods, the 
 QGP fits tend to be closer in distance to the true distribution. The QGP model, 
-however, performs about the same as the ORD model in terms of inference and QM. 
-The section below outlines a situation where the QGP model may be a better 
+however, performs about the same or for smaller $n$ slightly poorer than the
+ORD model in terms of inference and QM. However, we feel the QGP is a simpler
+model to
+understand than the ORD and easier to interpret.
+The following section outlines a situation where the QGP model may be a better 
 option for QM than the ORD model. 
 
 

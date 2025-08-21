@@ -351,7 +351,7 @@ distance <- foreach(replicate = 1:reps,
     # ks_kern <- ks.test(rkern(out_s), "punif")$statistic
     
     
-    # kls <- rdist(samples)
+    kls <- rdist(samples)
     cltnx <- dcltn(kls)
     # ordnx <- dordn(kls)
     cltx <- dclt(kls)
@@ -359,7 +359,7 @@ distance <- foreach(replicate = 1:reps,
     # indx <- dind(kls)
     # splinex <- dspline(kls)
     # kernx <- dkern(kls)
-    # py <- ddist(kls)
+    py <- ddist(kls)
     
     cltn_kl <- mean(log(py) - log(cltnx))
     # ordn_kl <- mean(log(py) - log(ordnx))
@@ -406,7 +406,7 @@ distance <- foreach(replicate = 1:reps,
 
 #print(paste0("sim_scores/", dist, "_", sample_type, "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 #write.csv(distance, "test_distance.csv")
-write.csv(distance, paste0("sim_scores/", dist, "5_", sample_type, "/", "size", n, "_probs", length(levels[[p]]), "_5comp_scores.csv"), row.names = FALSE)
+write.csv(distance, paste0("sim_scores/", dist, "5_", sample_type, "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 
 
 
