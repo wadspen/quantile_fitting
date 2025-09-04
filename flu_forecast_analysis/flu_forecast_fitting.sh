@@ -6,13 +6,10 @@
 #SBATCH --mem=0
 #SBATCH --exclusive
 #SBATCH --constraint=intel
-module load gcc
-module load r
-module load udunits
-module load r-rgdal
-module load proj
-module load r gsl
+module purge
+module load r/4.4.1 gcc udunits proj gsl r-rgdal
 
 
-Rscript ./flu_forecast_fitting.R "$1"
+
+Rscript ./flu_forecast_fitting_ord.R "$1"
 

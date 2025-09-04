@@ -10,7 +10,8 @@ library(StereoMorph)
 library(parallel)
 library(doParallel)
 library(doMC)
-n.cores <- detectCores()
+#n.cores <- detectCores()
+n.cores <- 64
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -50,7 +51,7 @@ get_lm <- function(y, x, stat = "slope") {
 
 forc_loc <- "../../../FluSight-forecast-hub/model-output/"
 hosp_loc <- paste0(forc_loc, "../target-data/target-hospital-admissions.csv")
-mod_loc <- "../model-fits/"
+mod_loc <- "../model-fits-ord/"
 models <- list.files(forc_loc)
 sub_dates <- substr(list.files(paste0(forc_loc, 
                                 "FluSight-baseline/")),
@@ -119,7 +120,7 @@ all_scores <- foreach(sub_date = sub_dates,
 
 
         true_hosp <- hosp_data %>% 
-	  dplyr::select(-X) %>%
+	  # dplyr::select(-X) %>%
           filter(date == date(sub_date) + 7*h, location == loc) %>% 
           mutate(value = log(value + 1), date = date(date),
 	         true_value = value) %>%

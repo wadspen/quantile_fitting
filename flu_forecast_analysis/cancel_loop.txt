@@ -1,0 +1,13 @@
+
+#ps=(8..40)
+
+#echo "${models[@]}"
+
+for p in {7463861..7464400} #"${ps[@]}"
+do
+ 
+  scancel $p
+#echo $p
+done
+
+

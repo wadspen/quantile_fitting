@@ -3,9 +3,11 @@ ps=(1 2 3 4 5 6 7 8 9 10 11)
 ns=(1 2 3 4 5 6)
 #echo "${models[@]}"
 
-for p in "${ps[@]}"
+#for p in "${ps[@]}"
+for p in 7
 do
-    for n in "${ns[@]}"
+    #for n in "${ns[@]}"
+     for n in 3
 	do
 	  #sbatch ./var_sim_fit.sh "$1" $p $n
 	  sbatch ./var_sim_fit.sh "$1" $p $n

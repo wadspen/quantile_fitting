@@ -19,7 +19,7 @@ args <- commandArgs()
 mod <- args[6]
 print(mod)
 qgp_stan <- cmdstan_model(stan_file = 
-                          './stan_models/cdf_quantile_normal_mix4.stan')
+                          './stan_models/order_normal_mix4.stan')
 
 burn <- 20000; # burn <- 150
 sample <- 60000;# sample <- 100
@@ -55,21 +55,21 @@ all_forecasts <- forecasts <- foreach(date = sub_dates,
    #h <- 1
    #loc <- locations[22]
    #date <- sub_dates[4]
-        if (dir.exists(paste0("model-fits/", mod)) == FALSE) {
-          dir.create(paste0("model-fits/", mod))
+        if (dir.exists(paste0("model-fits-ord/", mod)) == FALSE) {
+          dir.create(paste0("model-fits-ord/", mod))
         }
         
-        if (dir.exists(paste0("model-fits/", mod, "/draws")) == FALSE) {
-          dir.create(paste0("model-fits/", mod, "/draws"))
+        if (dir.exists(paste0("model-fits-ord/", mod, "/draws")) == FALSE) {
+          dir.create(paste0("model-fits-ord/", mod, "/draws"))
         }
         
-        if (dir.exists(paste0("model-fits/", mod, "/forecasts")) == FALSE) {
-          dir.create(paste0("model-fits/", mod, "/forecasts"))
+        if (dir.exists(paste0("model-fits-ord/", mod, "/forecasts")) == FALSE) {
+          dir.create(paste0("model-fits-ord/", mod, "/forecasts"))
         }
         
-        if (dir.exists(paste0("model-fits/", mod, 
+        if (dir.exists(paste0("model-fits-ord/", mod, 
                               "/summary_diagnostics")) == FALSE) {
-          dir.create(paste0("model-fits/", mod, "/summary_diagnostics"))
+          dir.create(paste0("model-fits-ord/", mod, "/summary_diagnostics"))
         }
        
         forc_file <- list.files(paste0(mod_loc, mod), pattern = date)
@@ -108,7 +108,7 @@ all_forecasts <- forecasts <- foreach(date = sub_dates,
 	    diag$min_ess <- min(summary$ess_bulk, na.rm = TRUE)
 	    diag$min_esst <- min(summary$ess_tail, na.rm = TRUE)
 	    
-	    saveRDS(diag, paste0("model-fits/all_diags/", mod, "diagnostics.rds"))
+	    saveRDS(diag, paste0("model-fits-ord/all_diags/", mod, "diagnostics.rds"))
     } else {
         stan_samp <- qgp_stan$sample(data = stan_data,
                             iter_warmup = burn,
@@ -120,7 +120,7 @@ all_forecasts <- forecasts <- foreach(date = sub_dates,
         
         draws <- stan_samp$draws(format = "df")
      }
-	saveRDS(draws, paste0("model-fits/", mod, "/draws/", date, "-", loc,
+	saveRDS(draws, paste0("model-fits-ord/", mod, "/draws/", date, "-", loc,
 			      "-", h, "-", mod,
                               ".rds"))
         
@@ -145,7 +145,7 @@ all_forecasts <- forecasts <- foreach(date = sub_dates,
         forecast$est_quantile <- exp(est_quantiles) - 1
         forecast$eval_quantile <- eval_quantiles
         forecast$model <- mod 
-        saveRDS(forecast, paste0("model-fits/", mod,
+        saveRDS(forecast, paste0("model-fits-ord/", mod,
 				 "/forecasts/", date, "-", loc,
 				 "-", h, "-", mod, ".rds"))
 
