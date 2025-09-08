@@ -1,4 +1,5 @@
 source("../simulation/simulation_functions.R")
+source("./get_fit_cover.R")
 library(dplyr)
 library(scoringRules)
 library(stringr)
@@ -6,6 +7,7 @@ library(evalcast)
 library(lubridate)
 library(evmix)
 library(tidyr)
+library(orderstats)
 library(StereoMorph)
 library(parallel)
 library(doParallel)
@@ -51,7 +53,10 @@ get_lm <- function(y, x, stat = "slope") {
 
 forc_loc <- "../../../FluSight-forecast-hub/model-output/"
 hosp_loc <- paste0(forc_loc, "../target-data/target-hospital-admissions.csv")
-mod_loc <- "../model-fits-ord/"
+mod_loc <- "../model-fits/"
+
+indt <- ifelse(str_detect(mod_loc, "ind"), TRUE, FALSE)
+ordt <- ifelse(str_detect(mod_loc, "ord"), TRUE, FALSE)
 models <- list.files(forc_loc)
 sub_dates <- substr(list.files(paste0(forc_loc, 
                                 "FluSight-baseline/")),
@@ -109,7 +114,17 @@ all_scores <- foreach(sub_date = sub_dates,
     
         draws <- readRDS(paste0(mod_loc, mod, "/draws/", sub_date, "-", 
                                 loc, "-", h, "-", mod, ".rds"))
-       
+        
+        qcorr <- make_qcorr(probs)
+        tot_coverage <- get_fit_coverage(draws, 
+                         true_quantiles = quantiles, true_probs = probs, 
+                         n = NULL, n_known = FALSE, n_modeled = TRUE,
+                         ind = indt, order = ordt, QCorr = qcorr, 
+                         num_samps = 200)
+        
+        cover <- apply(tot_coverage, MARGIN = 2, FUN = mean) %>% 
+          t() %>% 
+          as.data.frame()
         #cover <- readRDS(paste0(mod_loc, mod, "/coverage/", sub_date, "-", 
         #                        loc, "-", h, "-", mod, ".rds"))
         #cover <- cover %>%
@@ -140,8 +155,8 @@ all_scores <- foreach(sub_date = sub_dates,
 		ungroup() %>%
 		mutate(output_type_id = as.numeric(output_type_id)) %>%
 		reframe(
-			true_wis = weighted_interval_score(as.numeric(output_type_id), 
-						log(as.numeric(value) + 1), 
+			true_wis = weighted_interval_score(as.numeric(output_type_id),
+						log(as.numeric(value) + 1),
 						as.numeric(unique(true_value))),
 			est_wis = weighted_interval_score(as.numeric(output_type_id),
 							  log(as.numeric(est_quantile) + 1),
@@ -156,15 +171,15 @@ all_scores <- foreach(sub_date = sub_dates,
 			se_int = get_lm(est_quantile, value, stat = "se_int"),
 			slope = get_lm(est_quantile, value, stat = "se_slope"),
 			se_slope = get_lm(est_quantile, value, stat = "df"),
-			n = n()
+			n = dplyr::n()
 		)	
 	colnames(scores0) <- paste0(colnames(scores0), 0)
 
 	scores <- forecast %>%
 		ungroup() %>%
 		reframe(
-			true_wis = weighted_interval_score(as.numeric(output_type_id), 
-						log(as.numeric(value) + 1), 
+			true_wis = weighted_interval_score(as.numeric(output_type_id),
+						log(as.numeric(value) + 1),
 						as.numeric(unique(true_value))),
 			est_wis = weighted_interval_score(as.numeric(output_type_id),
 							  log(as.numeric(est_quantile) + 1),
@@ -179,13 +194,13 @@ all_scores <- foreach(sub_date = sub_dates,
 			se_int = get_lm(est_quantile, value, stat = "se_int"),
 			slope = get_lm(est_quantile, value, stat = "se_slope"),
 			se_slope = get_lm(est_quantile, value, stat = "df"),
-			n = n()
+			n = dplyr::n()
 		)
 	
-	scores <- data.frame(model = mod, date = sub_date, location = loc, horizon = h, 
-			     logs = logs, crps = crps, scores, scores0) #, cover)
+	all_scores <- data.frame(model = mod, date = sub_date, location = loc, horizon = h, 
+			     logs = logs, crps = crps, scores, scores0, cover)
         
-	scores    
+	all_scores    
          
        }
 
