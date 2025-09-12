@@ -6,8 +6,9 @@ library(evmix)
 library(parallel)
 library(doParallel)
 library(doMC)
-n.cores <- detectCores()
+#n.cores <- detectCores()
 #n.cores <- 1
+n.cores <- 64
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -19,7 +20,7 @@ args <- commandArgs()
 mod <- args[6]
 print(mod)
 qgp_stan <- cmdstan_model(stan_file = 
-                          './stan_models/cdf_ind_normal_mix4.stan')
+                          './stan_models/cdf_ind_quantile_normal_mix4.stan')
 
 burn <- 20000; # burn <- 150
 sample <- 60000;# sample <- 100
@@ -39,9 +40,9 @@ locations <- unique(get_loc_forc$location)
 #models <- models[6:7]
 
 
-sub_dates <- "2023-11-18"
-locations <- "US"
-horizons <- 0
+#sub_dates <- "2023-11-18"
+#locations <- "US"
+#horizons <- 0
 all_forecasts <- forecasts <- foreach(date = sub_dates,
         .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
                       "VGAM", "distr", "dplyr")

@@ -3,6 +3,6 @@ models=( $(ls ../../../FluSight-forecast-hub/model-output/) )
 for mod in "${models[@]}"
 #for mod in "UM-DeepOutbreak"
 do
-  sbatch ./flu_forecast_fitting_ind.sh "$mod"
+  sbatch ./flu_forecast_fitting.sh "$mod"
 
 done

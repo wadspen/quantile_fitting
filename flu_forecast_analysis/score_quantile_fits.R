@@ -53,7 +53,7 @@ get_lm <- function(y, x, stat = "slope") {
 
 forc_loc <- "../../../FluSight-forecast-hub/model-output/"
 hosp_loc <- paste0(forc_loc, "../target-data/target-hospital-admissions.csv")
-mod_loc <- "../model-fits/"
+mod_loc <- "../model-fits-ord/"
 
 indt <- ifelse(str_detect(mod_loc, "ind"), TRUE, FALSE)
 ordt <- ifelse(str_detect(mod_loc, "ord"), TRUE, FALSE)
@@ -61,7 +61,7 @@ models <- list.files(forc_loc)
 sub_dates <- substr(list.files(paste0(forc_loc, 
                                 "FluSight-baseline/")),
                     1, 10)
-horizons <- -1:3
+horizons <- 0:3
 get_loc_file <- list.files(paste0(forc_loc, "FluSight-baseline/"))[4]
 get_loc_forc <- read.csv(paste0(forc_loc, "FluSight-baseline/", get_loc_file))
 locations <- unique(get_loc_forc$location)
@@ -73,13 +73,13 @@ hosp_data <- read.csv(hosp_loc) %>%
   #select(-X) %>% 
   filter(year(date) >= 2023)
 
-#mod <- "CEPH-Rtrend_fluH"
-#h <- 2
-#loc <- "US"
-#sub_date <- "2023-10-14"
+# mod <- "CEPH-Rtrend_fluH"
+# h <- 2
+# loc <- "US"
+# sub_date <- "2023-10-14"
 
 all_scores <- foreach(sub_date = sub_dates,
-                                       .packages = c("distr", "dplyr", 
+                                       .packages = c("distr", "dplyr",
                                                      "stringr", "scoringRules",
                                                      "evalcast", "StereoMorph", "tidyr")
                                        ,.errorhandling = "remove"
@@ -117,10 +117,10 @@ all_scores <- foreach(sub_date = sub_dates,
         
         qcorr <- make_qcorr(probs)
         tot_coverage <- get_fit_coverage(draws, 
-                         true_quantiles = quantiles, true_probs = probs, 
+                         true_quantiles = quantiles, true_probs = probs,
                          n = NULL, n_known = FALSE, n_modeled = TRUE,
                          ind = indt, order = ordt, QCorr = qcorr, 
-                         num_samps = 200)
+                         num_samps = 400)
         
         cover <- apply(tot_coverage, MARGIN = 2, FUN = mean) %>% 
           t() %>% 
@@ -197,12 +197,12 @@ all_scores <- foreach(sub_date = sub_dates,
 			n = dplyr::n()
 		)
 	
-	all_scores <- data.frame(model = mod, date = sub_date, location = loc, horizon = h, 
+	all_score <- data.frame(model = mod, date = sub_date, location = loc, horizon = h, 
 			     logs = logs, crps = crps, scores, scores0, cover)
         
-	all_scores    
+	all_score    
          
-       }
+}
 
         saveRDS(all_scores, paste0(mod_loc, mod, 
                                 "/scores/all_scores.rds"))

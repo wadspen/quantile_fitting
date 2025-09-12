@@ -17,7 +17,7 @@ get_fit_coverage <- function(draws, true_quantiles, true_probs, n, n_known = FAL
                              # cal_levels = c(.025, .25, .5, .75, .975),
                              QCorr, num_samps = 400) {
   
-  cal_levels = probs
+  cal_levels = true_probs
   # draws <- samps$draws(format = "df")
   # num_samps <- nrow(draws)/100
   # draws_s <- draws[1:(num_samps)*100, ]

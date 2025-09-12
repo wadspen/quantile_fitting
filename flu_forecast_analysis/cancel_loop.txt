@@ -3,7 +3,7 @@
 
 #echo "${models[@]}"
 
-for p in {7463861..7464400} #"${ps[@]}"
+for p in {7663383..7663507} #"${ps[@]}"
 do
  
   scancel $p

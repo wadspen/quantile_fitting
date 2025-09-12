@@ -23,7 +23,7 @@ print(mod)
 
 forc_loc <- "../../../FluSight-forecast-hub/model-output/"
 hosp_loc <- paste0(forc_loc, "../target-data/target-hospital-admissions.csv")
-mod_loc <- "../model-fits/"
+mod_loc <- "../model-fits-ind/"
 models <- list.files(forc_loc)
 sub_dates <- substr(list.files(paste0(forc_loc, 
                                 "FluSight-baseline/")),

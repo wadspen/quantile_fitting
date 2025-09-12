@@ -11,5 +11,5 @@ module load r/4.4.1 gcc udunits proj gsl r-rgdal
 
 
 
-Rscript ./flu_forecast_fitting_ord.R "$1"
+Rscript ./flu_forecast_fitting.R "$1"
 

@@ -6,8 +6,8 @@ library(evmix)
 library(parallel)
 library(doParallel)
 library(doMC)
-n.cores <- detectCores()
-#n.cores <- 1
+#n.cores <- detectCores()
+n.cores <- 96
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -19,7 +19,7 @@ args <- commandArgs()
 mod <- args[6]
 print(mod)
 qgp_stan <- cmdstan_model(stan_file = 
-                          './stan_models/order_normal_mix4.stan')
+                          './stan_models/cdf_quantile_normal_mix4.stan')
 
 burn <- 20000; # burn <- 150
 sample <- 60000;# sample <- 100
@@ -28,6 +28,7 @@ mod_loc <- "../FluSight-forecast-hub/model-output/"
 #models <- list.files(mod_loc)
 #models <- models[models != "README.md"]
 sub_dates <- substr(list.files(paste0(mod_loc, "FluSight-baseline")), 1, 10)
+print(sub_dates)
 horizons <- 0:3
 get_loc_file <- list.files(paste0(mod_loc, "FluSight-baseline/"))[4]
 get_loc_forc <- read.csv(paste0(mod_loc, "FluSight-baseline/", get_loc_file))
@@ -39,9 +40,12 @@ locations <- unique(get_loc_forc$location)
 #models <- models[6:7]
 
 
-sub_dates <- "2023-11-18"
-locations <- "US"
-horizons <- 0
+#sub_dates <- "2023-11-18"
+#locations <- "US"
+#horizons <- 0
+lsd <- length(sub_dates)
+sub_dates <- sub_dates[(lsd - 5):lsd]
+print(sub_dates)
 all_forecasts <- forecasts <- foreach(date = sub_dates,
         .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
                       "VGAM", "distr", "dplyr")
@@ -55,21 +59,21 @@ all_forecasts <- forecasts <- foreach(date = sub_dates,
    #h <- 1
    #loc <- locations[22]
    #date <- sub_dates[4]
-        if (dir.exists(paste0("model-fits-ord/", mod)) == FALSE) {
-          dir.create(paste0("model-fits-ord/", mod))
+        if (dir.exists(paste0("model-fits/", mod)) == FALSE) {
+          dir.create(paste0("model-fits/", mod))
         }
         
-        if (dir.exists(paste0("model-fits-ord/", mod, "/draws")) == FALSE) {
-          dir.create(paste0("model-fits-ord/", mod, "/draws"))
+        if (dir.exists(paste0("model-fits/", mod, "/draws")) == FALSE) {
+          dir.create(paste0("model-fits/", mod, "/draws"))
         }
         
-        if (dir.exists(paste0("model-fits-ord/", mod, "/forecasts")) == FALSE) {
-          dir.create(paste0("model-fits-ord/", mod, "/forecasts"))
+        if (dir.exists(paste0("model-fits/", mod, "/forecasts")) == FALSE) {
+          dir.create(paste0("model-fits/", mod, "/forecasts"))
         }
         
-        if (dir.exists(paste0("model-fits-ord/", mod, 
+        if (dir.exists(paste0("model-fits/", mod, 
                               "/summary_diagnostics")) == FALSE) {
-          dir.create(paste0("model-fits-ord/", mod, "/summary_diagnostics"))
+          dir.create(paste0("model-fits/", mod, "/summary_diagnostics"))
         }
        
         forc_file <- list.files(paste0(mod_loc, mod), pattern = date)
@@ -108,7 +112,7 @@ all_forecasts <- forecasts <- foreach(date = sub_dates,
 	    diag$min_ess <- min(summary$ess_bulk, na.rm = TRUE)
 	    diag$min_esst <- min(summary$ess_tail, na.rm = TRUE)
 	    
-	    saveRDS(diag, paste0("model-fits-ord/all_diags/", mod, "diagnostics.rds"))
+	    saveRDS(diag, paste0("model-fits/all_diags/", mod, "diagnostics.rds"))
     } else {
         stan_samp <- qgp_stan$sample(data = stan_data,
                             iter_warmup = burn,
@@ -120,7 +124,7 @@ all_forecasts <- forecasts <- foreach(date = sub_dates,
         
         draws <- stan_samp$draws(format = "df")
      }
-	saveRDS(draws, paste0("model-fits-ord/", mod, "/draws/", date, "-", loc,
+	saveRDS(draws, paste0("model-fits/", mod, "/draws/", date, "-", loc,
 			      "-", h, "-", mod,
                               ".rds"))
         
@@ -145,7 +149,7 @@ all_forecasts <- forecasts <- foreach(date = sub_dates,
         forecast$est_quantile <- exp(est_quantiles) - 1
         forecast$eval_quantile <- eval_quantiles
         forecast$model <- mod 
-        saveRDS(forecast, paste0("model-fits-ord/", mod,
+        saveRDS(forecast, paste0("model-fits/", mod,
 				 "/forecasts/", date, "-", loc,
 				 "-", h, "-", mod, ".rds"))
 
