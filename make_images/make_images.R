@@ -31,7 +31,7 @@ indmod <- cmdstan_model(stan_file =
 
 burn <- 6000
 sample <- 7000
-samp_sizes <- c(50, 150, 500, 1000, 2000, 5000)
+samp_sizes <- c(50, 150, 500, 1000)
 n <- 200
 probs <- c(.01, .025, seq(.05, .95, by = .05), .975, .99)
 
@@ -66,14 +66,14 @@ for (n in samp_sizes) {
                                 iter_sampling = sample,
                                 chains = 1,
                                 # adapt_delta = .9999,
-                                refresh = 100)
+                                refresh = 1000)
   
   ordsamps <- ordmod$sample(data = stan_data,
                             iter_warmup = burn,
                             iter_sampling = sample,
                             chains = 1,
                             # adapt_delta = .9999,
-                            refresh = 100)
+                            refresh = 1000)
   
   
   indsamps <- indmod$sample(data = stan_data,
@@ -81,7 +81,7 @@ for (n in samp_sizes) {
                             iter_sampling = sample,
                             chains = 1,
                             # adapt_delta = .9999,
-                            refresh = 100)
+                            refresh = 1000)
   
   print("start processing data")
   cdf_data <- get_quantile_samps(cdfsamps, quantiles = quantiles,
@@ -146,8 +146,8 @@ for (n in samp_sizes) {
 # saveRDS(all_dens, "./make_images/lp_dens.rds")
 # saveRDS(all_quants, "./make_images/lp_quants.rds")
 
-all_dens <- readRDS("../make_images/lp_dens.rds")
-all_quants <- readRDS("../make_images/lp_quants.rds")
+# all_dens <- readRDS("../make_images/lp_dens.rds")
+# all_quants <- readRDS("../make_images/lp_quants.rds")
 all_dens %>% 
   filter(model != "ord") %>% 
   filter(N %in% c(50, 150, 500, 1000)) %>% 
@@ -174,11 +174,18 @@ all_quants %>%
               fill = "pink") + 
   geom_ribbon(aes(x = prob, ymin = `0.25`, ymax = `0.75`),
               fill = "red") +
-  geom_line(aes(x = p, y = xhat), colour = "darkgrey") +
-  geom_point(aes(x = prob, y = quantile)) +
+  geom_line(aes(x = p, y = xhat), colour = "darkgrey", size = 1) +
+  # geom_point(aes(x = prob, y = quantile)) +
+  # geom_point(data = all_quants %>% 
+  #              filter(!is.na(quantile)), aes(x = prob, y = quantile)) +
   # geom_point(data = data.frame(quantile = true_quantiles, prob = probs),
   #            aes(x = prob, y = quantile)) +
-  coord_cartesian(ylim = c(-5, 5)) +
+  geom_point(data = all_quants %>% 
+               filter(!is.na(quantile), N <= 1000) %>% 
+               dplyr::select(prob, quantile, N) %>% 
+               unique(),
+             aes(x = prob, y = quantile), size = .8) +
+  coord_cartesian(ylim = c(-5, 5)) + #laplace
   ggh4x::facet_grid2(N~model,
                      scales = "free", independent = "all",
                      remove_labels = TRUE, ) +
@@ -186,7 +193,13 @@ all_quants %>%
 
 
 
-
+all_quants %>% 
+  filter(!is.na(quantile), N <= 1000) %>% 
+  dplyr::select(prob, quantile, N) %>% 
+  unique() %>% 
+  ggplot() +
+  geom_point(aes(x = prob, y = quantile)) +
+  facet_grid(~N)
 
 
 
