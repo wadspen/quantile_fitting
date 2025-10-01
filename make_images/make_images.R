@@ -43,10 +43,10 @@ all_quants <- data.frame()
 dist <- "lp"
 for (n in samp_sizes) {
 
-  samp <- rlaplace(n)
-  true_quantiles <- qlaplace(probs)
-  # samp <- revd(n)
-  # true_quantiles <- qevd(probs)
+  # samp <- rlaplace(n)
+  # true_quantiles <- qlaplace(probs)
+  samp <- revd(n)
+  true_quantiles <- qevd(probs)
   # pars <- data.frame(mu = c(-1, 1.2),
   #                    sigma = c(.9, .6),
   #                    weight = c(.35, .65))
@@ -143,14 +143,20 @@ for (n in samp_sizes) {
 
 }
 
-# saveRDS(all_dens, "./make_images/lp_dens.rds")
-# saveRDS(all_quants, "./make_images/lp_quants.rds")
+# saveRDS(all_dens, "../make_images/lp_dens.rds")
+# saveRDS(all_quants, "../make_images/lp_quants.rds")
 
 # all_dens <- readRDS("../make_images/lp_dens.rds")
 # all_quants <- readRDS("../make_images/lp_quants.rds")
-all_dens %>% 
+dens_fit <- all_dens %>% 
   filter(model != "ord") %>% 
   filter(N %in% c(50, 150, 500, 1000)) %>% 
+  mutate(model = ifelse(model == "cdf", "QGP",
+                        ifelse(model == "ind", "IND", 
+                               ifelse(model == "kern", "KDE", 
+                                      ifelse(model == "spline", "SPL",
+                                             model))))) %>% 
+  mutate(model = factor(model, levels = c("KDE", "SPL", "IND", "QGP"))) %>%
   ggplot() +
   geom_ribbon(aes(x = x, ymin = `0.025`, ymax = `0.975`),
               fill = "pink") + 
@@ -159,16 +165,27 @@ all_dens %>%
   geom_line(aes(x = x, y = yhat), colour = "darkgrey") +
   geom_line(aes(x = x, y = y)) + 
   ggh4x::facet_grid2(N~model,
-                     scales = "free", independent = "all",
+                     scales = "free_y", independent = "y",
                      remove_labels = TRUE, ) +
   # facet_grid(N~model, scales = "free", independent = "all") +
+  ylab("f(x)") +
+  xlab("x") +
   theme_bw() +
-  theme(axis.text = element_blank())
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title = element_text(size = 15),
+        strip.text = element_text(size = 11))
 
 
-all_quants %>% 
+quant_fit <- all_quants %>% 
   filter(model != "ord") %>% 
   filter(N %in% c(50, 150, 500, 1000)) %>% 
+  mutate(model = ifelse(model == "cdf", "QGP",
+                        ifelse(model == "ind", "IND", 
+                               ifelse(model == "kern", "KDE", 
+                                      ifelse(model == "spline", "SPL",
+                                             model))))) %>% 
+  mutate(model = factor(model, levels = c("KDE", "SPL", "IND", "QGP"))) %>% 
   ggplot() +
   geom_ribbon(aes(x = prob, ymin = `0.025`, ymax = `0.975`),
               fill = "pink") + 
@@ -185,21 +202,25 @@ all_quants %>%
                dplyr::select(prob, quantile, N) %>% 
                unique(),
              aes(x = prob, y = quantile), size = .8) +
+  ylab("Q(p)") +
+  xlab("p") +
   coord_cartesian(ylim = c(-5, 5)) + #laplace
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 3)) +
   ggh4x::facet_grid2(N~model,
-                     scales = "free", independent = "all",
+                     # scales = "free", independent = "all",
                      remove_labels = TRUE, ) +
-  theme_bw()
+  theme_bw() +
+  theme(axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title = element_text(size = 15),
+        strip.text = element_text(size = 11))
+
+
+cowplot::plot_grid(quant_fit, dens_fit, nrow = 1,
+                   align = "hv")
 
 
 
-all_quants %>% 
-  filter(!is.na(quantile), N <= 1000) %>% 
-  dplyr::select(prob, quantile, N) %>% 
-  unique() %>% 
-  ggplot() +
-  geom_point(aes(x = prob, y = quantile)) +
-  facet_grid(~N)
 
 
 

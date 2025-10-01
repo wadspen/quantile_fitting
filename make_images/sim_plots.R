@@ -177,7 +177,7 @@ sum_cover %>%
 ###############Exp Scores################
 #########################################
 
-exp_score <- readRDS("./simulation/comb_res/scores_exp_MCMC.rds")
+exp_score <- readRDS("../simulation/comb_res/scores_exp_MCMC.rds")
 
 
 exp_sum <- exp_score %>% 
@@ -269,10 +269,90 @@ exp_dist %>%
         legend.text = element_text(size = 11))
 
 
+cover_plot <- exp_sum %>% 
+  filter(n %in% c(50, 150, 500, 1000, 5000), quants %in% c(3,7,15,23,50)) %>% 
+  filter(quants == 23) %>% 
+  dplyr::select(model, n, quants, mcl, mcl, mcn) %>% 
+  pivot_longer(4:5, names_to = "param", values_to = "mean_param") %>% 
+  # filter(param != "mcn") %>% 
+  mutate(facet = ifelse(param == "mcl", "lambda", "n")) %>% 
+  mutate(facet = factor(facet, levels = c("lambda", "n"))) %>% 
+  ggplot() +
+  geom_hline(yintercept = 90, size = .7) +
+  geom_path(aes(x = n, y = mean_param*100, group = model, 
+                colour = model, linetype = model), size = 1, alpha = .9, 
+            lineend = "round") +
+  # scale_x_discrete(labels=c('label1', 'label2', 'label3', 'label4', 'label5')) +
+  # geom_path(aes(x = n, y = mcs, linetype = model, colour = model), 
+  #           size = 1.3) +
+  facet_grid(~facet, labeller = label_parsed, scale = "free") +
+  xlab("n") +
+  ylab("% Coverage") +
+  # xlim(c(50, 5000)) +
+  # expand_limits(y=100) +
+  ylim(c(65,100)) +
+  # labs(colour = "Model") +
+  scale_colour_manual(name = "Model", 
+                      labels = c("QGP", "QGP-n","IND", "ORD", "ORD-n"),
+                      values = c("#0072B2", "#56B4E9", "#009E73",
+                                 "#E69F00", "#D55E00")) +
+  scale_linetype_manual(name= "Model", 
+                        values=c("solid", "dashed", "dotdash", 
+                                 "solid", "dashed"),
+                        labels = c("QGP", "QGP-n","IND", "ORD", "ORD-n")) +
+  # guides(linetype = FALSE) +
+  theme_bw() +
+  theme(axis.text.y=element_text(size=10),
+        axis.text.x=element_text(size=10, angle=35),
+        axis.title=element_text(size=15),
+        strip.text.y = element_text(size = 12),
+        strip.text.x = element_text(size = 15),
+        legend.title = element_text(size = 13),
+        strip.text = element_text(margin = margin(0,0,0,0, "cm")),
+        legend.text = element_text(size = 11),
+        
+        legend.key.height = unit(.3, 'cm'), 
+        legend.key.width = unit(.4, 'cm'))
 
 
+dist_plot <- exp_dist %>% 
+  filter(quants %in% c(3,7,15,23,50), metric != "mwd2") %>% 
+  filter(quants == 23) %>% 
+  filter(!(model %in% c("cltn", "ordn"))) %>% 
+  mutate(facet = ifelse(metric == "mwd1", "UWD1", 
+                        ifelse(metric == "mtv", "TV", "KLD"))) %>% 
+  mutate(facet = factor(facet, levels = c("UWD1", "TV", "KLD"))) %>% 
+  ggplot() +
+  geom_path(aes(x = n, y = dist, group = model, 
+                colour = model, linetype = model), size = 1, alpha = .9) +
+  facet_grid(~facet, scale = "free") +
+  scale_colour_manual(name = "Model", 
+                      labels = c("QGP", "IND","KDE", "ORD", "SPL"),
+                      values = c("#0072B2", "#009E73", "darkgrey",
+                                 "#E69F00", "#CC79A7")) +
+  scale_linetype_manual(name= "Model",
+                        labels=c("QGP", "IND","KDE", "ORD", "SPL"),
+                        values=c("solid", "dashed", "dotdash", 
+                                 "longdash", "dotdash")) +
+  scale_y_continuous(n.breaks = 3) +
+  ylab("") +
+  xlab("n") +
+  # facet_wrap(~metric) +
+  theme_bw() +
+  theme(axis.text.y=element_text(size=10),
+        axis.text.x=element_text(size=10, angle=35),
+        axis.title=element_text(size=18),
+        strip.text.y = element_text(size = 12),
+        strip.text.x = element_text(size = 12),
+        legend.title = element_text(size = 13),
+        strip.text = element_text(margin = margin(0,0,0,0, "cm")),
+        legend.text = element_text(size = 11),
+        
+        legend.key.height = unit(.3, 'cm'), 
+        legend.key.width = unit(.4, 'cm'))
 
-
+cowplot::plot_grid(cover_plot, dist_plot, ncol = 1,
+                   align = "hv")
 
 
 
