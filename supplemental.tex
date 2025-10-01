@@ -42,6 +42,7 @@
 \usepackage{amsmath,amsthm,amssymb,scrextend,mathtools}
 \usepackage{hyperref}
 \usepackage{newtxmath} %for making indicator function
+\usepackage{booktabs}
 % \RequirePackage[colorlinks,citecolor=blue,urlcolor=blue,backref=page,backref=page]{hyperref}
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
@@ -55,6 +56,8 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{definition}{Definition}
 \usepackage{natbib}
+\usepackage{adjustbox}
+\usepackage{multirow}
 
 \journal{Computational Statistics and Data Analysis}
 
@@ -282,7 +285,88 @@ The estimated PDF plots (right) show the true PDF (black) with either a the QM e
 \end{figure}
 
 
+\begin{figure}[hbt!]
+\centering
+  \includegraphics[]{Images/mix_comps.png}
+\caption{Future caption}
+\label{fig:mix_comps}
+\end{figure}
 
+
+% \begin{table}[hbt!]
+% \footnotesize
+% \centering
+% \caption{UWD1}
+% \begin{adjustbox}{center}
+% \begin{tabular}{lcccccc|cccccc}
+%  & \multicolumn{6}{c}{QGP} & \multicolumn{6}{c}{QGP-n} \\
+% \cmidrule(lr){2-7} \cmidrule(lr){8-13}
+% Components & 1 & 2 & 3 & 4 & 5 & 6 & 1 & 2 & 3 & 4 & 5 & 6 \\
+% \midrule
+% EV & 0.063 & 0.025 & 0.021 & 0.020 & 0.020 & 0.020 & 
+%       0.064 & 0.025 & 0.021 & 0.021 & 0.020 & 0.020\\
+% La & 0.044 & 0.022 & 0.020 & 0.020 & 0.020 & 0.020 & 
+%       0.044 & 0.021 & 0.020 & 0.020 & 0.020 & 0.020 \\
+% MIX & 0.107 & 0.018 & 0.019 & 0.019 & 0.019 & 0.019 & 
+%       0.157 & 0.018 & 0.019 & 0.018 & 0.018 & 0.018
+% \end{tabular}
+% \end{adjustbox}
+% \end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{table}[hbt!]
+\footnotesize
+\centering
+\caption{UWD1}
+\begin{adjustbox}{center}
+\begin{tabular}{clcccccc|cccccc}
+& & \multicolumn{6}{c}{QGP} & \multicolumn{6}{c}{QGP-n} \\
+\cmidrule(lr){3-8} \cmidrule(lr){9-14}
+& Components & 1 & 2 & 3 & 4 & 5 & 6 & 1 & 2 & 3 & 4 & 5 & 6 \\
+\midrule
+\multirow{3}{*}{UWD1} &
+EV & 0.063 & 0.025 & 0.021 & 0.020 & 0.020 & 0.020 & 
+      0.064 & 0.025 & 0.021 & 0.021 & 0.020 & 0.020\\
+ & La & 0.044 & 0.022 & 0.020 & 0.020 & 0.020 & 0.020 & 
+      0.044 & 0.021 & 0.020 & 0.020 & 0.020 & 0.020 \\
+ & MIX & 0.107 & 0.018 & 0.019 & 0.019 & 0.019 & 0.019 & 
+      0.157 & 0.018 & 0.019 & 0.018 & 0.018 & 0.018 \\
+      \hline
+\multirow{3}{*}{TV} &
+EV & 0.127 & 0.053 & 0.047 & 0.047 & 0.048 & 0.049 &
+      0.125 & 0.052 & 0.039 & 0.039 & 0.039 & 0.039\\
+ & La & 0.117 & 0.051 & 0.047 & 0.047 & 0.048 & 0.048 &
+      0.117 & 0.048 & 0.043 & 0.043 & 0.043 & 0.042 \\
+ & MIX & 0.226 & 0.038 & 0.033 & 0.032 & 0.033 & 0.034 &
+      0.225 & 0.029 & 0.031 & 0.032 & 0.034 & 0.035 \\
+      \hline
+\multirow{3}{*}{KLD} &
+EV & 0.171 & 0.025 & 0.014 & 0.013 & 0.014 & 0.015 & 
+      0.170 & 0.025 & 0.011 & 0.010 & 0.010 & 0.010\\
+& La & 0.110 & 0.014 & 0.012 & 0.012 & 0.012 & 0.012 & 
+      0.111 & 0.013 & 0.010 & 0.010 & 0.010 & 0.010 \\
+& MIX & 0.221 & 0.010 & 0.008 & 0.008 & 0.009 & 0.010 & 
+      0.293 & 0.004 & 0.006 & 0.007 & 0.009 & 0.010
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+
+
+
+
+
+\end{document}
 
 
 %% For citations use: 
@@ -317,7 +401,8 @@ The estimated PDF plots (right) show the true PDF (black) with either a the QM e
 %   1994.
 % 
 % \end{thebibliography}
-\end{document}
+
+
 
 \endinput
 %%

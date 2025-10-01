@@ -110,7 +110,118 @@ Below, you find my detailed comments.
   \end{itemize}
   
   
+\section*{Reviewer 2}
+
+
+I find the idea and motivation behind QGP compelling, and particularly 
+attractive is that the general framework and the Stan code provided allow for 
+flexible and relatively easy extension to other distributions beyond normal 
+mixtures. The manuscript is coherent, clear, and well-structured. I believe 
+there are some points that need further attention to enhance clarity.
+
+\begin{itemize}
+
+\item Clarification on the asymptotic nature of QGP:
+ Since the QGP method relies on asymptotic results, I recommend explicitly 
+ stating this in the abstract for clarity. Additionally, a concise summary in 
+ the main text about when these asymptotic assumptions hold would be helpful. 
+ While graphical results are provided, a practical guide on suitable sample 
+ sizes or conditions would enhance the method's applicability.
+
+\item Additional visual evaluation of estimated distributions:
+ While thorough quantitative evaluations (KLD, Wasserstein) are provided, 
+ additional graphical comparisons between the estimated and true underlying 
+ distributions would offer valuable insight. After closely examining Figure 2, 
+ it remains unclear to me why certain alternative methods underperform. For 
+ instance, I suspect that the low coverage observed for the IND method is due 
+ to its underestimation of uncertainty. Visualizing a set of estimated 
+ distributions for selected scenarios (such as n=50 or n=150) would help reveal 
+ where and why specific methods exhibit inaccuracies or weaknesses. These 
+ visualizations would also support a more intuitive understanding of the 
+ magnitude of approximation error; for example, it is not immediately obvious 
+ whether a KLD of 0.05 is large or small.
+
+\item Justification and selection of informative priors:
+ Currently, the priors chosen for the parameters of the QGP method are generic 
+ and identical across all examples, including the flu hospitalization case 
+ study. Given the Bayesian nature of QGP, this aspect is critically important. 
+ The thoughtful use of informative priors could substantially distinguish the 
+ QGP model from competing methods (ORD, KDE, SPL). Specifically, incorporating 
+ expert knowledge into the prior distributions, especially for practical 
+ applications such as flu modeling, could lead to improved inference, 
+ increased stability with smaller sample sizes, reduced uncertainty, and 
+ better interpretability. It would strengthen the manuscript if the authors 
+ explicitly discuss this point in the conclusions. In particular, it would be 
+ valuable to explain how to select these priors, perform prior predictive 
+ checks (see, for example, (1)), suggest context-specific informative priors, 
+ and clarify how these choices could vary across different applications.
+Reference:
+(1) Betancourt, M. (2017). Principled Bayesian Workflow. Available at:
+\href{https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html}{}
+
+\item Sensitivity to the choice of distribution within QGP:
+ While the paper fixes the QGP distributional assumption to a mixture of four 
+ normal components, it would be informative to study how sensitive the results 
+ are to this modeling choice. For example, it would be valuable to investigate 
+ how varying the number of normal components in the mixture affects the 
+ performance of QGP.
+
+\item Explicit clarification on practical advantages of QGP:
+ The manuscript carefully benchmarks QGP against alternative approaches, yet 
+ the conclusions remain relatively modest regarding its practical advantages. 
+ It would be helpful to include in the final discussion a concise summary of 
+ the specific scenarios or data conditions where QGP outperforms the other 
+ methods. Additionally, I believe that QGP stands out in two important aspects: 
+ it naturally provides explicit uncertainty through the Bayesian posterior, and 
+ it allows for the straightforward incorporation of expert knowledge via 
+ informative priors.
+ 
+\end{itemize}
+\section*{Reviewer 3}
+
+The paper introduces a “Quantile Gaussian Process” (QGP) model for estimating a 
+full continuous distribution from a finite set of quantiles. The authors
+apply this method in the context of probabilistic forecasting, particularly for
+epidemic modeling, and compare the QGP approach with other quantile-matching
+(QM) methods using both simulation studies and real CDC flu forecast data.
+
+There are, however, several substantive issues with the manuscript, as outlined 
+below. For these reasons, I do not believe it is currently suitable for
+publication in Computational Statistics and Data Analysis. That said, I do not
+wish to diminish the authors’ contributions to this important and active area
+of research. With further development, this line of work could be expanded
+into two complementary manuscripts: (i) a review-style paper summarizing 
+existing quantile matching methods, and (ii) a computationally focused methods
+paper with deeper theoretical or algorithmic contributions. And of course, that
+will require substantial work beyond what is presented in this paper. The final
+application section also has the potential to form the basis of a strong 
+domainspecific paper, particularly in the biomedical or public health context. 
+On a
+personal note, I found the manuscript engaging, well-detailed and informative,
+and I learned a great deal from reading it.
+
+\begin{enumerate}[1]
+
+  \item While the paper is well-written and the methodology is carefully 
+  implemented, the contribution feels incremental rather than fundamentally
+  novel. It reads more like an extended methodological review or a pedagogical 
+  exposition rather than a research paper that breaks new ground.
   
+  \item If the authors intend to emphasize their methodological contribution, 
+  they
+  should clearly articulate it in the introduction and present it more directly
+  in Section 2. The focus should be placed primarily on describing the
+  proposed method, rather than extensively reviewing existing literature.
+  While such a review is valuable in a review article, in a research paper,
+  much of this background could be moved to the supplementary material.
+  
+  \item For a stand-alone methods paper, the simulation study should be more
+  comprehensive, incorporating additional tables and clearer, more informative 
+  plots. The current figures make it difficult to assess the relative
+  performance of the models.
+  
+\end{enumerate}  
+
 
   
 
