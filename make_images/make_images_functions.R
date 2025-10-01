@@ -1,3 +1,4 @@
+library(orderstats)
 get_quantile_samps <- function(samps, quantiles, n, n_known = FALSE, n_modeled = FALSE,
                                ind = TRUE, samp_quant = FALSE, order = TRUE,
                                dens_probs = c(.025, .25, .5, .75, .975),

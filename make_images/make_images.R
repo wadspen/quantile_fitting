@@ -1,5 +1,5 @@
-source("./simulation/simulation_functions.R")
-source("./make_images/make_images_functions.R")
+source("../simulation/simulation_functions.R")
+source("../make_images/make_images_functions.R")
 library(VGAM) #Laplace distribution
 library(EnvStats) #Extreme value distribution
 library(cmdstanr)
@@ -13,17 +13,18 @@ library(tidyr)
 library(evmix) #for the KDE estimation
 library(distfromq)
 library(ggpubr)
+library(orderstats)
 
 
 
 cdfmod <- cmdstan_model(stan_file = 
-                          './stan_models/cdf_quantile_normal_mix4.stan')
+                          '../stan_models/cdf_quantile_normal_mix4.stan')
 
 ordmod <- cmdstan_model(stan_file = 
-                          './stan_models/order_normal_mix4_quantiles.stan')
+                          '../stan_models/order_normal_mix4_quantiles.stan')
 
 indmod <- cmdstan_model(stan_file = 
-                          './stan_models/cdf_ind_quantile_normal_mix4.stan')
+                          '../stan_models/cdf_ind_quantile_normal_mix4.stan')
 
 
 
@@ -83,25 +84,25 @@ for (n in samp_sizes) {
                             refresh = 100)
   
   print("start processing data")
-  cdf_data <- get_quantile_samps(cdfsamps, quantiles = true_quantiles,
+  cdf_data <- get_quantile_samps(cdfsamps, quantiles = quantiles,
                                  n_modeled = TRUE,
                                  ind = FALSE, true_dist = dist, model = "cdf")
   
   print("cdf done")
-  ord_data <- get_quantile_samps(ordsamps, quantiles = true_quantiles,
+  ord_data <- get_quantile_samps(ordsamps, quantiles = quantiles,
                                  n_modeled = TRUE, order = TRUE,
                                  ind = FALSE, 
                                  true_dist = dist, model = "ord")
   
   
-  ind_data <- get_quantile_samps(indsamps, quantiles = true_quantiles, 
+  ind_data <- get_quantile_samps(indsamps, quantiles = quantiles, 
                                  true_dist = dist, model = "ind")
   
   print("data processed")
   dens <- rbind(cdf_data[[1]], ord_data[[1]], ind_data[[1]]) %>% 
     mutate(N = n)
   
-  dkern <- function(x) {dkden(x, dat$quantile, kernel = "epanechnikov")}
+  dkern <- function(x) {dkden(x, dat$quantile, kernel = "gaussian")}
   dspline <- make_d_fn(dat$prob, dat$quantile)
   
   # dx <- seq(-3.5, 3.5, length.out = 1001) #Laplace bounds
@@ -123,7 +124,7 @@ for (n in samp_sizes) {
     mutate(N = n)
   
   
-  qkern <- function(p) {qkden(p, dat$quantile, kernel = "epanechnikov")}
+  qkern <- function(p) {qkden(p, dat$quantile, kernel = "gaussian")}
   qspline <- make_q_fn(dat$prob, dat$quantile)
   
   

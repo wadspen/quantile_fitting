@@ -67,7 +67,8 @@ for (i in c(3, 7, 10)) {
     clt_fit <- cltmod$sample(data = stan_data, 
                              iter_warmup = 10000,
                              iter_sampling = 50000,
-                             chains = 1)
+                             chains = 1,
+                             refresh = 0)
     
     clt_draws <- clt_fit$draws(variables = c("mu", "sigma", "n"), format = "df")
     clt_draws$model <- "clt"
@@ -76,7 +77,8 @@ for (i in c(3, 7, 10)) {
     ord_fit <- ordmod$sample(data = stan_data, 
                              iter_warmup = 10000,
                              iter_sampling = 50000,
-                             chains = 1)
+                             chains = 1,
+                             refresh = 0)
     
     ord_draws <- ord_fit$draws(variables = c("mu", "sigma", "n"), format = "df")
     ord_draws$model <- "ord"
@@ -85,7 +87,8 @@ for (i in c(3, 7, 10)) {
     cltn_fit <- cltnmod$sample(data = stan_data, 
                              iter_warmup = 10000,
                              iter_sampling = 50000,
-                             chains = 1)
+                             chains = 1,
+                             refresh = 0)
     
     cltn_draws <- cltn_fit$draws(variables = c("mu", "sigma"), format = "df")
     cltn_draws$n <- NA
@@ -95,7 +98,8 @@ for (i in c(3, 7, 10)) {
     ordn_fit <- ordnmod$sample(data = stan_data, 
                              iter_warmup = 10000,
                              iter_sampling = 50000,
-                             chains = 1)
+                             chains = 1,
+                             refresh = 0)
     
     ordn_draws <- ordn_fit$draws(variables = c("mu", "sigma"), format = "df")
     ordn_draws$n <- NA
@@ -105,7 +109,8 @@ for (i in c(3, 7, 10)) {
     ind_fit <- indmod$sample(data = stan_data, 
                              iter_warmup = 10000,
                              iter_sampling = 50000,
-                             chains = 1)
+                             chains = 1,
+                             refresh = 0)
     
     ind_draws <- ind_fit$draws(variables = c("mu", "sigma"), format = "df")
     ind_draws$n <- NA
@@ -123,6 +128,8 @@ for (i in c(3, 7, 10)) {
   }
 }
 # set.seed(21)
+
+# saveRDS(all_draws, "all_dens_draws.rds")
 thin <- seq(1, nrow(all_draws), by = 20)
 thin_draws <- all_draws[thin,]
 
@@ -488,6 +495,7 @@ for (i in c(3, 7, 10)) {
   }
 }
 
+saveRDS(all_draws, "all_exp_dens_draws.rds")
 
 lambda_plot <- all_draws %>% 
   # filter(quant == 15, n == 50) %>% 
