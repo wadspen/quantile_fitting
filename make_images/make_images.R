@@ -40,19 +40,19 @@ probs <- c(.01, .025, seq(.05, .95, by = .05), .975, .99)
 #################################################
 all_dens <- data.frame()
 all_quants <- data.frame()
-dist <- "lp"
+dist <- "evd"
 for (n in samp_sizes) {
 
   # samp <- rlaplace(n)
   # true_quantiles <- qlaplace(probs)
-  samp <- revd(n)
-  true_quantiles <- qevd(probs)
-  # pars <- data.frame(mu = c(-1, 1.2),
-  #                    sigma = c(.9, .6),
-  #                    weight = c(.35, .65))
-  # mdist <- make_gaussian_mixture(pars$mu, pars$sigma, pars$weight)
-  # samp <- r(mdist)(n)
-  # true_quantiles <- q(mdist)(probs)
+  # samp <- revd(n); dist <- "evd"
+  # true_quantiles <- qevd(probs)
+  pars <- data.frame(mu = c(-1, 1.2),
+                     sigma = c(.9, .6),
+                     weight = c(.35, .65))
+  mdist <- make_gaussian_mixture(pars$mu, pars$sigma, pars$weight)
+  samp <- r(mdist)(n); dist <-
+  true_quantiles <- q(mdist)(probs)
   ddist <- function(x) {d(mdist)(x)}
   quantiles <- quantile(samp, probs = probs)
   
@@ -84,6 +84,7 @@ for (n in samp_sizes) {
                             refresh = 1000)
   
   print("start processing data")
+  print(paste("sample size is", n))
   cdf_data <- get_quantile_samps(cdfsamps, quantiles = quantiles,
                                  n_modeled = TRUE,
                                  ind = FALSE, true_dist = dist, model = "cdf")
@@ -143,8 +144,8 @@ for (n in samp_sizes) {
 
 }
 
-# saveRDS(all_dens, "../make_images/lp_dens.rds")
-# saveRDS(all_quants, "../make_images/lp_quants.rds")
+# saveRDS(all_dens, "../make_images/gmix_dens.rds")
+# saveRDS(all_quants, "../make_images/gmix_quants.rds")
 
 # all_dens <- readRDS("../make_images/lp_dens.rds")
 # all_quants <- readRDS("../make_images/lp_quants.rds")
@@ -204,7 +205,9 @@ quant_fit <- all_quants %>%
              aes(x = prob, y = quantile), size = .8) +
   ylab("Q(p)") +
   xlab("p") +
-  coord_cartesian(ylim = c(-5, 5)) + #laplace
+  # coord_cartesian(ylim = c(-5, 5)) + #laplace
+  # coord_cartesian(ylim = c(-2.5, 4.2)) + #evd
+  coord_cartesian(ylim = c(-3, 3.2)) +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 3)) +
   ggh4x::facet_grid2(N~model,
                      # scales = "free", independent = "all",

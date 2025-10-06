@@ -152,60 +152,64 @@
 
 
 
-Here we include a simulation study similar to the first study in section (??).
-% \ref{sec:simulation_analyses}. 
-However, instead of simulating data from a normal distribution, data is 
-simulated 
-from an exponential distribution with parameter $\lambda = 4$. The same prior 
-distribution for $\lambda$ was used in fitting QGP, ORD, and IND models, and the 
-same prior distribution was assigned to $n$ in QGP and ORD models and 
-$1/\sigma_{\rho}$. The prior for $\lambda$ was 
-$\pi(\lambda) \sim N(0, 7^2)\vmathbb{1}\{\lambda > 0\}$, the prior for $n$ was
-$\pi(n) \sim N(0, 3000^2)\vmathbb{1}\{n > 0\}$, and the prior for
-$1/\sigma_{\rho}$ was
-$\pi(1/\sigma_{\rho}) \sim N(0, 3000^2)\vmathbb{1}\{1/\sigma_{\rho} > 0\}$.
-
-Figure \ref{fig:exp_par_fit} shows examples of posterior sample density plots 
-for $\lambda$ and $n$. QGP and ORD show similar distributions which tend to be 
-a bit wider than the posterior distributions from the IND model. The left side 
-of figure \ref{fig:exp_cov_dists} shows the percent coverage of the 500 
-simulation replicates for $\lambda$ and $n$. Here, the IND model coverage is 
-much closer to the nominal level than in the normal distribution case of the 
-previous section. The right side of figure \ref{fig:exp_cov_dists} shows the 
-average UWD1, TV, and KLD distances for the five QM methods. Again the 
-parametric models tend to perform better than the non-parametric SPL and KDE 
-methods with the SPL and KDE performing better as $n$ and $K$ increase.
-
-
-
+The figures herein are supplementary to those in the main manuscript. Figure 
+\ref{fig:norm_dens} shows examples of marginal
+posterior densities for QM of quantiles for a normal distribution from the 
+simulation study in section 4.1 in
+the main manuscript. The parameter uncertainty of the QGP and ORD models are 
+unsurprisingly similar in
+most cases, and where they differ it is hard to say that one is estimating the 
+true parameter better than the
+other. The IND model on the other hand has tighter densities, and often the 
+bulk of the posterior is far from
+the true parameter.
 
 
 \begin{figure}
-
 \centering
-% \begin{subfigure}
-  \centering
-  \hspace{-.8cm}
-  \includegraphics[width=.94\linewidth]{Images/exponential_par_fit.png}
-  % \caption{A subfigure}
-  % \label{fig:sub1}
-% \end{subfigure}%
-% \begin{subfigure}
-  \centering
-  \hspace{-.9cm}
-  \includegraphics[width=1.05\linewidth]{Images/exponential_n_fit.png}
-  % \caption{A subfigure}
-  % \label{fig:sub2}
-% \end{subfigure}
-\caption{Density plots of posterior distribution samples for the exponential 
-parameters by QM for QGP, ORD, and IND models. QM was done on estimated 
-quantiles from a exponential distribution with parameter $\lambda = 4$. The 
-posterior densities are for $\lambda$ (left) and sample size $n$ (right). Plots 
-are faceted by true sample size $n \in \{50, 150, 500, 1{,}000\}$ ($y$-axis) 
-and number of quantiles $K \in \{7, 15, 23\}$ ($x$-axis). Vertical lines 
-(black) show the value of the true parameter.}
-\label{fig:exp_par_fit}
+  \includegraphics[width = 1.1\linewidth]{Images/norm_params_fit.png}
+\caption{Density plots of posterior distribution samples for normal parameters 
+by QM for QGP, ORD, and
+IND models. QM was done on estimated quantiles from a normal distribution with 
+mean 4 and standard
+deviation 3.5. The posterior densities are for $\mu$ (top left), 
+$\sigma$ (top right), and 
+sample size n (bottom). Plots are
+faceted by the sample size $n \in \{50, 150, 500, 1,000\}$ 
+($y$-axis) and number of 
+quantiles $K \in \{7, 15, 23\}$ ($x$-axis).
+Vertical lines (black) show the value of the true parameter}
+\label{fig:norm_dens}
 \end{figure}
+
+
+Figures \ref{fig:exp_dens} and \ref{fig:exp_cov_dists} are from a simulation 
+study similar to that of section 4.1 
+except that QM was performed on
+quantiles estimated from draws from an exponential distribution with 
+parameter $\lambda = 4$ rather than a normal distribution. 
+The results in the study for the exponential distribution were similar 
+to those for the normal
+distribution.
+
+
+\begin{figure}
+\centering
+  \includegraphics[width = 1.1\linewidth]{Images/exp_params_fit.png}
+\caption{Density plots of posterior distribution samples for the exponential 
+parameters by QM for QGP,
+ORD, and IND models. QM was done on estimated quantiles from a exponential 
+distribution with parameter
+$\lambda = 4$. The posterior densities are for $\lambda$
+(left) and sample size $n$ (right). 
+Plots are faceted by true sample
+size $n \in \{50, 150, 500, 1,000\}$ ($y$-axis) and number of quantiles 
+$K \in \{7, 15, 23\}$ 
+($x$-axis). Vertical lines (black)
+show the value of the true parameter.}
+\label{fig:exp_dens}
+\end{figure}
+
 
 
 
@@ -213,33 +217,30 @@ and number of quantiles $K \in \{7, 15, 23\}$ ($x$-axis). Vertical lines
 
 \begin{figure}[hbt!]
 % \begin{subfigure}
-  \includegraphics[width=\linewidth]{Images/exponential_coverage.png}
-  % \caption{}
-  % \label{MLEDdet}
-% \end{subfigure}\hfill % <-- "\hfill"
-% \begin{subfigure}
-  \includegraphics[width=\linewidth]{Images/exponential_dists.png}
-  % \caption{}
-  % \label{energydetPSK}
-% \end{subfigure}
-\caption{Posterior coverage (left) calculated as the percentage of times the 
-true parameter fell within the modeled 90\% credible interval over the 500 
-replications. Coverage is faceted by the exponential parameter 
-$\lambda$ and $n$ with $K \in \{3, 7, 15, 23, 50\}$, and by increasing sample 
-size ($x$-axis). The five models QGP, ORD, QGPN, ORDN, and IND are colored as 
-shown the legend. The horizontal line (black) is at the nominal 90\% level. 
-Only QGP and ORD appear for the parameter $n$ as they are the only two which 
-estimate an unknown $n$.
+  \includegraphics[width=\linewidth]{Images/exp_cov_dists.png}
+
+\caption{ Posterior coverage (top) calculated as the percentage of times the 
+true parameter fell within the
+modeled 90\% credible interval over the 500 replications. Coverage is faceted 
+by the exponential parameter $\lambda$
+and $n$ with $K = 23$, and by increasing sample size ($x$-axis). 
+The five models 
+QGP, ORD, QGPN, ORDN,
+and IND are colored as shown the legend. The horizontal line (black) is at 
+the nominal 90\% level. Only QGP
+and ORD appear for the parameter $n$ as they are the only two which estimate 
+an unknown $n$. (bottom)
 Distance between the true distribution and the estimated QM predictive 
-distribution (right) averaged over the 500 replications. Distances include 
-UWD1, TV, and KLD for $K \in \{3, 7, 15, 23, 50\}$, and by increasing sample 
-size ($x$-axis).}
+distribution averaged over the 500
+replications. Distances include UWD1, TV, and KLD for $K = 23$, 
+and by increasing sample size (x-axis)}
 \label{fig:exp_cov_dists}
 \end{figure}
 
 
 
-
+??Figures 11, 12, and 13 were referred to
+in section 4.2 of the main manuscript.??
 
 
 
@@ -249,16 +250,8 @@ size ($x$-axis).}
 \centering
 %\begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.49\linewidth]{Images/quants_lp.png}
-  % \caption{A subfigure}
-  % \label{fig:sub1}
-%\end{subfigure}%
-%\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.49\linewidth]{Images/dens_lp.png}
-  % \caption{A subfigure}
-  % \label{fig:sub2}
-%\end{subfigure}
+  \includegraphics[width=1.3\linewidth]{Images/quants_dens_la.png}
+
 \caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the Laplace distribution $La(0,1)$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
 The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink).}
 \label{fig:lp_fits}
@@ -269,16 +262,7 @@ The estimated PDF plots (right) show the true PDF (black) with either a the QM e
 \centering
 %\begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.49\linewidth]{Images/quants_gmix.png}
-  % \caption{A subfigure}
-  % \label{fig:sub1}
-%\end{subfigure}%
-%\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.49\linewidth]{Images/dens_gmix.png}
-  % \caption{A subfigure}
-  % \label{fig:sub2}
-%\end{subfigure}
+  \includegraphics[width=1.3\linewidth]{Images/quants_dens_gmix.png}
 \caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the two component normal mixture distribution $w N(-1, 0.9) + (1-w)N(1.2, .6)$ where $w = 0.35$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
 The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink). }
 \label{fig:gmix_fits}
