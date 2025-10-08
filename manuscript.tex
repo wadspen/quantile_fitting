@@ -1283,15 +1283,16 @@ US flu hospitalizations. Beginning in 2013, the CDC began hosting a yearly
 forecast competition of the influenza outbreak in the US. This competition is 
 known as FluSight. The flu epidemic typically begins in the fall and ends in 
 late spring the following year, and the forecast competition lasts around 30 
-weeks starting in October and ending in May. FluSight involves several academic 
-and industry research teams who each independently develop forecasts  every 
+weeks starting in October and ending in May. FluSight involves 
+a few dozen academic 
+and industry research teams who each independently develop forecasts every 
 week for predicting certain flu targets for future weeks 
 \cite[]{biggerstaff2016results}. During the 2022-23 and 2023-24 seasons, the 
 forecast targets were the 1, 2, 3, and 4-week ahead hospitalizations as 
 reported by Health and Human Services (HHS) for the 50 US states, Puerto Rico, 
 the District of Columbia, and the nation as a whole. The data for weekly 
 hospitalizations of flu patients may be found at \cite{healthdata2024covidts}. 
-The official guidelines of the most 2023-24 FluSight and all submitted quantile 
+The official guidelines of the 2023-24 FluSight and all submitted quantile 
 forecasts are publicly available at \cite{mathis2023flusight} 
 \cite[]{mathis2024evaluation}. 
 
@@ -1317,10 +1318,10 @@ as many of the existing tools for scoring forecasts and constructing ensembles
 require CDFs or PDFs \cite[]{wadsworth2023mixture,ranjan2010combining}. 
 Because of these limitations, it may be desirable to approximate continuous 
 distributions from the quantile forecasts to allow for more flexibility in 
-scoring or ensemble building. In this section, we fit the QGP model for QM to 
-every forecast of hospitalizations submitted to the FluSight during the 2023-24 
-season, and an analysis is made to compare the scoring of the quantile 
-forecasts to QGP estimated forecasts using proper scoring rules.
+scoring or ensemble building. In this section, we fit the QGP and other
+models for QM to 
+forcasts submitted to the FluSight during the 2023-24 
+season, and an analysis is made to compare the fits.
 
 \begin{figure}[hbt!]
     \centering
@@ -1341,7 +1342,8 @@ quantiles that were less than 0. As a result, there were forecasts with one or
 many quantiles equal to 0. When fitting the QGP model, these instances of 0 
 values were removed so that some forecasts had $K < 23$ quantiles. Between 39 
 competing forecast teams, 53 locations, 29 forecast dates, and 4 horizons, 
-there were 180,312 quantile forecasts to which the QGP was fit. For each 
+there were 161,093 quantile forecasts on which QM was done.
+For each 
 forecast, the WIS was calculated for the quantile forecast and the continuous 
 ranked probability score (CRPS) was calculated over the predictive distribution 
 of the fit QGP model.
@@ -1402,14 +1404,19 @@ To calculate the WIS, we use the \texttt{evalcast} \texttt{R} package
 % \end{equation}
  
 
-Figures \ref{fig:flu_horizon_corr} and \ref{fig:flu_rank_corr} show results of 
-comparing the WIS from quantile forecasts and the CRPS from the QGP fitted 
-forecasts. Figure \ref{fig:flu_horizon_corr} has in the $x$-axis the WIS and 
+Figures \ref{fig:flu_methods_corr} shows results of 
+comparing the WIS from quantile forecasts and the CRPS from the 
+fitted forecasts for QGP, ORD, IND, SPL, and KDE methods. 
+The plots have in the $x$-axis the WIS and 
 CRPS is in the $y$-axis. Each point is for one forecast for any participating 
-team, season week, and state. The plot is faceted by horizon. Clearly the 
-relationship between the quantile forecasts and the QGP forecasts are very 
-close with high correlation near 0.9 for each horizon. 
-
+team, season week, and state. Unsurprisingly, the correlation between the
+QM CRPS and WIS is very highly correlated for each method. For all but the KDE
+method, there is a tendency for some CRPS values to go above the $x = y$ line
+suggesting the CRPS scores are enlarged due to the addition of distribution
+tails. The CRPS scores for the IND method also go below the $x = y$ line 
+suggesting that the method's fit may be simply be poorer than the other methods.
+The slightly lower correlation for the QGP compared to ORD and IND may also be
+a result of adding more uncertainty in the fitting of tail quantiles.
 
 
 \begin{figure}[hbt!]
@@ -1418,47 +1425,39 @@ close with high correlation near 0.9 for each horizon.
         \adjustbox{trim=0 0 0 0,clip}{\includegraphics[scale=.5]{Images/all_methods_cwcor.png}}%
     }
     \caption{Scatterplots of WIS and CRPS values for forecasts from 39 
-    different teams for 2023-24 CDC flu forecast competition. The plots are 
-    faceted by forecast horizon. Each point represents scores for a flu 
+    different teams for 2023-24 CDC flu forecast competition. Each plot
+    is for a different QM method. Each point represents scores for a flu 
     forecast for one week during the season, one state, and one competing team. 
     Points are transparent to show where more scores tended to be. Overall 
     linear correlation is also given in the corner of each plot.}
-    \label{fig:flu_horizon_corr}
+    \label{fig:flu_methods_corr}
 \end{figure}
 
-Figure \ref{fig:flu_rank_corr} shows the ranking of teams under the quantile 
-forecasts' WIS vs. the QGP forecasts' CRPS. Here we say a team is considered 
-the best performing by having the lowest score averaged across all season 
-weeks, states, and horizons. The $x$-axis indicates where one of the 39 teams 
-ranks by WIS and the $y$-axis where they rank by CRPS. If a block is on the 
-diagonal line, the team's ranking was the same under the WIS as under the CRPS. 
-The darkness of the block indicates how correlated that team's WIS is to the 
-CRPS over the whole season. Of the 39 teams represented, 16 have the same 
-ranking for both scores, and for over half of all teams the ranking difference 
-between WIS and CRPS is within 3 positions. For most teams the linear 
-correlation between WIS and CRPS is very high with only five teams having a 
-correlation below 0.85.
+We do not know the true distributions from which each quantile forecast was
+made, but we can assess closeness of fit by measuring the difference between
+the QM quantiles and the original forecast quantiles given the FluSight
+probability values.
+Figure \ref{fig:all_methods_dists} shows the average over week mean absolute
+error (MAE) and mean sqaure error (MSE) between the the newly estimated 
+QM quantiles and the original forecast quantiles. The MAE and MSE values for the
+SPL method are 0 for every week because the estimated quantile functions are 
+interpolations of the original forecasts. Besides the SPL, however, the QGP
+appears to estimate quantiles that are the closest to the original forecast
+quantiles. The aveage MAE for the QGP is smaller than for the remaining methods
+for each week and the MSE is smaller for most weeks showing a robustness which
+the other methods -- namely ORD and KDE -- may lack.
+
 
 \begin{figure}[hbt!]
     \centering
     \makebox[\textwidth][c]{%
         \adjustbox{trim=0 0 0 0,clip}{\includegraphics[scale=.45]{Images/all_methods_dists.png}}%
     }
-    \caption{Blocks showing the overall season ranking of 39 competing forecast 
-    teams for WIS ($x$-axis) and CRPS ($y$-axis). Blocks on the diagonal line 
-    have the same ranking under both scores. Blocks are shaded to show 
-    correlation between WIS and CRPS for all forecasts submitted by that team.}
-    \label{fig:flu_rank_corr}
+    \caption{Mean absolute error (MAE) and mean square error (MSE) over week
+    for FluSight QM quantiles for each of QGP, ORD, IND, SPL, and KDE methods.}
 \end{figure}
 
-The results in this section show the close relationship between the quantile 
-forecasts of the CDC flu forecast competition and the more complete forecast 
-distributions estimated via QGP. The implications of these results include 
-being able to score forecasts according to scoring rules used for continuous 
-distributions, including more problem specific rules, and being able to combine 
-forecasts into an ensemble according to sums of CDFs or PDFs. Increased 
-flexibility in scoring and ensemble construction could lead to improved 
-decision making as problem specific evaluation becomes more accessible. 
+
 
 
 %%%%
@@ -1469,25 +1468,31 @@ decision making as problem specific evaluation becomes more accessible.
 \section{Conclusion} \label{sec:qm_conclusion}
 
 In this paper we consider the situation where quantiles with known probability 
-levels are given as data or is given to represent a distribution rather than 
+levels are given as data or the quantiles represent a distribution rather than 
 raw data or a fully defined distribution. We review basic properties of QFs, 
 sample quantiles, and resulting CLTs which motivate a new model, the QGP 
 model, for matching a set of quantiles to a continuous distribution. The QGP 
 model is assessed for parameter estimation and inference, distribution 
 approximation, and it is compared with other QM methods found in the 
-literature. The simulation studies show that the QGP model does well in 
-estimating parameters and allows for accurate measurement of uncertainty. It 
+literature. The QGP provides explicit and easily interpretable uncertainty 
+quantification of QM distributions, and generally outperforms the methods to 
+which it is compared, sometimes with the exception of the ORD.
+An added advantage, however, is that the QGP 
 provides a way to perform QM for distributions defined by CDFs as well as 
 quantile distributions where the CDF is difficult to evaluate.
-An application of the QGP for QM of quantile forecasts from the 2023-24 
-FluSight project shows how QGP matched distributions are closely related to 
-the original quantile forecasts in terms forecast performance among competing 
-models. QGP forecasts, however, may be scored using a variety of scoring rules 
+An application of QM on quantile forecasts from the 2023-24 
+FluSight project demonstrates that QM methods allow for the use of the CRPS
+for scoring forecasts which is able to account for distribution tail 
+uncertainty. 
+QGP and other QM forecasts may be scored using a variety of scoring rules 
 unavailable to quantile forecasts, and independent forecasts may be combined 
 using methods made only for combining distributions by CDF or PDF functions. 
 QGP has already been applied in chapter 4 of \cite{wadsworth2024quantile} who 
 used the QGP predictive distributions fit in section \ref{sec:qm_analysis} to 
 construct ensemble forecasts.
+In the analysis, it is shown that the QGP may offer a more robust
+fit to quantile distributions than other QM methods.
+
 
 Approximating continuous distributions given only a set of estimated quantiles 
 is not a new idea, but QGP provides a method of doing so while also accurately 
@@ -1506,12 +1511,9 @@ and using other non parametric functions, similar to
 \cite{gasthaus2019probabilistic}, may provide needed flexibility. As long as 
 the selected function is continuous and once differentiable, the theory herein 
 applies. 
-
 The application in this paper suggests QM being useful for forecast hubs.  
 \cite{gerding2023evaluating} found QM a necessity in order to evaluate 
-forecasts by a new scoring rule with COVID-19 specific applications. The extra 
-work that comes with QM may or may not be worth the effort for any given 
-forecast hub, but in some contexts it is something worth considering.
+forecasts by a new scoring rule with COVID-19 specific applications. 
 
 
 \section{Acknowledgments}

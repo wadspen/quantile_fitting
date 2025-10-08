@@ -43,6 +43,7 @@
 \usepackage{hyperref}
 \usepackage{newtxmath} %for making indicator function
 \usepackage{booktabs}
+\usepackage{float} %hopefully keeps images and text in order
 % \RequirePackage[colorlinks,citecolor=blue,urlcolor=blue,backref=page,backref=page]{hyperref}
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
@@ -142,32 +143,30 @@
 %% main text
 %%
 
-\Huge
+% \Huge
 \begin{center}
   Supplementary Material
 \end{center}
 \normalsize
+ 
 
-
-
-
-
-The figures herein are supplementary to those in the main manuscript. Figure 
+\section*{Additional simulation study results to section 4.1}
+Figure
 \ref{fig:norm_dens} shows examples of marginal
-posterior densities for QM of quantiles for a normal distribution from the 
+posterior densities for QM of quantiles for a normal distribution from the
 simulation study in section 4.1 in
-the main manuscript. The parameter uncertainty of the QGP and ORD models are 
+the main manuscript. The parameter uncertainty of the QGP and ORD models are
 unsurprisingly similar in
-most cases, and where they differ it is hard to say that one is estimating the 
+most cases, and where they differ it is hard to say that one is estimating the
 true parameter better than the
-other. The IND model on the other hand has tighter densities, and often the 
+other. The IND model on the other hand has tighter densities, and often the
 bulk of the posterior is far from
 the true parameter.
 
 
-\begin{figure}
+\begin{figure}[hbt!]
 \centering
-  \includegraphics[width = 1.1\linewidth]{Images/norm_params_fit.png}
+  \includegraphics[width = 1\linewidth]{Images/norm_params_fit.png}
 \caption{Density plots of posterior distribution samples for normal parameters 
 by QM for QGP, ORD, and
 IND models. QM was done on estimated quantiles from a normal distribution with 
@@ -182,7 +181,7 @@ Vertical lines (black) show the value of the true parameter}
 \label{fig:norm_dens}
 \end{figure}
 
-
+\newpage
 Figures \ref{fig:exp_dens} and \ref{fig:exp_cov_dists} are from a simulation 
 study similar to that of section 4.1 
 except that QM was performed on
@@ -193,7 +192,7 @@ to those for the normal
 distribution.
 
 
-\begin{figure}
+\begin{figure}[hbt!]
 \centering
   \includegraphics[width = 1.1\linewidth]{Images/exp_params_fit.png}
 \caption{Density plots of posterior distribution samples for the exponential 
@@ -239,9 +238,11 @@ and by increasing sample size (x-axis)}
 
 
 
-??Figures 11, 12, and 13 were referred to
-in section 4.2 of the main manuscript.??
 
+\section*{Additional simulation study results to section 4.2}
+
+Figures \ref{fig:lp_fits} and \ref{fig:gmix_fits} show examples of QM fits
+to Laplace and normal mixture distributions as described in section 4.2.
 
 
 
@@ -273,49 +274,50 @@ The estimated PDF plots (right) show the true PDF (black) with either a the QM e
 \end{figure}
 
 
+
+
+\newpage
+
+\section*{QGP normal mixture components analysis}
+
+This section shows an analysis which was made to determine the number of 
+normal components to use in the distribution assigned for use in the QGP.
+Figure \ref{fig:mix_comps} shows the UWD1, TV, and KLD distances between 
+a QGP fit distributions and simulated quantiles averaged over 500 simulated
+replicates. Table \ref{tab:mix_comps} shows the average values. The results 
+show that while the larger the number of components, the closer is the fit 
+distribution in terms of the given distances. However, the imrpovement after 
+three or four components is not much making four components attractive 
+for relatively good fit and for model simplicity.
+
 \begin{figure}[hbt!]
 \centering
-  \includegraphics[]{Images/mix_comps.png}
-\caption{Future caption}
+  \includegraphics[width=.9\textwidth]{Images/mix_comps.png}
+\caption{UWD1, TV, and KLD distances averaged over 500 simulation replicates
+for QGP fits of quantile simulated from extreme value, Laplace, and
+mixture distributions. The QGP with normal 
+mixture distributions of 1 to 6 components were fit for both the cases where 
+$n$ is not known (left) and $n$ is known.}
 \label{fig:mix_comps}
 \end{figure}
 
 
-% \begin{table}[hbt!]
-% \footnotesize
-% \centering
-% \caption{UWD1}
-% \begin{adjustbox}{center}
-% \begin{tabular}{lcccccc|cccccc}
-%  & \multicolumn{6}{c}{QGP} & \multicolumn{6}{c}{QGP-n} \\
-% \cmidrule(lr){2-7} \cmidrule(lr){8-13}
-% Components & 1 & 2 & 3 & 4 & 5 & 6 & 1 & 2 & 3 & 4 & 5 & 6 \\
-% \midrule
-% EV & 0.063 & 0.025 & 0.021 & 0.020 & 0.020 & 0.020 & 
-%       0.064 & 0.025 & 0.021 & 0.021 & 0.020 & 0.020\\
-% La & 0.044 & 0.022 & 0.020 & 0.020 & 0.020 & 0.020 & 
-%       0.044 & 0.021 & 0.020 & 0.020 & 0.020 & 0.020 \\
-% MIX & 0.107 & 0.018 & 0.019 & 0.019 & 0.019 & 0.019 & 
-%       0.157 & 0.018 & 0.019 & 0.018 & 0.018 & 0.018
-% \end{tabular}
-% \end{adjustbox}
-% \end{table}
 
 
 
 
 
 
-
-
-
-
-
+\newpage
 
 \begin{table}[hbt!]
 \footnotesize
 \centering
-\caption{UWD1}
+\caption{UWD1, TV, and KLD distances averaged over 500 simulation replicates
+for QGP fits of quantile simulated from extreme value, Laplace, and
+mixture distributions. The QGP with normal 
+mixture distributions of 1 to 6 components were fit for both the cases where 
+$n$ is not known (left) and $n$ is known.}
 \begin{adjustbox}{center}
 \begin{tabular}{clcccccc|cccccc}
 & & \multicolumn{6}{c}{QGP} & \multicolumn{6}{c}{QGP-n} \\
@@ -347,6 +349,7 @@ EV & 0.171 & 0.025 & 0.014 & 0.013 & 0.014 & 0.015 &
       0.293 & 0.004 & 0.006 & 0.007 & 0.009 & 0.010
 \end{tabular}
 \end{adjustbox}
+\label{tab:mix_comps}
 \end{table}
 
 
