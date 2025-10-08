@@ -1277,7 +1277,8 @@ uncertainty estimation.
 
 % In this section, we fit the QGP model to quantile forecasts from the 2023-24 CDC flu forecasting competition. 
 % Doing this allows for tools to be used to compare forecast performance between models and build ensemble forecasts beyond what is possible using only quantile forecasts \cite[]{mathis2024evaluation,wadsworth2023mixture}.  
-In this section, the QGP model is used for QM of quantile forecasts targeting 
+In this section, the QGP and other models are 
+used for QM of quantile forecasts targeting 
 US flu hospitalizations. Beginning in 2013, the CDC began hosting a yearly 
 forecast competition of the influenza outbreak in the US. This competition is 
 known as FluSight. The flu epidemic typically begins in the fall and ends in 
@@ -1413,7 +1414,9 @@ close with high correlation near 0.9 for each horizon.
 
 \begin{figure}[hbt!]
     \centering
-    \includegraphics[scale=.5]{Images/flu_horizon_corr.png}
+    \makebox[\textwidth][c]{%
+        \adjustbox{trim=0 0 0 0,clip}{\includegraphics[scale=.5]{Images/all_methods_cwcor.png}}%
+    }
     \caption{Scatterplots of WIS and CRPS values for forecasts from 39 
     different teams for 2023-24 CDC flu forecast competition. The plots are 
     faceted by forecast horizon. Each point represents scores for a flu 
@@ -1438,7 +1441,9 @@ correlation below 0.85.
 
 \begin{figure}[hbt!]
     \centering
-    \includegraphics[scale=.45]{Images/flu_rank_corr.png}
+    \makebox[\textwidth][c]{%
+        \adjustbox{trim=0 0 0 0,clip}{\includegraphics[scale=.45]{Images/all_methods_dists.png}}%
+    }
     \caption{Blocks showing the overall season ranking of 39 competing forecast 
     teams for WIS ($x$-axis) and CRPS ($y$-axis). Blocks on the diagonal line 
     have the same ranking under both scores. Blocks are shaded to show 
