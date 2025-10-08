@@ -1,0 +1,12 @@
+
+models=( $(ls ../../../FluSight-forecast-hub/model-output/) )
+#echo "${models[@]}"
+
+
+for mod in "${models[@]}"
+do
+	sbatch ./spl_kern.sh "$mod"
+	
+
+done
+#Rscript ./flu_forecast_fitting.R

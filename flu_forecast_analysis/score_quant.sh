@@ -10,5 +10,5 @@ module purge
 module load r/4.4.1 gcc udunits proj gsl r-rgdal
 
 
-Rscript ./score_quantile_fits.R "$1" 
+Rscript ./score_quantile_fits.R "$1"
 

@@ -30,6 +30,8 @@ get_loc_file <- list.files(paste0(mod_loc, "FluSight-baseline/"))[4]
 get_loc_forc <- read.csv(paste0(mod_loc, "FluSight-baseline/", get_loc_file))
 locations <- unique(get_loc_forc$location)
 
+forc_loc <- "../../FluSight-forecast-hub/model-output/"
+hosp_loc <- paste0(forc_loc, "../target-data/target-hospital-admissions.csv")
 
 hosp_loc <- paste0(forc_loc, "../target-data/target-hospital-admissions.csv")
 hosp_data <- read.csv(hosp_loc) %>% 

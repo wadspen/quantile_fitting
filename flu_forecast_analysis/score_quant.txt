@@ -2,10 +2,12 @@
 models=( $(ls ../../../FluSight-forecast-hub/model-output/) )
 #echo "${models[@]}"
 
+for method in "ord" "ind" "qgp"
+do
 for mod in "${models[@]}"
 do
-	sbatch ./score_quant.sh "$mod"
+	sbatch ./score_quant_auto.sh "$mod" "$method"
 	
 done
-
+done
 #Rscript ./flu_forecast_fitting.R

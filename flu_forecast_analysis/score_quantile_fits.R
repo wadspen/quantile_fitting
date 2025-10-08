@@ -57,6 +57,9 @@ mod_loc <- "../model-fits-ord/"
 
 indt <- ifelse(str_detect(mod_loc, "ind"), TRUE, FALSE)
 ordt <- ifelse(str_detect(mod_loc, "ord"), TRUE, FALSE)
+# mod_loc <- ifelse(str_detect(mod_loc, "ind"), "../model-fits-ind/",
+#                   ifelse(str_detect(mod_loc, "ord", "../model-fits-ord",
+#                                     "../model-fits/")))
 models <- list.files(forc_loc)
 sub_dates <- substr(list.files(paste0(forc_loc, 
                                 "FluSight-baseline/")),
@@ -134,15 +137,15 @@ all_scores <- foreach(sub_date = sub_dates,
 	#	pivot_wider(values_from = 1:6, names_from = prob)
 
 
-        true_hosp <- hosp_data %>% 
-	  # dplyr::select(-X) %>%
-          filter(date == date(sub_date) + 7*h, location == loc) %>% 
-          mutate(value = log(value + 1), date = date(date),
-	         true_value = value) %>%
-	  dplyr::select(-value)
+  true_hosp <- hosp_data %>% 
+    # dplyr::select(-X) %>%
+    filter(date == date(sub_date) + 7*h, location == loc) %>% 
+    mutate(value = log(value + 1), date = date(date)) %>% 
+    mutate(true_value = value) %>%
+    dplyr::select(-value)
         
-        crps <- crps_sample(true_hosp$true_value, draws$dist_samp)
-        logs <- logs_sample(true_hosp$true_value, draws$dist_samp)
+  crps <- crps_sample(true_hosp$true_value, draws$dist_samp)
+  logs <- logs_sample(true_hosp$true_value, draws$dist_samp)
         
 	forecast <- forecast %>%
 		left_join(true_hosp, by = c("date", "location")) %>%
@@ -164,9 +167,9 @@ all_scores <- foreach(sub_date = sub_dates,
 			dist_diff = eval_dist(eval_quantile, as.numeric(output_type_id)),
 			dist_diff2 = eval_dist(eval_quantile, as.numeric(output_type_id), p = 2),
 			ssp = sum((eval_quantile - output_type_id)^2),
-			ssq = sum((value - est_quantile)^2),
+			ssq = sum((log(value + 1) - log(est_quantile + 1))^2),
 			sap = sum(abs(eval_quantile - output_type_id)),
-			saq = sum(abs(value - est_quantile)),
+			saq = sum(abs(log(value + 1) - log(est_quantile + 1))),
 			int = get_lm(est_quantile, value, stat = "int"),
 			se_int = get_lm(est_quantile, value, stat = "se_int"),
 			slope = get_lm(est_quantile, value, stat = "se_slope"),
@@ -187,9 +190,9 @@ all_scores <- foreach(sub_date = sub_dates,
 			dist_diff = eval_dist(eval_quantile, output_type_id),
 			dist_diff2 = eval_dist(eval_quantile, output_type_id, p = 2),
 			ssp = sum((eval_quantile - output_type_id)^2),
-			ssq = sum((value - est_quantile)^2),
+			ssq = sum((log(value + 1) - log(est_quantile + 1))^2),
 			sap = sum(abs(eval_quantile - output_type_id)),
-			saq = sum(abs(value - est_quantile)),
+			saq = sum(abs(log(value + 1) - log(est_quantile + 1))),
 			int = get_lm(est_quantile, value, stat = "int"),
 			se_int = get_lm(est_quantile, value, stat = "se_int"),
 			slope = get_lm(est_quantile, value, stat = "se_slope"),
