@@ -146,7 +146,7 @@ ideas for further development in QM modeling.
 Along with the CDF and PDF, the QF is a defining function of a random variable. 
 The QF, however, often receives less attention in standard statistical 
 training than do the CDF and PDF \cite[]{parzen2004quantile}, and the CDF and 
-PDF are more used often for modeling and inference.
+PDF are used more often for modeling and inference.
 % But the QF tends to be the little brother 
 % \jarad{little brother?}
 % of both the CDF and PDF in that the latter two functions are taught and used far more in statistical modeling and inference. 
@@ -446,7 +446,8 @@ covariance function $\kappa_{\theta}(\cdot, \cdot)$ where
 The covariance function $\kappa_{\theta} (\cdot, \cdot)$ initially appears as 
 if it will be difficult to evaluate and indeed can be, depending on the 
 functional forms of $f_{\theta}$ and $Q_{\theta}$. But where these functions 
-belong to a location-scale family, the covariance function can be greatly 
+belong to distributions in a location-scale family, 
+the covariance function can be greatly 
 simplified. 
 Noting that the covariance is a function of $f_{\theta}(Q_{\theta}(p)) = q_{\theta}(p)$, the QDF, if $\theta = (\mu, \sigma)$ where $\mu$ is a location parameter and $\sigma$ is a scale parameter, then $q_{\theta}(p) = \sigma q(p)$ where $q(p)$ is the QDF of a standard distribution having location 0 and shape 1. \cite{staudte2017shapes} calls this the location invariant and scale equivariant property. For location-scale distribution families, this greatly simplifies the form of $\kappa_{\theta}(\cdot,\cdot)$ so that it becomes
 \[
@@ -557,8 +558,8 @@ only that $F_{\theta}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p}))$ be evaluated as
 part of the acceptance ratio of a Markov chain Monte Carlo (MCMC) iteration. 
 
 In section \ref{sec:simulation_analyses}, we analyze PIT transformed QGP model 
-(\ref{eq:pit_qgp}) where $F_{\theta}$ is set as a normal mixture distribution 
-with $C = 4$ component normal distributions. Fitting this model proved faster 
+(\ref{eq:pit_qgp}) where $F_{\theta}$ is set as a normal mixture distribution. 
+Fitting this model proved faster 
 and produced better results than trying to fit the QGP model (\ref{eq:qgp}) and 
 evaluating $Q_{\theta}$ the QF of a normal mixture. In fact we found that in 
 cases where $F_{\theta}$ was a simpler function, such as a normal or 
@@ -658,7 +659,7 @@ Wasserstein distance (WD) and a slight modification of it, the total variation
 A brief overview of these and other metrics, some of their statistical uses 
 and properties, and relationships between metrics is found in 
 \cite{gibbs2002choosing}. These metrics were used in section 
-\ref{sec:simulation_analyses} to assess the how well different QM methods 
+\ref{sec:simulation_analyses} to assess how well different QM methods 
 approximate a true distribution.
 
 
@@ -686,7 +687,7 @@ We define a modified version of the WD, the uniform 1-WD (UWD1) in
 random variable $X$. For a different continuous random variable $\xi$ with CDF 
 $F_{\xi}$, $F_X(\xi)$ is a random variable with support on $[0,1]$. We let 
 $F_{X,\xi}$ be the CDF of the random variable $F_X(\xi)$. Then the measure in 
-(\ref{eq:pit_wass_dist}) measures how close $F_X(\xi)$ is the the CDF of 
+(\ref{eq:pit_wass_dist}) measures how close $F_X(\xi)$ is the   CDF of 
 a standard uniform distribution with CDF $\mathcal{U}$, 
 noting that by the PIT, if 
 $\xi \overset{D}{=} X$, $F_X(\xi)$ is the random variable of a standard uniform 
@@ -837,7 +838,7 @@ that of the IND model, and for the two models where $n$ is known the coverage
 is better than where it is unknown, particularly for lower values of 
 $n$ and $K$. The coverage for the ORD models appears to be slightly better 
 than for the QGP models though not by much, and the difference
-decrases as $n$ increases. 
+decreases as $n$ increases. 
 The superior performance of the ORD model is possibly because it
 provides exact inference 
 whereas the QGP model provides asymptotic inference.
@@ -1027,9 +1028,8 @@ the competing methods.
 
 With the true distribution family being unknown, we made the modeling decision 
 to set $F$ in the QGP model of (\ref{eq:pit_qgp}) to be a mixture of normals 
-distribution taking the form of (\ref{eq:norm_mix}). The number of component 
-distributions was chosen to be $C = 4$ to provide enough flexibility to 
-approximate the different shapes of quantile functions. This decision was 
+distribution taking the form of (\ref{eq:norm_mix}). This decision to use
+a normal mixture was 
 based on the common claim that any continuous distribution may be approximated 
 by a finite mixture of normal distributions 
 \cite[]{peel2000finite,nguyen2019approximations,nguyen2020approximation}. This 
@@ -1038,6 +1038,13 @@ distribution can approximate the non-normally shaped distributions reasonably
 well. However, any function which meets the technical definition of a CDF would 
 be appropriate to use for $F$, see \cite{gasthaus2019probabilistic} for an 
 example.
+After a small analysis comparing fits of one to six normal components,
+the number of component 
+distributions was chosen to be $C = 4$. The results, included in the 
+supplementary materials, show that as the number of components in the mixture
+distrubtion increases, the distribution approximation improves. But for the 
+cases considered, the improvement from four to five components or more is small.
+
 
 
 
@@ -1053,7 +1060,7 @@ ORD, and IND models, $\theta = \{\theta_1, \theta_2, \theta_3, \theta_4\}$
 where $\theta_c = (\mu_c, \sigma_c)$ for $c \in \{1,2,3,4\}$. The prior 
 distributions assigned were $\mu_c \overset{ind}{\sim} N(5, 7^2)$,
 $\sigma_c \overset{ind}{\sim} N(0, 6^2)\mathds{1}\{\sigma_c > 0\}$,
-$w \sim Dir(\boldsymbol{\alpha}), \quad \alpha_c = 1$, and
+$w \sim Dirichlet(\boldsymbol{1}_C)$, and
 $\nu \sim N(0, 3000^2)\mathds{1}\{\nu > 0\}$
 % as below 
 where $\nu = n$ for the QGP and ORD models 
@@ -1106,16 +1113,11 @@ intervals which provide superior coverage of the quantiles and the PDFs.
 \centering
 %\begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=.49\linewidth]{Images/quants_evd.png}
-  % \caption{A subfigure}
-  % \label{fig:sub1}
-%\end{subfigure}%
-%\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=.49\linewidth]{Images/dens_evd.png}
-  % \caption{A subfigure}
-  % \label{fig:sub2}
-%\end{subfigure}
+  % \includegraphics[width=\paperwidth]{Images/quants_dens_evd.png}
+  \makebox[\textwidth][c]{%
+        \adjustbox{trim=0 0 0 0,clip}{\includegraphics[width=1.3\textwidth]{Images/quants_dens_evd.png}}%
+    }
+
 \caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for 
 $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the extreme 
 value distribution $Ev(0,1)$. The quantile fits (left) show the true quantiles 

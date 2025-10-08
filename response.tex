@@ -86,11 +86,15 @@ Below, you find my detailed comments.
   differently? I assume that $\alpha$ = ($\alpha_1, . . . , \alpha_C$), is this correct? Furthermore, why are the results not
   compared with the best performing model from Section 4.1.1. i.e. the ORD model?
   
+  \spencer{Responded}
+  
   \item In the real data application, what is the value of $n$? Figure 5 and 6 are quite difficult to interpret.
   I was expecting a comparison with other methods, as done in the simulation study, potentially
   using metrics such as the qCRPS. Instead, only two metrics are compared, without explaining
   well what is happening to the dots and what are they referring to.
   \end{itemize}
+  
+  \spencer{Ignore}
 
 
 \subsection*{Minor Comments}
@@ -140,6 +144,8 @@ there are some points that need further attention to enhance clarity.
  visualizations would also support a more intuitive understanding of the 
  magnitude of approximation error; for example, it is not immediately obvious 
  whether a KLD of 0.05 is large or small.
+ 
+\spencer{Image that was in supplementary material is added to main manuscript}
 
 \item Justification and selection of informative priors:
  Currently, the priors chosen for the parameters of the QGP method are generic 
@@ -159,12 +165,16 @@ Reference:
 (1) Betancourt, M. (2017). Principled Bayesian Workflow. Available at:
 \href{https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html}{}
 
+\spencer{Ignore for now}
+
 \item Sensitivity to the choice of distribution within QGP:
  While the paper fixes the QGP distributional assumption to a mixture of four 
  normal components, it would be informative to study how sensitive the results 
  are to this modeling choice. For example, it would be valuable to investigate 
  how varying the number of normal components in the mixture affects the 
  performance of QGP.
+ 
+ \spencer{Added statement and small analysis to supplementary materials}
 
 \item Explicit clarification on practical advantages of QGP:
  The manuscript carefully benchmarks QGP against alternative approaches, yet 
@@ -207,6 +217,8 @@ and I learned a great deal from reading it.
   novel. It reads more like an extended methodological review or a pedagogical 
   exposition rather than a research paper that breaks new ground.
   
+  \spencer{Ignore}
+  
   \item If the authors intend to emphasize their methodological contribution, 
   they
   should clearly articulate it in the introduction and present it more directly
@@ -219,6 +231,8 @@ and I learned a great deal from reading it.
   comprehensive, incorporating additional tables and clearer, more informative 
   plots. The current figures make it difficult to assess the relative
   performance of the models.
+  
+  \spencer{Ignore}
   
 \end{enumerate}  
 

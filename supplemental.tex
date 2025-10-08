@@ -250,7 +250,9 @@ in section 4.2 of the main manuscript.??
 \centering
 %\begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=1.3\linewidth]{Images/quants_dens_la.png}
+  \makebox[\textwidth][c]{%
+        \adjustbox{trim=0 0 0 0,clip}{\includegraphics[width=1.3\textwidth]{Images/quants_dens_la.png}}%
+    }
 
 \caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the Laplace distribution $La(0,1)$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
 The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink).}
@@ -262,7 +264,9 @@ The estimated PDF plots (right) show the true PDF (black) with either a the QM e
 \centering
 %\begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=1.3\linewidth]{Images/quants_dens_gmix.png}
+  \makebox[\textwidth][c]{%
+        \adjustbox{trim=0 0 0 0,clip}{\includegraphics[width=1.3\textwidth]{Images/quants_dens_gmix.png}}%
+    }
 \caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the two component normal mixture distribution $w N(-1, 0.9) + (1-w)N(1.2, .6)$ where $w = 0.35$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
 The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink). }
 \label{fig:gmix_fits}
