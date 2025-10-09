@@ -62,6 +62,8 @@
 \usepackage{dsfont}
 \newcommand{\1}[1]{\mathds{1}\left[#1\right]}
 \usepackage{adjustbox}
+% \usepackage{biblatex}
+
 
 %%%%%=============================================================================%%%%
 %%%%  Remarks: This template is provided to aid authors with the preparation
@@ -145,7 +147,8 @@ ensemble modeling simpler. Most existing methods for fitting a distribution to
 quantiles lack accurate representation of the inherent uncertainty from 
 quantile estimation or are limited in their applications. In this manuscript, we 
 present a Gaussian process model, the quantile Gaussian process, which is based 
-on established theory of quantile functions and sample quantiles, to construct 
+on established asymptotic results
+of quantile functions and sample quantiles, to construct 
 a probability distribution given estimated quantiles. A Bayesian application of 
 the quantile Gaussian process is evaluated for parameter inference and 
 distribution approximation in simulation studies. The quantile Gaussian 
@@ -154,6 +157,8 @@ process is used to approximate the distributions of quantile forecasts from the
 initiative. The simulation studies and data analysis show that the quantile 
 Gaussian process leads to accurate inference on model parameters, estimation of 
 a continuous distribution, and uncertainty quantification of sample quantiles.
+The method being Bayesian also allows for the use of prior information when 
+approximating a distribution given quantiles.
 }
 
 \keywords{Sample quantiles, Quantile regression, Probabilistic forecasting, 
