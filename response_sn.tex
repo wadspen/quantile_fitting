@@ -1,0 +1,311 @@
+%Version 3.1 December 2024
+% See section 11 of the User Manual for version history
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                 %%
+%% Please do not use \input{...} to include other tex files.       %%
+%% Submit your LaTeX manuscript as one .tex document.              %%
+%%                                                                 %%
+%% All additional figures and files should be attached             %%
+%% separately and not embedded in the \TeX\ document itself.       %%
+%%                                                                 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%\documentclass[referee,sn-basic]{sn-jnl}% referee option is meant for double line spacing
+
+%%=======================================================%%
+%% to print line numbers in the margin use lineno option %%
+%%=======================================================%%
+
+%%\documentclass[lineno,pdflatex,sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
+
+%%=========================================================================================%%
+%% the documentclass is set to pdflatex as default. You can delete it if not appropriate.  %%
+%%=========================================================================================%%
+
+%%\documentclass[sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
+
+%%Note: the following reference styles support Namedate and Numbered referencing. By default the style follows the most common style. To switch between the options you can add or remove ?Numbered? in the optional parenthesis. 
+%%The option is available for: sn-basic.bst, sn-chicago.bst%  
+ 
+%%\documentclass[pdflatex,sn-nature]{sn-jnl}% Style for submissions to Nature Portfolio journals
+%%\documentclass[pdflatex,sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
+\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}% Math and Physical Sciences Numbered Reference Style
+%%\documentclass[pdflatex,sn-mathphys-ay]{sn-jnl}% Math and Physical Sciences Author Year Reference Style
+%%\documentclass[pdflatex,sn-aps]{sn-jnl}% American Physical Society (APS) Reference Style
+%%\documentclass[pdflatex,sn-vancouver-num]{sn-jnl}% Vancouver Numbered Reference Style
+%%\documentclass[pdflatex,sn-vancouver-ay]{sn-jnl}% Vancouver Author Year Reference Style
+%%\documentclass[pdflatex,sn-apa]{sn-jnl}% APA Reference Style
+%%\documentclass[pdflatex,sn-chicago]{sn-jnl}% Chicago-based Humanities Reference Style
+
+%%%% Standard Packages
+%%<additional latex packages if required can be included here>
+
+\usepackage{graphicx}%
+\usepackage{multirow}%
+\usepackage{amsmath,amssymb,amsfonts}%
+\usepackage{amsthm}%
+\usepackage{mathrsfs}%
+\usepackage[title]{appendix}%
+\usepackage{xcolor}%
+\usepackage{textcomp}%
+\usepackage{manyfoot}%
+\usepackage{booktabs}%
+\usepackage{algorithm}%
+\usepackage{algorithmicx}%
+\usepackage{algpseudocode}%
+\usepackage{listings}%
+%%%%
+
+
+%%%%%%Added by Spencer
+\usepackage{dsfont}
+\newcommand{\1}[1]{\mathds{1}\left[#1\right]}
+\usepackage{adjustbox}
+% \usepackage{biblatex}
+
+
+%%%%%=============================================================================%%%%
+%%%%  Remarks: This template is provided to aid authors with the preparation
+%%%%  of original research articles intended for submission to journals published 
+%%%%  by Springer Nature. The guidance has been prepared in partnership with 
+%%%%  production teams to conform to Springer Nature technical requirements. 
+%%%%  Editorial and presentation requirements differ among journal portfolios and 
+%%%%  research disciplines. You may find sections in this template are irrelevant 
+%%%%  to your work and are empowered to omit any such section if allowed by the 
+%%%%  journal you intend to submit to. The submission guidelines and policies 
+%%%%  of the journal take precedence. A detailed User Manual is available in the 
+%%%%  template package for technical guidance.
+%%%%%=============================================================================%%%%
+
+%% as per the requirement new theorem styles can be included as shown below
+\theoremstyle{thmstyleone}%
+\newtheorem{theorem}{Theorem}%  meant for continuous numbers
+%%\newtheorem{theorem}{Theorem}[section]% meant for sectionwise numbers
+%% optional argument [theorem] produces theorem numbering sequence instead of independent numbers for Proposition
+\newtheorem{proposition}[theorem]{Proposition}% 
+%%\newtheorem{proposition}{Proposition}% to get separate numbers for theorem and proposition etc.
+
+\theoremstyle{thmstyletwo}%
+\newtheorem{example}{Example}%
+\newtheorem{remark}{Remark}%
+
+\theoremstyle{thmstylethree}%
+\newtheorem{definition}{Definition}%
+
+\raggedbottom
+%%\unnumbered% uncomment this for unnumbered level heads
+
+\begin{document}
+
+\title[Article Title]{Response to Reviewers}
+
+\Huge
+\noindent Associate Editor
+\\~\\
+\normalsize
+
+\emph{
+The paper has been read by two referees and myself. The review team finds that 
+the paper is novel and well-written. The authors should revise their work 
+taking account of the comments of the referees. Of particular interest is 
+exploring sensitivity to the number of quantiles and misspecification of the 
+parametric model, and explaining details of the fitting in the case of finite 
+mixture models.}
+\\~\\
+
+\Huge
+\noindent Reviewer 1
+\normalsize
+
+\section*{Overview}
+\emph{
+I have carefully reviewed the manuscript. The authors propose to estimate the 
+entire probability distribution of a random variable given a finite set of 
+estimated quantiles. To do so, the authors leverage the quantile
+central limit theorem in order to motivate their so-called Quantile Gaussian 
+Process Model. Essentially, they
+use a Gaussian process to model the finite set of quantiles, with the mean 
+and covariance functions given by
+a pre-specified distribution for the data. This enables quantile prediction 
+and posterior predictive sampling
+through the probability integral transform, which enables both CDF and PDF 
+estimation. They explore
+ways to incorporate this framework for nonparametric distribution functions. 
+An extensive simulation study
+compares both the estimation accuracy and the computational efficiency of 
+their approach relative to other
+Quantile Matching approaches. A real data analysis provides a new evaluation 
+of quantile forecasts for flu
+hospitalizations.
+}
+
+\emph{
+I think this is a nice paper; it is well-written and provides some interesting 
+ideas about estimating
+distributions with coarse information. However, I think there is some room 
+for additional detail and methods
+development. I elaborate in further detail below,
+}
+
+\section*{Sensitivity Analyses are Needed}
+\emph{
+The effectiveness of the author’s method both for parameter and distribution 
+estimations seems to rely on
+the number of quantiles given at the onset. It seems that the authors conduct 
+their simulations with $K = 23$
+quantiles because it matches their real data analysis. However, for the 
+method to be sufficiently general, it
+behooves the authors to discuss the sensitivity of inferences and estimates 
+when there are fewer quantiles
+available. Obviously, the QGP won’t work well when there are very few 
+quantiles available, but I encourage
+the authors to look more into the quantiles available - utility frontier, 
+perhaps with further simulations.
+}
+
+
+\section*{Finite Sample Behavior vs. Asymptotic Behavior?}
+\emph{
+I am confused at some of the coverage results presented in the simulation 
+study. For example, looking at
+Figure 5, the empirical coverage rates of the QGP when assuming a Gaussian 
+mixture all approach 100%.
+By contrast, when the marginal distribution is correctly specified, the 
+intervals under-cover (and severely so
+for small sample sizes) the true parameter values (e.g., Figure 2).
+This result is counter-intuitive and should be explored more. One would 
+think that coverage would close
+the enumerated level when the model is correctly specified. When the model 
+is misspecified, the intervals
+should be biased and thus decrease coverage. The results presented in Figures 
+2 and 5 tell the opposite story. Why is this?
+}
+
+\section*{Unknown Marginals}
+\emph{
+I appreciate that the authors use a Finite Gaussian Mixture when the marginal 
+model is not known.
+Further, their PIT transformed QGP renders model estimation relatively simple. 
+This approach seems to be the primary use of the method, as often a more 
+flexible distribution function will be needed in real data
+analysis. However, I have a few questions/suggestions for the authors to 
+consider:
+}
+
+\begin{itemize}
+  
+  \item \emph{Rather than pre-specifying the number of mixture components when
+  they use
+  the finite mixture as the
+  marginal model, is it possible to learn the number of mixture components
+  during model estimation,
+  perhaps using a truncated Dirichlet Process Prior on the mixing weights?
+  How will this impact computation? If the authors are able to do allow for
+  an unknown number of mixture components, this
+  will really strengthen the comparison to ORD. The results between the two
+  methods are quite similar,
+  though I note that the authors demonstrate the potential computational
+  advantages of QGP relative
+  to ORD.
+  }
+
+\item \emph{Can the authors explain how they do parameter estimation
+(i.e. more means
+and variances/covariances)
+under the QGP when the finite mixture is assumed?
+}
+
+\item \emph{Why are there spikes in the estimated density functions in Figure 4
+for some of the sample sizes, but
+not all? I would assume that the spikes would smooth out as the sample sizes
+get bigger, but this is
+not the case.
+}
+\end{itemize}
+
+
+\section*{Minor Points}
+
+\begin{itemize}
+ 
+  \item \emph{Feldman and Kowal 2024, JMLR consider the problem of estimating 
+  distribution 
+  functions from a
+  finite set of quantiles and use smoothing techniques, and so should be cited 
+  in the introduction
+  }
+  
+  
+  \item \emph{Can the authors clarify whether they performed QM using the QGP for all 
+  160,000 forecasts?
+  }
+  
+  \item \emph{Pg. 21, please reformat: “Unsurprisingly, the correlation between the QM 
+  CRPS and WIS is very
+  highly correlated for each method”
+  }
+\end{itemize}
+\newpage
+
+\Huge
+\noindent Reviewer 2
+\normalsize
+
+\emph{
+The paper proposes the Quantile Gaussian Process model for recovering a 
+continuous distribution from a set of estimated quantiles. The approach 
+builds on the well-known asymptotic distribution of sample quantiles, treating 
+the vector of quantiles as approximately multivariate normal with a covariance 
+structure determined by the quantile density function. The Bayesian 
+formulation allows for uncertainty quantification and incorporation of prior 
+information, which is useful in applications where one has domain knowledge 
+about the underlying distribution.
+}
+
+\emph{
+The theoretical development is clear and the connection to standard linear 
+regression in the location-scale case is a nice insight that makes the model 
+accessible. The alternative formulation using the probability integral 
+transform is a practical contribution that extends the method to situations
+where the quantile function is difficult to evaluate but the cumulative 
+distribution function is available. This is demonstrated convincingly with the 
+generalized lambda and metalog distributions, where the order statistics 
+approach struggles computationally.
+}
+
+\emph{
+The simulation studies are thorough. The comparisons with spline 
+interpolation, kernel density estimation, the independent error model, and 
+the order statistics model are fair and well executed. The results show that 
+the QGP performs comparably to the order statistics model for standard 
+distributions while offering advantages for quantile-defined distributions. 
+The coverage analysis demonstrates that the asymptotic approximation works 
+well even for moderate sample sizes.
+}
+
+\emph{
+The application to the CDC FluSight forecasts is relevant and timely. 
+Disease forecasting hubs increasingly rely on quantile submissions, and the 
+ability to convert these to full distributions for scoring with the 
+continuous ranked probability score or for ensemble construction is 
+practically valuable. The analysis of over 160,000 forecasts shows that the 
+method scales to real applications.
+}
+
+\emph{
+One area where the paper could say more is the sensitivity of the QGP to model 
+misspecification when using mixture distributions to approximate unknown 
+shapes. The paper reports that four components work well for the 
+distributions considered, but some discussion of how one might detect 
+inadequacy in practice would be helpful for users applying this to new problems.
+}
+
+\emph{
+The writing is clear throughout and the paper is well organized. The code 
+availability will support adoption by practitioners working with forecast 
+hubs and similar applications.
+}
+
+
+\end{document}

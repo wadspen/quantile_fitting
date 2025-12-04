@@ -1,0 +1,270 @@
+\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}
+
+
+\usepackage{amsmath,amsthm,amssymb,scrextend,mathtools}
+\usepackage{hyperref}
+\usepackage{newtxmath} %for making indicator function
+\usepackage{booktabs}
+\usepackage{float} %hopefully keeps images and text in order
+% \RequirePackage[colorlinks,citecolor=blue,urlcolor=blue,backref=page,backref=page]{hyperref}
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\usepackage{natbib}
+\usepackage{adjustbox}
+\usepackage{multirow}
+
+% \journal{Computational Statistics and Data Analysis}
+
+\begin{document}
+
+
+
+\title{Supplementary Material} %% Article title
+
+
+
+\Huge
+\begin{center}
+  Supplementary Material
+\end{center}
+\normalsize
+ 
+
+\section*{Additional simulation study results to section 4.1}
+Figure
+\ref{fig:norm_dens} shows examples of marginal
+posterior densities for QM of quantiles for a normal distribution from the
+simulation study in section 4.1 in
+the main manuscript. The parameter uncertainty of the QGP and ORD models are
+unsurprisingly similar in
+most cases, and where they differ it is hard to say that one is estimating the
+true parameter better than the
+other. The IND model on the other hand has tighter densities, and often the
+bulk of the posterior is far from
+the true parameter.
+
+
+\begin{figure}[hbt!]
+\centering
+  \includegraphics[width = 1\linewidth]{Images/norm_params_fit.png}
+\caption{Density plots of posterior distribution samples for normal parameters 
+by QM for QGP, ORD, and
+IND models. QM was done on estimated quantiles from a normal distribution with 
+mean 4 and standard
+deviation 3.5. The posterior densities are for $\mu$ (top left), 
+$\sigma$ (top right), and 
+sample size n (bottom). Plots are
+faceted by the sample size $n \in \{50, 150, 500, 1,000\}$ 
+($y$-axis) and number of 
+quantiles $K \in \{7, 15, 23\}$ ($x$-axis).
+Vertical lines (black) show the value of the true parameter}
+\label{fig:norm_dens}
+\end{figure}
+
+\newpage
+Figures \ref{fig:exp_dens} and \ref{fig:exp_cov_dists} are from a simulation 
+study similar to that of section 4.1 
+except that QM was performed on
+quantiles estimated from draws from an exponential distribution with 
+parameter $\lambda = 4$ rather than a normal distribution. 
+The results in the study for the exponential distribution were similar 
+to those for the normal
+distribution.
+
+
+\begin{figure}[hbt!]
+\centering
+  \includegraphics[width = 1.1\linewidth]{Images/exp_params_fit.png}
+\caption{Density plots of posterior distribution samples for the exponential 
+parameters by QM for QGP,
+ORD, and IND models. QM was done on estimated quantiles from a exponential 
+distribution with parameter
+$\lambda = 4$. The posterior densities are for $\lambda$
+(left) and sample size $n$ (right). 
+Plots are faceted by true sample
+size $n \in \{50, 150, 500, 1,000\}$ ($y$-axis) and number of quantiles 
+$K \in \{7, 15, 23\}$ 
+($x$-axis). Vertical lines (black)
+show the value of the true parameter.}
+\label{fig:exp_dens}
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[hbt!]
+% \begin{subfigure}
+  \includegraphics[width=\linewidth]{Images/exp_cov_dists.png}
+
+\caption{ Posterior coverage (top) calculated as the percentage of times the 
+true parameter fell within the
+modeled 90\% credible interval over the 500 replications. Coverage is faceted 
+by the exponential parameter $\lambda$
+and $n$ with $K = 23$, and by increasing sample size ($x$-axis). 
+The five models 
+QGP, ORD, QGPN, ORDN,
+and IND are colored as shown the legend. The horizontal line (black) is at 
+the nominal 90\% level. Only QGP
+and ORD appear for the parameter $n$ as they are the only two which estimate 
+an unknown $n$. (bottom)
+Distance between the true distribution and the estimated QM predictive 
+distribution averaged over the 500
+replications. Distances include UWD1, TV, and KLD for $K = 23$, 
+and by increasing sample size (x-axis)}
+\label{fig:exp_cov_dists}
+\end{figure}
+
+
+
+
+\section*{Additional simulation study results to section 4.2}
+
+Figures \ref{fig:lp_fits} and \ref{fig:gmix_fits} show examples of QM fits
+to Laplace and normal mixture distributions as described in section 4.2.
+
+
+
+
+\begin{figure}[hbt!]
+\centering
+%\begin{subfigure}{.5\textwidth}
+  \centering
+  \makebox[\textwidth][c]{%
+        \adjustbox{trim=0 0 0 0,clip}{\includegraphics[width=1.3\textwidth]{Images/quants_dens_la.png}}%
+    }
+
+\caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the Laplace distribution $La(0,1)$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
+The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink).}
+\label{fig:lp_fits}
+\end{figure}
+
+
+\begin{figure}[hbt!]
+\centering
+%\begin{subfigure}{.5\textwidth}
+  \centering
+  \makebox[\textwidth][c]{%
+        \adjustbox{trim=0 0 0 0,clip}{\includegraphics[width=1.3\textwidth]{Images/quants_dens_gmix.png}}%
+    }
+\caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the two component normal mixture distribution $w N(-1, 0.9) + (1-w)N(1.2, .6)$ where $w = 0.35$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
+The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink). }
+\label{fig:gmix_fits}
+\end{figure}
+
+
+
+
+\newpage
+
+\section*{QGP normal mixture components analysis}
+
+This section shows an analysis which was made to determine the number of 
+normal components to use in the distribution assigned for use in the QGP.
+Figure \ref{fig:mix_comps} shows the UWD1, TV, and KLD distances between 
+a QGP fit distributions and simulated quantiles averaged over 500 simulated
+replicates. Table \ref{tab:mix_comps} shows the average values. The results 
+show that while the larger the number of components, the closer is the fit 
+distribution in terms of the given distances. However, the imrpovement after 
+three or four components is not much making four components attractive 
+for relatively good fit and for model simplicity.
+
+\begin{figure}[hbt!]
+\centering
+  \includegraphics[width=.9\textwidth]{Images/mix_comps.png}
+\caption{UWD1, TV, and KLD distances averaged over 500 simulation replicates
+for QGP fits of quantile simulated from extreme value, Laplace, and
+mixture distributions. The QGP with normal 
+mixture distributions of 1 to 6 components were fit for both the cases where 
+$n$ is not known (left) and $n$ is known.}
+\label{fig:mix_comps}
+\end{figure}
+
+
+
+
+
+
+
+
+\newpage
+
+\begin{table}[hbt!]
+\footnotesize
+\centering
+\caption{UWD1, TV, and KLD distances averaged over 500 simulation replicates
+for QGP fits of quantile simulated from extreme value, Laplace, and
+mixture distributions. The QGP with normal 
+mixture distributions of 1 to 6 components were fit for both the cases where 
+$n$ is not known (left) and $n$ is known.}
+\begin{adjustbox}{center}
+\begin{tabular}{clcccccc|cccccc}
+& & \multicolumn{6}{c}{QGP} & \multicolumn{6}{c}{QGP-n} \\
+\cmidrule(lr){3-8} \cmidrule(lr){9-14}
+& Components & 1 & 2 & 3 & 4 & 5 & 6 & 1 & 2 & 3 & 4 & 5 & 6 \\
+\midrule
+\multirow{3}{*}{UWD1} &
+EV & 0.063 & 0.025 & 0.021 & 0.020 & 0.020 & 0.020 & 
+      0.064 & 0.025 & 0.021 & 0.021 & 0.020 & 0.020\\
+ & La & 0.044 & 0.022 & 0.020 & 0.020 & 0.020 & 0.020 & 
+      0.044 & 0.021 & 0.020 & 0.020 & 0.020 & 0.020 \\
+ & MIX & 0.107 & 0.018 & 0.019 & 0.019 & 0.019 & 0.019 & 
+      0.157 & 0.018 & 0.019 & 0.018 & 0.018 & 0.018 \\
+      \hline
+\multirow{3}{*}{TV} &
+EV & 0.127 & 0.053 & 0.047 & 0.047 & 0.048 & 0.049 &
+      0.125 & 0.052 & 0.039 & 0.039 & 0.039 & 0.039\\
+ & La & 0.117 & 0.051 & 0.047 & 0.047 & 0.048 & 0.048 &
+      0.117 & 0.048 & 0.043 & 0.043 & 0.043 & 0.042 \\
+ & MIX & 0.226 & 0.038 & 0.033 & 0.032 & 0.033 & 0.034 &
+      0.225 & 0.029 & 0.031 & 0.032 & 0.034 & 0.035 \\
+      \hline
+\multirow{3}{*}{KLD} &
+EV & 0.171 & 0.025 & 0.014 & 0.013 & 0.014 & 0.015 & 
+      0.170 & 0.025 & 0.011 & 0.010 & 0.010 & 0.010\\
+& La & 0.110 & 0.014 & 0.012 & 0.012 & 0.012 & 0.012 & 
+      0.111 & 0.013 & 0.010 & 0.010 & 0.010 & 0.010 \\
+& MIX & 0.221 & 0.010 & 0.008 & 0.008 & 0.009 & 0.010 & 
+      0.293 & 0.004 & 0.006 & 0.007 & 0.009 & 0.010
+\end{tabular}
+\end{adjustbox}
+\label{tab:mix_comps}
+\end{table}
+
+
+
+
+
+
+\end{document}
+
+
+%% For citations use: 
+%%       \citet{<label>} ==> Lamport (1994)
+%%       \citep{<label>} ==> (Lamport, 1994)
+%%
+% Example citation, See \citet{lamport94}.
+
+%% If you have bib database file and want bibtex to generate the
+%% bibitems, please use
+%%
+% \bibliographystyle{sn-mathphys}
+\bibliography{master_bib}
+
+
+
+
+
+\endinput
+
+
