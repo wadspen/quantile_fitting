@@ -46,5 +46,18 @@ generated quantities {
   //  pred_q[i] = normal_rng(mu + sigma*inv_Phip[i], sigma_rho);
   //}
   dist_samp = normal_rng(mu, sigma);
+  
+  vector[N] p_samp;
+  vector[N] Q_rep;  // Q such that GM_CDF(Q_rep[i]) ≈ p[i]
+  
+  for (i in 1:N) {
+    p_samp[i] = normal_rng(p[i], 1/sigma_rho);
+    if (p_samp[i] < 0) p_samp[i] = 1e-6;
+    if (p_samp[i] > 1) p_samp[i] = .999999;
+  }
+  
+  for (i in 1:N) {
+    Q_rep[i] = mu + sigma * inv_Phi(p_samp[i]); // normal_quantile(p_samp[i], mu, sigma);
+  }
 }
 

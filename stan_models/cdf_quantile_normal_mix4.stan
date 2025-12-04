@@ -45,6 +45,25 @@ functions{
     return density;
   }
   
+  
+  real GM_quantile(real p, vector mu, vector sigma, vector pi) {
+    // Quantile by bisection
+    real left = -10;
+    real right =  10;
+    real mid;
+    real cdf_mid;
+
+    for (n in 1:60) {                     // 2^-60 ≈ 1e-18 precision
+      mid = 0.5 * (left + right);
+      cdf_mid = GM_CDF(mid, mu, sigma, pi);
+      if (cdf_mid > p)
+        right = mid;
+      else
+        left = mid;
+    }
+    return mid;
+  }
+  
 }  
 
 data {
@@ -58,6 +77,14 @@ data {
   real<lower=0> sv; // sd prior sd
   real<lower=0> nv; // sample size prior sd
   vector[n_components] alpha; // component weights prior parameter
+}
+
+transformed data{
+  real scaling_step = 1e-2;
+  real rel_tol = 1e-6;
+  real f_tol = 1;
+  int max_steps = 500;
+  vector[1] y_guess = [0.5]';
 }
 
 parameters {
@@ -86,5 +113,24 @@ generated quantities {
   int samp_comp = categorical_rng(pi);
   
   dist_samp = normal_rng(mus[samp_comp], sigmas[samp_comp]);
+  
+  vector[N] p_samp;
+  vector[N] Q_rep;  // Q such that GM_CDF(Q_rep[i]) ≈ p[i]
+  
+  p_samp = multi_normal_rng(p, (1/n)*QCorr);
+  for (i in 1:N) if (p_samp[i] < 0) p_samp[i] = 1e-6;
+  for (i in 1:N) if (p_samp[i] > 1) p_samp[i] = .999999;
+  // p_samp[p_samp < 0] = 0;
+  // p_samp[p_samp > 1] = 1;
+  // for (i in 1:N) {
+  //   Q_rep[i] = GM_quantile(p_samp[i], mus, sigmas, pi);
+  // }
+  
+  for (i in 1:N) {
+    Q_rep[i] = solve_powell_tol(GMInv_CDF, y_guess,
+                                rel_tol, f_tol, max_steps,
+                                p_samp[i], pi, mus, sigmas, N)[1];
+  }
+  
 }
 
