@@ -87,7 +87,7 @@ pdist <- function(x) {pnorm(x, mu, sigma)}
 
 distance <- foreach(replicate = 1:reps,
 		    .packages = c("cmdstanr", "evmix", "distfromq", "dplyr", "tidyr",
-		                  "janitor")
+		                  "janitor", "posterior")
 		    ,.errorhandling = "remove"
 		    ,.combine = rbind) %dopar% {
 		#foreach(n = samp_sizes, .combine = rbind) %:%
@@ -103,6 +103,7 @@ source("./simulation_functions.R")
   quantiles <- quantile(samp, probs)
   
   data <- data.frame(quantile = quantiles, prob = probs)
+  data$true_quantile <- qtrue(probs)
   stan_data <- make_stan_data(data, size = n)
   
   #fit models
@@ -148,17 +149,32 @@ source("./simulation_functions.R")
 
   times <- c(cltn_time, ordn_time, clt_time, ord_time, ind_time)
   
-  sum_cltn <- fit_cltn[[2]]$summary()
-  sum_ordn <- fit_ordn[[2]]$summary()
-  sum_clt <- fit_clt[[2]]$summary()
-  sum_ord <- fit_ord[[2]]$summary()
-  sum_ind <- fit_ind[[2]]$summary()
+  sum_cltn <- fit_cltn[[2]]$summary(NULL, 
+                                    posterior::default_summary_measures()[1:4],
+                                    quantiles = ~ quantile2(., probs = c(0.025, 0.975)),
+                                    posterior::default_convergence_measures())
+  sum_ordn <- fit_ordn[[2]]$summary(NULL, 
+                                    posterior::default_summary_measures()[1:4],
+                                    quantiles = ~ quantile2(., probs = c(0.025, 0.975)),
+                                    posterior::default_convergence_measures())
+  sum_clt <- fit_clt[[2]]$summary(NULL, 
+                                  posterior::default_summary_measures()[1:4],
+                                  quantiles = ~ quantile2(., probs = c(0.025, 0.975)),
+                                  posterior::default_convergence_measures())
+  sum_ord <- fit_ord[[2]]$summary(NULL, 
+                                  posterior::default_summary_measures()[1:4],
+                                  quantiles = ~ quantile2(., probs = c(0.025, 0.975)),
+                                  posterior::default_convergence_measures())
+  sum_ind <- fit_ind[[2]]$summary(NULL, 
+                                  posterior::default_summary_measures()[1:4],
+                                  quantiles = ~ quantile2(., probs = c(0.025, 0.975)),
+                                  posterior::default_convergence_measures())
   
-  sum_eval <- rbind(eval_sum(sum_cltn, true_params),
-                    eval_sum(sum_ordn, true_params),
-                    eval_sum(sum_clt, true_params),
-                    eval_sum(sum_ord, true_params),
-                    eval_sum(sum_ind, true_params)
+  sum_eval <- rbind(eval_sum(sum_cltn, true_params, data),
+                    eval_sum(sum_ordn, true_params, data),
+                    eval_sum(sum_clt, true_params, data),
+                    eval_sum(sum_ord, true_params, data),
+                    eval_sum(sum_ind, true_params, data)
                     )
   
   sum_eval$time <- times

@@ -203,10 +203,13 @@ run_stan_model <- function(mod, data_list, burn = 5000, sample = 5000,
 isolate_draws <- function(stan_samps, variable = "dist_samp") {
   draws <- stan_samps$draws(format = "df")
   draws <- draws$dist_samp
-  summary <- stan_samps$summary()
+  summary <- stan_samps$summary(NULL, 
+                                posterior::default_summary_measures()[1:4],
+                                quantiles = ~ quantile2(., probs = c(0.025, 0.975)),
+                                posterior::default_convergence_measures())
   summary <- summary %>% 
     filter(variable %in% c("mu", "sigma", "n")) %>% 
-    dplyr::select(variable, q5, q95) %>% mutate(width = q95 - q5)
+    dplyr::select(variable, q2.5, q97.5) %>% mutate(width = q97.5 - q2.5)
   
   return(list(draws = draws, summary = summary))
 }
@@ -225,13 +228,13 @@ stan_fit_draws <- function(mod, data_list, burn = 10000, sample = 50000,
 }
 
 
-eval_sum <- function(summary, true_params) {
+eval_sum <- function(summary, true_params, quantile_data) {
   sum1 <- summary %>% 
     left_join(true_params, by = "variable") %>% 
-    mutate(cover90 = between(truth, q5, q95)) %>% 
-    mutate(cover90 = as.numeric(cover90)) %>%
-    mutate(width = q95 - q5) %>% 
-    select(variable, width, cover90) %>% 
+    mutate(cover95 = between(truth, q2.5, q97.5)) %>% 
+    mutate(cover95 = as.numeric(cover95)) %>%
+    mutate(width = q97.5 - q2.5) %>% 
+    dplyr::select(variable, width, cover95) %>% 
     t() %>% 
     row_to_names(1) %>% 
     data.frame() %>%
@@ -241,22 +244,30 @@ eval_sum <- function(summary, true_params) {
   
   width <- sum1[1,]
   colnames(width) <- paste("width", colnames(width), sep = "_")
-  cover90 <- sum1[2,] 
-  colnames(cover90) <- paste("cover90", colnames(cover90), sep = "_")
+  cover95 <- sum1[2,] 
+  colnames(cover95) <- paste("cover95", colnames(cover95), sep = "_")
   
-  params_res <- cbind(width, cover90)
+  params_res <- cbind(width, cover95)
   rownames(params_res) <- NULL
   
-  if (sum(colnames(params_res) %in% c("width_n", "cover90_n")) == 0) {
-    blank_n <- data.frame(width_n = NA, cover90_n = NA)
+  if (sum(colnames(params_res) %in% c("width_n", "cover95_n")) == 0) {
+    blank_n <- data.frame(width_n = NA, cover95_n = NA)
     params_res <- cbind(params_res, blank_n)
   }
   
-  params_res <- params_res %>% select(contains(true_params[,1])) %>% 
-    select(-contains("rho"))
-    # select(width_mu, width_sigma, width_n, cover90_mu, cover90_sigma, cover90_n)
+  params_res <- params_res %>% dplyr::select(contains(true_params[,1])) %>% 
+    dplyr::select(-contains("rho"))
+    # dplyr::select(width_mu, width_sigma, width_n, cover95_mu, cover95_sigma, cover95_n)
+  
+  quants_res <- summary %>% 
+    filter(str_detect(variable, "Q_rep")) %>% 
+    mutate(true_quantile = quantile_data$true_quantile) %>% 
+    mutate(width = q97.5 - q2.5, 
+           cover = between(true_quantile, q2.5, q97.5)) %>% 
+    summarise(width_quant = mean(width),
+              cover95_quant =  mean(cover))
 
-  return(params_res)
+  return(cbind(params_res, quants_res))
   
 }
 

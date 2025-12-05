@@ -91,7 +91,7 @@ distance <- foreach(replicate = 1:reps,
                     .packages = c("cmdstanr", "evmix", "distfromq", "dplyr", "tidyr",
                                   "janitor")
                     ,.errorhandling = "remove"
-                    ,.combine = rbind) %:% {
+                    ,.combine = rbind) %:% 
                       foreach(n = samp_sizes, .combine = rbind) %:%
                       foreach(p = 1:length(levels), .combine = rbind) %dopar% {
                       
@@ -263,6 +263,10 @@ distance <- foreach(replicate = 1:reps,
                       
                     }
 
+
+# if (!dir.exists(save_dir)) {
+#   dir.create(save_dir, recursive = TRUE)
+# }
 
 write.csv(distance, paste0("sim_scores/norm_", sample_type, "/", 
                            "size", n, "_probs", length(levels[[p]]), 
