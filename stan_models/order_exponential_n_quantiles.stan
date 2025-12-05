@@ -49,5 +49,18 @@ generated quantities {
   // real log_prob = orderstatistics(n, N, p, U);
   // for (i in 1:N)
   //   log_prob += normal_lpdf(Q[i] | mu, sigma);
+  
+  vector<lower=0, upper=1>[N] p_samp;
+  vector[N] Q_rep;  // Q such that GM_CDF(Q_rep[i]) ≈ p[i]
+  
+  for (i in 1:N) p_samp[i] = beta_rng(n*p[i], n - p[i]*n + 1);
+  
+  // for (i in 1:N) {
+  //   Q_rep[i] = GM_quantile(p_samp[i], mus, sigmas, pi);
+  // }
+  
+  for (i in 1:N) {
+    Q_rep[i] = -log(1 - p_samp[i])/lambda; // normal_quantile(p_samp[i], mu, sigma);
+  }
 }
 
