@@ -13,6 +13,8 @@ functions{
           + pi[4]*exp(normal_lcdf(Q | mu[4], sigma[4]))
           + pi[5]*exp(normal_lcdf(Q | mu[5], sigma[5]))
           + pi[6]*exp(normal_lcdf(Q | mu[6], sigma[6]))
+          + pi[7]*exp(normal_lcdf(Q | mu[7], sigma[7]))
+          + pi[8]*exp(normal_lcdf(Q | mu[8], sigma[8]))
           ;
     z[1] = cdf - p;
     return z;
@@ -27,6 +29,8 @@ functions{
            + pi[4]*normal_cdf(y | mu[4], sigma[4])
            + pi[5]*normal_cdf(y | mu[5], sigma[5])
            + pi[6]*normal_cdf(y | mu[6], sigma[6])
+           + pi[7]*normal_cdf(y | mu[7], sigma[7])
+           + pi[8]*normal_cdf(y | mu[8], sigma[8])
            ;
            
     return prob;
@@ -42,6 +46,8 @@ functions{
               + pi[4]*exp(normal_lpdf(y | mu[4], sigma[4]))
               + pi[5]*exp(normal_lpdf(y | mu[5], sigma[5]))
               + pi[6]*exp(normal_lpdf(y | mu[6], sigma[6]))
+              + pi[7]*exp(normal_lpdf(y | mu[7], sigma[7]))
+              + pi[8]*exp(normal_lpdf(y | mu[8], sigma[8]))
               + .000001
               ;
     

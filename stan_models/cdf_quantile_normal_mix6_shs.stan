@@ -41,7 +41,7 @@ functions{
               + pi[3]*exp(normal_lpdf(y | mu[3], sigma[3]))
               + pi[4]*exp(normal_lpdf(y | mu[4], sigma[4]))
               + pi[5]*exp(normal_lpdf(y | mu[5], sigma[5]))
-              + pi[6]*exp(normal_lpdf(y | mu[5], sigma[6]))
+              + pi[6]*exp(normal_lpdf(y | mu[6], sigma[6]))
               + .000001
               ;
     
