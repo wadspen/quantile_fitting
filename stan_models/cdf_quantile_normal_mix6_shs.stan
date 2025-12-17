@@ -60,7 +60,9 @@ data {
   real<lower=0> c; // mean prior sd  
   real<lower=0> sv; // sd prior sd
   real<lower=0> nv; // sample size prior sd
-  vector[n_components] alpha; // component weights prior parameter
+  // vector[n_components] alpha; // component weights prior parameter
+  real a;
+  real c1;
 }
 
 transformed data{
@@ -76,6 +78,7 @@ parameters {
   vector<lower=0>[n_components] sigmas;
   simplex[n_components] pi;
   real<lower=0> n;
+  vector<lower=0>[n_components] alpha;
 }
 
 transformed parameters {
@@ -84,6 +87,7 @@ transformed parameters {
 }
 
 model {
+  target += log((alpha + (a / c))^(-1) - (alpha + ((a + 1) / c))^(-1));
   pi ~ dirichlet(alpha);
   mus ~ normal(m, c);
   sigmas ~ normal(0, sv);
@@ -98,8 +102,7 @@ generated quantities {
   
   dist_samp = normal_rng(mus[samp_comp], sigmas[samp_comp]);
   
-  
-  vector[N] p_samp;
+   vector[N] p_samp;
   vector[N] Q_rep;  // Q such that GM_CDF(Q_rep[i]) ≈ p[i]
   
   p_samp = multi_normal_rng(p, (1/n)*QCorr);

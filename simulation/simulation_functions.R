@@ -1,5 +1,5 @@
 library(distr)
-
+library(posterior)
 
 eval_dist <- function(ests, probs, p = 1) {
 	ests <- c(0, ests, 1)
@@ -152,7 +152,8 @@ make_qcorr <- function(probs, corr = "brown") {
 
 make_stan_data <- function(data, size, comps = 4, m = 5, c = 7, sv = 6,
                            nv = 3000,
-                           pv = 3000, alpha = 1, cor = "brown") {
+                           pv = 3000, alpha = 1, cor = "brown",
+                           a = 1.1, c1 = 5) {
   quantiles <- data$quantile
   probs <- data$prob
 
@@ -170,6 +171,8 @@ make_stan_data <- function(data, size, comps = 4, m = 5, c = 7, sv = 6,
     sv = sv,
     nv = nv,
     pv = pv, 
+    a = 1.1,
+    c1 = 5,
     alpha = rep(alpha, comps)
   )
   

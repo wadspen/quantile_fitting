@@ -5,7 +5,7 @@ library(tidyverse)
 
 
 
-all_scores <- readRDS("./flu_forecast_analysis/all_scores.rds")
+all_scores <- readRDS("../flu_forecast_analysis/all_scores.rds")
 
 all_cors <- all_scores %>% 
   # filter(logs < Inf) %>% 
