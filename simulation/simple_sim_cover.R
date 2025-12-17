@@ -10,6 +10,7 @@ library(VGAM)
 library(EnvStats)
 library(tidyr)
 library(LaplacesDemon)
+library(stringr)
 library(parallel)
 library(doParallel)
 library(doMC)
@@ -42,8 +43,8 @@ mod <- cmdstan_model(stan_file = paste0(mod_loc, mod_name))
 
 
 
-burn <- 2000
-samples <- 2000
+burn <- 20000
+samples <- 60000
 out_s <- 5000
 sample_type <- "MCMC"
 
@@ -61,7 +62,7 @@ levels <- list(
 
 
 
-reps <- 500
+reps <- 60
 n <- samp_sizes[nind]
 
 #p <- 7
