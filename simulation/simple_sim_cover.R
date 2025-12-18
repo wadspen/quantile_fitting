@@ -33,9 +33,15 @@ print(dist); print(p); print(nind); print(model)
 
 mod_loc <- "../stan_models/"
 
-mod_name <- ifelse(str_detect(model, "_shs"),
-                   "cdf_quantile_normal_mix6_shs.stan",
-                   "cdf_quantile_normal_mix6.stan")
+mod_name <- ifelse(model == "clt_shs",
+                   "cdf_quantile_normal_mixK_shs.stan",
+                   ifelse(model == "clt", "cdf_quantile_normal_mixK.stan",
+                          ifelse(model == "ord", "order_normal_mixK_quantiles.stan",
+                                 ifelse(model == "ord_shs",
+                                        "order_normal_mixK_quantiles_shs.stan",
+                                        ifelse(model == "ind_shs",
+                                               "cdf_ind_quantile_normal_mixK_shs.stan",
+                                               "cdf_ind_quantile_normal_mixK.stan")))))
 
 mod <- cmdstan_model(stan_file = paste0(mod_loc, mod_name))
 
@@ -43,8 +49,8 @@ mod <- cmdstan_model(stan_file = paste0(mod_loc, mod_name))
 
 
 
-burn <- 20000
-samples <- 60000
+burn <- 2000
+samples <- 2000
 out_s <- 5000
 sample_type <- "MCMC"
 
@@ -81,7 +87,7 @@ distance <- foreach(replicate = 1:reps,
                       #foreach(n = samp_sizes, .combine = rbind) %:%
                       #foreach(p = 1:length(levels), .combine = rbind) %dopar% {
                       
-                      
+                      set.seed(replicate)
                       source("./simulation_functions.R")
                       
                       if (dist == "norm") {
@@ -120,12 +126,16 @@ distance <- foreach(replicate = 1:reps,
                       
                       data <- data.frame(quantile = quantiles, prob = probs,
                                          true_quantile = true_quantiles)
-                      stan_data6 <- make_stan_data(data, size = n, comps = 6)
+                      stan_data <- make_stan_data(data, size = n, comps = 20)
                       
                       
-                      fit_mod <- stan_fit_draws(mod, stan_data6,
+                      fit_mod <- stan_fit_draws(mod, stan_data,
                                                  sampler = sample_type, burn = burn, samp = samples,
                                                  refresh = 100, out_s = 5000)
+                      
+                      # fit <- mod$sample(data = stan_data,
+                      #                   num_chains = 4,
+                      #                   num_cores = 4)
                       
                       
                       
@@ -136,8 +146,13 @@ distance <- foreach(replicate = 1:reps,
                       comp_props <- table(comps)/sum(table(comps))
                       comp_props <- comp_props[order(comp_props, decreasing = TRUE)]
                       num_comps95 <- min(which(cumsum(comp_props) >= .95))
+                      num_comps98 <- min(which(cumsum(comp_props) >= .98))
                       num_comps99 <- min(which(cumsum(comp_props) >= .99))
+                      ncompg1 <- sum(comp_props > .01)
                       
+                      # draws <- draws %>%
+                      #   # filter(samp_comp %in% as.numeric(names(comp_props))[1:num_comps95])
+                      #   filter(samp_comp %in% as.numeric(names(comp_props))[comp_props > .01])
                       
                       
                       drawsQ <- draws %>% 
@@ -167,18 +182,46 @@ distance <- foreach(replicate = 1:reps,
                         dplyr::select(contains("mus") | contains("sigmas") |
                                         contains("pi"))
                       m_params <- apply(params, MARGIN = 2, FUN = mean)
-                      cltn_mus <- m_params[1:6]
-                      cltn_sigmas <- m_params[7:12]
-                      wts <- m_params[13:18] 
+                      mus <- m_params[1:20]
+                      sigmas <- m_params[21:40]
+                      wts <- m_params[41:60] 
                       wts[wts < 0] <- 0
-                      cltn_wts <- wts/sum(wts)
+                      wts <- wts/sum(wts)
                       
+                      mix_dist <- UnivarMixingDistribution(Norm(mus[1], sigmas[1]),
+                                                           Norm(mus[2], sigmas[2]),
+                                                           Norm(mus[3], sigmas[3]),
+                                                           Norm(mus[4], sigmas[4]),
+                                                           Norm(mus[5], sigmas[5]),
+                                                           Norm(mus[6], sigmas[6]),
+                                                           Norm(mus[7], sigmas[7]),
+                                                           Norm(mus[8], sigmas[8]),
+                                                           Norm(mus[9], sigmas[9]),
+                                                           Norm(mus[10], sigmas[10]),
+                                                           Norm(mus[11], sigmas[11]),
+                                                           Norm(mus[12], sigmas[12]),
+                                                           Norm(mus[13], sigmas[13]),
+                                                           Norm(mus[14], sigmas[14]),
+                                                           Norm(mus[15], sigmas[15]),
+                                                           Norm(mus[16], sigmas[16]),
+                                                           Norm(mus[17], sigmas[17]),
+                                                           Norm(mus[18], sigmas[18]),
+                                                           Norm(mus[19], sigmas[19]),
+                                                           Norm(mus[20], sigmas[20]),
+                                                           mixCoeff = wts)
                       
+                      dmix <- function(x) {d(mix_dist)(x)}
+                      qmix <- function(p) {q(mix_dist)(p)} 
                       
+                      kls <- rdist(samples)
+                      py <- ddist(kls)
+                      mixx <- dmix(kls)
                       
+                      mix_kl <- mean(log(py) - log(mixx))
                       
+                      mix_tv <- dens_dist(dmix, ddist)
                       
-                      udraws <- pdist(fit_mod[[1]]$draws)
+                      udraws <- pdist(draws$dist_samp)
                       
                       
                       #make unit ecdfs
@@ -188,19 +231,28 @@ distance <- foreach(replicate = 1:reps,
                       
                       uwd1 <- unit_wass_dist(pu, d = 1)
                       
+                      qdiff <- sum(abs(quantile(draws$dist_samp, probs = probs) - qdist(probs))^2)
+                      
                       data.frame(model = model, n = n, 
                                  numq = length(probs),
+                                 dist = dist,
+                                 samp_type = sample_type,
                                  rep = replicate,
                                  uwd1 = uwd1, 
+                                 kld = mix_kl,
+                                 tv = mix_tv,
                                  comp95 = num_comps95, 
+                                 comp98 = num_comps98,
                                  comp99 = num_comps99,
-                                 coverm = coverm
+                                 compg1 = ncompg1,
+                                 coverm = coverm,
+                                 qdiff = qdiff
                                  )
-                      # one <- uwd1_clt6
                     }
 
 
-saveRDS(distance, paste0("./", model, ".rds"))
+saveRDS(distance, paste0("./simple_res/", 
+                         paste(dist, model, p, nind, sep = "_"), ".rds"))
 # write.csv(distance, paste0("sim_scores/", dist, "_", sample_type, "_numcomp",
 #                            "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
 
