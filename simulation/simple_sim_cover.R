@@ -15,7 +15,7 @@ library(parallel)
 library(doParallel)
 library(doMC)
 #n.cores <- detectCores()
-n.cores <- 64
+n.cores <- 110
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -49,13 +49,15 @@ mod <- cmdstan_model(stan_file = paste0(mod_loc, mod_name))
 
 
 
-burn <- 2000
-samples <- 2000
+burn <- 10000
+samples <- 50000
 out_s <- 5000
 sample_type <- "MCMC"
 
 samp_sizes <- c(50, 150, 500, 1000, 2000, 5000)
 levels <- list(
+  c(.25, .5, .75),
+  c(.025, .25, .5, .95, .975),  
   seq(.1, .9, by = .1),
   c(.05, seq(.1, .9, by = .1), .95),
   c(.025, .05, seq(.1, .9, by = .1), .95, .975),
@@ -68,7 +70,7 @@ levels <- list(
 
 
 
-reps <- 60
+reps <- 500
 n <- samp_sizes[nind]
 
 #p <- 7
@@ -126,13 +128,15 @@ distance <- foreach(replicate = 1:reps,
                       
                       data <- data.frame(quantile = quantiles, prob = probs,
                                          true_quantile = true_quantiles)
-                      stan_data <- make_stan_data(data, size = n, comps = 20)
+                      stan_data <- make_stan_data(data, size = n, comps = 6)
                       
-                      
+                      start <- Sys.time() 
                       fit_mod <- stan_fit_draws(mod, stan_data,
                                                  sampler = sample_type, burn = burn, samp = samples,
                                                  refresh = 100, out_s = 5000)
-                      
+                      end <- Sys.time()
+		      tdiff <- end - start
+		      tdiff <- as.numeric(tdiff, "mins")
                       # fit <- mod$sample(data = stan_data,
                       #                   num_chains = 4,
                       #                   num_cores = 4)
@@ -182,9 +186,9 @@ distance <- foreach(replicate = 1:reps,
                         dplyr::select(contains("mus") | contains("sigmas") |
                                         contains("pi"))
                       m_params <- apply(params, MARGIN = 2, FUN = mean)
-                      mus <- m_params[1:20]
-                      sigmas <- m_params[21:40]
-                      wts <- m_params[41:60] 
+                      mus <- m_params[1:6]
+                      sigmas <- m_params[7:12]
+                      wts <- m_params[13:18] 
                       wts[wts < 0] <- 0
                       wts <- wts/sum(wts)
                       
@@ -194,20 +198,20 @@ distance <- foreach(replicate = 1:reps,
                                                            Norm(mus[4], sigmas[4]),
                                                            Norm(mus[5], sigmas[5]),
                                                            Norm(mus[6], sigmas[6]),
-                                                           Norm(mus[7], sigmas[7]),
-                                                           Norm(mus[8], sigmas[8]),
-                                                           Norm(mus[9], sigmas[9]),
-                                                           Norm(mus[10], sigmas[10]),
-                                                           Norm(mus[11], sigmas[11]),
-                                                           Norm(mus[12], sigmas[12]),
-                                                           Norm(mus[13], sigmas[13]),
-                                                           Norm(mus[14], sigmas[14]),
-                                                           Norm(mus[15], sigmas[15]),
-                                                           Norm(mus[16], sigmas[16]),
-                                                           Norm(mus[17], sigmas[17]),
-                                                           Norm(mus[18], sigmas[18]),
-                                                           Norm(mus[19], sigmas[19]),
-                                                           Norm(mus[20], sigmas[20]),
+                                                           #Norm(mus[7], sigmas[7]),
+                                                           #Norm(mus[8], sigmas[8]),
+                                                           #Norm(mus[9], sigmas[9]),
+                                                           #Norm(mus[10], sigmas[10]),
+                                                           #Norm(mus[11], sigmas[11]),
+                                                           #Norm(mus[12], sigmas[12]),
+                                                           #Norm(mus[13], sigmas[13]),
+                                                           #Norm(mus[14], sigmas[14]),
+                                                           #Norm(mus[15], sigmas[15]),
+                                                           #Norm(mus[16], sigmas[16]),
+                                                           #Norm(mus[17], sigmas[17]),
+                                                           #Norm(mus[18], sigmas[18]),
+                                                           #Norm(mus[19], sigmas[19]),
+                                                           #Norm(mus[20], sigmas[20]),
                                                            mixCoeff = wts)
                       
                       dmix <- function(x) {d(mix_dist)(x)}
@@ -246,7 +250,8 @@ distance <- foreach(replicate = 1:reps,
                                  comp99 = num_comps99,
                                  compg1 = ncompg1,
                                  coverm = coverm,
-                                 qdiff = qdiff
+                                 qdiff = qdiff,
+				 ftime = tdiff
                                  )
                     }
 
