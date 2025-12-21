@@ -27,6 +27,7 @@ dist <- args[6]
 p <- as.numeric(args[7])
 nind <- as.numeric(args[8])
 model <- args[9]
+num_comps <- as.numeric(args[10])
 
 print(dist); print(p); print(nind); print(model)
 
@@ -128,7 +129,7 @@ distance <- foreach(replicate = 1:reps,
                       
                       data <- data.frame(quantile = quantiles, prob = probs,
                                          true_quantile = true_quantiles)
-                      stan_data <- make_stan_data(data, size = n, comps = 6)
+                      stan_data <- make_stan_data(data, size = n, comps = num_comps)
                       
                       start <- Sys.time() 
                       fit_mod <- stan_fit_draws(mod, stan_data,
@@ -186,13 +187,52 @@ distance <- foreach(replicate = 1:reps,
                         dplyr::select(contains("mus") | contains("sigmas") |
                                         contains("pi"))
                       m_params <- apply(params, MARGIN = 2, FUN = mean)
-                      mus <- m_params[1:6]
-                      sigmas <- m_params[7:12]
-                      wts <- m_params[13:18] 
+                      if (num_comps == 6) {
+                      	mus <- m_params[1:6]
+                      	sigmas <- m_params[7:12]
+                      	wts <- m_params[13:18]
+		      } else if (num_comps == 3) {
+			mus <- m_params[1:3]
+		        sigmas <- m_params[4:6]
+			wts <- m_params[7:9]
+		      }	else if (num_comps == 12) {
+			mus <- m_params[1:12]
+                      	sigmas <- m_params[13:24]
+                      	wts <- m_params[25:36] 
+		      } else if (num_comps == 20) {
+			mus <- m_params[1:20]
+                      	sigmas <- m_params[21:40]
+                      	wts <- m_params[41:60] 
+		      }
                       wts[wts < 0] <- 0
                       wts <- wts/sum(wts)
-                      
-                      mix_dist <- UnivarMixingDistribution(Norm(mus[1], sigmas[1]),
+		      wts <- wts/sum(wts)
+		      wts <- wts/sum(wts)
+                     
+		      if (num_comps == 3) {
+                     	 mix_dist <- UnivarMixingDistribution(Norm(mus[1], sigmas[1]),
+                                                           Norm(mus[2], sigmas[2]),
+                                                           Norm(mus[3], sigmas[3]),
+                                                           #Norm(mus[4], sigmas[4]),
+                                                           #Norm(mus[5], sigmas[5]),
+                                                           #Norm(mus[6], sigmas[6]),
+                                                           #Norm(mus[7], sigmas[7]),
+                                                           #Norm(mus[8], sigmas[8]),
+                                                           #Norm(mus[9], sigmas[9]),
+                                                           #Norm(mus[10], sigmas[10]),
+                                                           #Norm(mus[11], sigmas[11]),
+                                                           #Norm(mus[12], sigmas[12]),
+                                                           #Norm(mus[13], sigmas[13]),
+                                                           #Norm(mus[14], sigmas[14]),
+                                                           #Norm(mus[15], sigmas[15]),
+                                                           #Norm(mus[16], sigmas[16]),
+                                                           #Norm(mus[17], sigmas[17]),
+                                                           #Norm(mus[18], sigmas[18]),
+                                                           #Norm(mus[19], sigmas[19]),
+                                                           #Norm(mus[20], sigmas[20]),
+                                                           mixCoeff = wts)
+		      } else if (num_comps == 6) {
+		      		 mix_dist <- UnivarMixingDistribution(Norm(mus[1], sigmas[1]),
                                                            Norm(mus[2], sigmas[2]),
                                                            Norm(mus[3], sigmas[3]),
                                                            Norm(mus[4], sigmas[4]),
@@ -213,7 +253,57 @@ distance <- foreach(replicate = 1:reps,
                                                            #Norm(mus[19], sigmas[19]),
                                                            #Norm(mus[20], sigmas[20]),
                                                            mixCoeff = wts)
-                      
+ 
+		      } else if (num_comps == 12) {
+			 mix_dist <- UnivarMixingDistribution(Norm(mus[1], sigmas[1]),
+                                                           Norm(mus[2], sigmas[2]),
+                                                           Norm(mus[3], sigmas[3]),
+                                                           Norm(mus[4], sigmas[4]),
+                                                           Norm(mus[5], sigmas[5]),
+                                                           Norm(mus[6], sigmas[6]),
+                                                           Norm(mus[7], sigmas[7]),
+                                                           Norm(mus[8], sigmas[8]),
+                                                           Norm(mus[9], sigmas[9]),
+                                                           Norm(mus[10], sigmas[10]),
+                                                           Norm(mus[11], sigmas[11]),
+                                                           Norm(mus[12], sigmas[12]),
+                                                           #Norm(mus[13], sigmas[13]),
+                                                           #Norm(mus[14], sigmas[14]),
+                                                           #Norm(mus[15], sigmas[15]),
+                                                           #Norm(mus[16], sigmas[16]),
+                                                           #Norm(mus[17], sigmas[17]),
+                                                           #Norm(mus[18], sigmas[18]),
+                                                           #Norm(mus[19], sigmas[19]),
+                                                           #Norm(mus[20], sigmas[20]),
+                                                           mixCoeff = wts)
+
+	              } else if (num_comps == 20) {
+				 mix_dist <- UnivarMixingDistribution(Norm(mus[1], sigmas[1]),
+                                                           Norm(mus[2], sigmas[2]),
+                                                           Norm(mus[3], sigmas[3]),
+                                                           Norm(mus[4], sigmas[4]),
+                                                           Norm(mus[5], sigmas[5]),
+                                                           Norm(mus[6], sigmas[6]),
+                                                           Norm(mus[7], sigmas[7]),
+                                                           Norm(mus[8], sigmas[8]),
+                                                           Norm(mus[9], sigmas[9]),
+                                                           Norm(mus[10], sigmas[10]),
+                                                           Norm(mus[11], sigmas[11]),
+                                                           Norm(mus[12], sigmas[12]),
+                                                           Norm(mus[13], sigmas[13]),
+                                                           Norm(mus[14], sigmas[14]),
+                                                           Norm(mus[15], sigmas[15]),
+                                                           Norm(mus[16], sigmas[16]),
+                                                           Norm(mus[17], sigmas[17]),
+                                                           Norm(mus[18], sigmas[18]),
+                                                           Norm(mus[19], sigmas[19]),
+                                                           Norm(mus[20], sigmas[20]),
+                                                           mixCoeff = wts)
+
+		      } else {
+		    	 mix_dist <- UnivarMixingDistribution(Norm())
+                                                           
+	              }
                       dmix <- function(x) {d(mix_dist)(x)}
                       qmix <- function(p) {q(mix_dist)(p)} 
                       
@@ -256,7 +346,7 @@ distance <- foreach(replicate = 1:reps,
                     }
 
 
-saveRDS(distance, paste0("./simple_res/", 
+saveRDS(distance, paste0("./simple_res/ncomp", num_comps, "/", 
                          paste(dist, model, p, nind, sep = "_"), ".rds"))
 # write.csv(distance, paste0("sim_scores/", dist, "_", sample_type, "_numcomp",
 #                            "/", "size", n, "_probs", length(levels[[p]]), "_scores.csv"), row.names = FALSE)
