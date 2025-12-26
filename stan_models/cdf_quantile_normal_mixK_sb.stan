@@ -77,7 +77,7 @@ parameters {
 }
 
 transformed parameters {
-  vector[n_components] pi;
+  simplex[n_components] pi;
   real stick_remaining;
 
   stick_remaining = 1;
