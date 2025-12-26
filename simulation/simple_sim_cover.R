@@ -50,7 +50,7 @@ mod_name <- ifelse(model == "clt_shs",
                                                              ifelse(model == "clt_sb",
                                                                     "cdf_quantile_normal_mixK_sb.stan",
                                                                     ifelse(model == "ord_sb",
-                                                                           "order_normal_mixK_quantiles_hs.stan",
+                                                                           "order_normal_mixK_quantiles_sb.stan",
                                                              "cdf_ind_quantile_normal_mixK.stan")))))))))
 
 mod <- cmdstan_model(stan_file = paste0(mod_loc, mod_name))
