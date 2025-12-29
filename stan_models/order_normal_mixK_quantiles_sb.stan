@@ -88,6 +88,7 @@ data {
   // vector[n_components] alpha;
   real a;
   real c1;
+  real alph;
 }
 
 transformed data{
@@ -96,7 +97,7 @@ transformed data{
   real f_tol = 1;
   int max_steps = 500;
   vector[1] y_guess = [0.5]';
-  real alpha = 0.5;
+  // real alpha = 0.5;
 }
 
 parameters {
@@ -140,7 +141,7 @@ transformed parameters {
 }
 
 model {
-  v ~ beta(1, alpha);
+  v ~ beta(1, alph);
   // lambda ~ cauchy(0, 1);
   // tau ~ cauchy(0, 1);
   // rho ~ normal(0, sigma_rho);

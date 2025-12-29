@@ -57,6 +57,7 @@ data {
   // vector[n_components] alpha; // component weights prior parameter
   real a;
   real c1;
+  real alph;
 }
 
 transformed data{
@@ -65,7 +66,7 @@ transformed data{
   real f_tol = 1;
   int max_steps = 500;
   vector[1] y_guess = [0.5]';
-  real alpha = 0.5;
+  // real alpha = 0.5;
 }
 
 parameters {
@@ -92,7 +93,7 @@ transformed parameters {
 }
 
 model {
-  v ~ beta(1, alpha);
+  v ~ beta(1, alph);
   // target += log((alpha + (a / c1))^(-1) - (alpha + ((a + 1) / c1))^(-1));
   // pi ~ dirichlet(alpha);
   mus ~ normal(m, c);
