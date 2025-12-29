@@ -140,7 +140,8 @@ distance <- foreach(replicate = 1:reps,
                       
                       data <- data.frame(quantile = quantiles, prob = probs,
                                          true_quantile = true_quantiles)
-                      stan_data <- make_stan_data(data, size = n, comps = num_comps)
+                      stan_data <- make_stan_data(data, size = n, comps = num_comps,
+						  alph = 1)
                       
                       start <- Sys.time() 
                       fit_mod <- stan_fit_draws(mod, stan_data,

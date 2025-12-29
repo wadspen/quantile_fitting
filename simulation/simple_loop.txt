@@ -4,23 +4,24 @@ ns=(1 2 3 4 5 6)
 #echo "${models[@]}"
 
 #for p in "${ps[@]}"
-
+for num_comps in 3 6 12 20
+do
 for dist in "gmix" "evd" "lp"
 do
   
-	for p in 1 2 3 4 5
+	for p in 6 7 9 1 2 4 
 	do
     	#for n in "${ns[@]}"
      	  for n in 1 2 3 4 5 6
 	  do
-            for mod in "clt_shs" "ord_shs" "clt" "ord"
+            for mod in "clt_sb" "ord_sb" #"clt_hs" "ord_hs" "clt" "ord" "clt_shs" "ord_shs"
             do
 		  #sbatch ./var_sim_fit.sh "$1" $p $n
-	  	sbatch ./simple_sim.sh $dist $p $n $mod
+	  	sbatch ./simple_sim.sh $dist $p $n $mod $num_comps
 	  	#echo "$1" $p $n
 	    done
 	  done
         done	
 done
-
+done
 
