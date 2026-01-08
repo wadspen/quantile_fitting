@@ -1,6 +1,23 @@
 library(distr)
 library(posterior)
 
+make_normmix <- function(mus, sds, weights) {
+  stopifnot(
+    length(mus) == length(sds),
+    length(mus) == length(weights)
+  )
+  
+  # normalize weights just in case
+  weights <- weights / sum(weights)
+  
+  comps <- Map(Norm, mean = mus, sd = sds)
+  
+  do.call(
+    UnivarMixingDistribution,
+    c(comps, list(mixCoeff = weights))
+  )
+}
+
 eval_dist <- function(ests, probs, p = 1) {
 	ests <- c(0, ests, 1)
 	probs <- c(0, probs, 1)
