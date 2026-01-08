@@ -1,4 +1,4 @@
-.libPaths("~/rlibs")
+#.libPaths("~/rlibs")
 source("./simulation_functions.R")
 #setwd("./simulation/")
 library(cmdstanr)
@@ -15,7 +15,7 @@ library(parallel)
 library(doParallel)
 library(doMC)
 #n.cores <- detectCores()
-n.cores <- 110
+n.cores <- 62
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -224,9 +224,9 @@ distance <- foreach(replicate = 1:reps,
             		      wtss <- wtss/sum(wtss)
             		      wtss <- wtss/sum(wtss)
 		      
-            		      make_normmix(mus, sigmas, wts)
+            		      #make_normmix(mus, sigmas, wts)
 		      
-		                  mix_dist <- make_normmix(mus[sig], sigmas[sig], wtss)
+		              mix_dist <- make_normmix(mus[sig], sigmas[sig], wtss)
                      
 
                       dmix <- function(x) {d(mix_dist)(x)}
