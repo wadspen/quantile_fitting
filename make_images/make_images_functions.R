@@ -1,4 +1,23 @@
 library(orderstats)
+
+
+make_normmix <- function(mus, sds, weights) {
+  stopifnot(
+    length(mus) == length(sds),
+    length(mus) == length(weights)
+  )
+  
+  # normalize weights just in case
+  weights <- weights / sum(weights)
+  
+  comps <- Map(Norm, mean = mus, sd = sds)
+  
+  do.call(
+    UnivarMixingDistribution,
+    c(comps, list(mixCoeff = weights))
+  )
+}
+
 get_quantile_samps <- function(samps, quantiles, n, n_known = FALSE, n_modeled = FALSE,
                                ind = TRUE, samp_quant = FALSE, order = TRUE,
                                dens_probs = c(.025, .25, .5, .75, .975),
@@ -30,8 +49,10 @@ get_quantile_samps <- function(samps, quantiles, n, n_known = FALSE, n_modeled =
     sigmas <- unlist(all_sigmas[m,])
     
     pi <- unlist(all_pis[m,])
-    pi[which(pi < 0)] <- 0
-    pi <- pi/sum(pi)
+    sig <- which(pi > 1e-5)
+    pis <- pi[sig]
+    pis[which(pis < 0)] <- 0
+    pis <- pis/sum(pis)
     # if (sum(pi) < 1) {
     #   pi[which.max(pi)] <- pi[which.max(pi)] + (1 - sum(pi))
     # } else if (sum(pi) > 1) {
@@ -39,11 +60,21 @@ get_quantile_samps <- function(samps, quantiles, n, n_known = FALSE, n_modeled =
     # }
     if (n_modeled == TRUE) {n <- unlist(all_ns[m])}
     if (ind == TRUE) {sigma <- all_sigma[m]}
-    normmix <- UnivarMixingDistribution(Norm(mus[1], sigmas[1]),
-                                        Norm(mus[2], sigmas[2]), 
-                                        Norm(mus[3], sigmas[3]), 
-                                        Norm(mus[4], sigmas[4]),
-                                        mixCoeff = pi)
+    # normmix <- UnivarMixingDistribution(Norm(mus[1], sigmas[1]),
+    #                                     Norm(mus[2], sigmas[2]),
+    #                                     Norm(mus[3], sigmas[3]),
+    #                                     Norm(mus[4], sigmas[4]),
+    #                                     Norm(mus[5], sigmas[5]),
+    #                                     Norm(mus[6], sigmas[6]),
+    #                                     Norm(mus[7], sigmas[7]),
+    #                                     Norm(mus[8], sigmas[8]),
+    #                                     Norm(mus[9], sigmas[9]),
+    #                                     Norm(mus[10], sigmas[10]),
+    #                                     Norm(mus[11], sigmas[11]),
+    #                                     Norm(mus[12], sigmas[12]),
+    #                                     mixCoeff = pi)
+    
+    normmix <- make_normmix(mus[sig], sigmas[sig], pis)
     
     
     

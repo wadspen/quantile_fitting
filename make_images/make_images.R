@@ -17,14 +17,15 @@ library(orderstats)
 
 
 
+
 cdfmod <- cmdstan_model(stan_file = 
-                          '../stan_models/cdf_quantile_normal_mix4.stan')
+                          '../stan_models/cdf_quantile_normal_mixK_sb.stan')
 
 ordmod <- cmdstan_model(stan_file = 
-                          '../stan_models/order_normal_mix4_quantiles.stan')
+                          '../stan_models/order_normal_mixK_quantiles_sb.stan')
 
 indmod <- cmdstan_model(stan_file = 
-                          '../stan_models/cdf_ind_quantile_normal_mix4.stan')
+                          '../stan_models/cdf_ind_quantile_normal_mixK_sb.stan')
 
 
 
@@ -40,25 +41,29 @@ probs <- c(.01, .025, seq(.05, .95, by = .05), .975, .99)
 #################################################
 all_dens <- data.frame()
 all_quants <- data.frame()
-dist <- "evd"
+dist <- "gmix"
 for (n in samp_sizes) {
 
-  # samp <- rlaplace(n)
-  # true_quantiles <- qlaplace(probs)
-  # samp <- revd(n); dist <- "evd"
-  # true_quantiles <- qevd(probs)
-  pars <- data.frame(mu = c(-1, 1.2),
-                     sigma = c(.9, .6),
-                     weight = c(.35, .65))
-  mdist <- make_gaussian_mixture(pars$mu, pars$sigma, pars$weight)
-  samp <- r(mdist)(n); dist <-
-  true_quantiles <- q(mdist)(probs)
-  ddist <- function(x) {d(mdist)(x)}
+  if (dist == "lp") {
+    samp <- rlaplace(n)
+    true_quantiles <- qlaplace(probs)
+  } else if (dist == "evd") {
+    samp <- revd(n); dist <- "evd"
+    true_quantiles <- qevd(probs)
+  } else if (dist == "gmix") {
+    pars <- data.frame(mu = c(-1, 1.2),
+                       sigma = c(.9, .6),
+                       weight = c(.35, .65))
+    mdist <- make_gaussian_mixture(pars$mu, pars$sigma, pars$weight)
+    samp <- r(mdist)(n);
+    true_quantiles <- q(mdist)(probs)
+    ddist <- function(x) {d(mdist)(x)}
+  }
   quantiles <- quantile(samp, probs = probs)
   
   
   dat <- data.frame(quantile = quantiles, prob = probs)
-  stan_data <- make_stan_data(dat, size = n, comps = 4)
+  stan_data <- make_stan_data(dat, size = n, comps = 12)
   
   
   cdfsamps <- cdfmod$sample(data = stan_data,
@@ -144,6 +149,8 @@ for (n in samp_sizes) {
 
 }
 
+# saveRDS(all_dens, "../make_images/gmix_dens_sb.rds")
+# saveRDS(all_quants, "../make_images/gmix_quants_sb.rds")
 # saveRDS(all_dens, "../make_images/gmix_dens.rds")
 # saveRDS(all_quants, "../make_images/gmix_quants.rds")
 

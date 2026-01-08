@@ -158,7 +158,8 @@ distance <- foreach(replicate = 1:reps,
                       
                       fit <- fit_mod[[2]]
                       
-                      draws <- fit$draws(format = "df") 
+                      draws <- fit$draws(format = "df") %>% 
+                        filter(if_all(everything(), ~ !is.na(.)))
                       comps <- draws$samp_comp
                       comp_props <- table(comps)/sum(table(comps))
                       comp_props <- comp_props[order(comp_props, decreasing = TRUE)]
@@ -181,7 +182,7 @@ distance <- foreach(replicate = 1:reps,
                                              FUN = quantile, probs = 0.025),
                                upp95 = apply(drawsQ, MARGIN = 2, 
                                              FUN = quantile, probs = 0.975),
-                               mean = apply(drawsQ, MARGIN = 2, 
+                               mean = apply(drawsQ, MARGIN = 2,
                                             FUN = mean)
                         ) 
                       
