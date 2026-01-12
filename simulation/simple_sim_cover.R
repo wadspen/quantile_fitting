@@ -1,4 +1,4 @@
-#.libPaths("~/rlibs")
+.libPaths("~/rlibs")
 source("./simulation_functions.R")
 #setwd("./simulation/")
 library(cmdstanr)
@@ -15,7 +15,7 @@ library(parallel)
 library(doParallel)
 library(doMC)
 #n.cores <- detectCores()
-n.cores <- 62
+n.cores <- 110
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -82,7 +82,7 @@ levels <- list(
 
 
 
-reps <- 500
+reps <- 200
 n <- samp_sizes[nind]
 
 #p <- 7
