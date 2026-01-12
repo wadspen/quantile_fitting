@@ -103,6 +103,30 @@ distance <- foreach(replicate = 1:reps,
                         ddist <- function(x) {d(mdist)(x)}
                         rdist <- function(n) {r(mdist)(n)}
                         qdist <- function(p) {q(mdist)(p)}
+                      } else if (dist == "tdp") {
+                        Ndp <- 5
+                        alphadp <- 1
+                        
+                        v <- rbeta(Ndp - 1, 1, alphadp)
+                        pi <- Stick(v)
+                        
+                        pi <- c(pi, 1 - sum(pi))
+                        pi[pi < 0] <- 0
+                        while (sum(pi) != 1) {
+                          pi <- pi/sum(pi)
+                        }
+                        
+                        mus <- rnorm(Ndp + 1, 0, 2)
+                        sigmas <- rep(1, Ndp + 1)
+                        sigmas <- rgamma(Ndp + 1, 2)
+                        
+                        mdist <- make_normmix(mus, sigmas, pi)
+                        samp <- r(mdist)(n)
+                        pdist <- function(x) {p(mdist)(x)}
+                        ddist <- function(x) {d(mdist)(x)}
+                        rdist <- function(n) {r(mdist)(n)}
+                        qdist <- function(p) {q(mdist)(p)}
+                        
                       }
                       
                       probs <- levels[[p]]
