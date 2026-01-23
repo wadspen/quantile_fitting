@@ -17,7 +17,7 @@ library(doParallel)
 library(doMC)
 #n.cores <- detectCores()
 n.cores <- 64
-#n.cores <- 1
+n.cores <- 1
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -30,9 +30,9 @@ print(paste("There are", n.cores, "cores!"))
 args <- commandArgs()
 forc_mod <- args[6]
 fit_mod <- args[7]
-# h <- as.numeric(args[8])
-# horizon <- h
-num_comps <- as.numeric(args[8])
+h <- as.numeric(args[8])
+horizon <- h
+num_comps <- as.numeric(args[9])
 
 hosp_loc <- "../FluSight-forecast-hub/target-data/target-hospital-admissions.csv"
 
@@ -68,8 +68,8 @@ mod_name <- ifelse(fit_mod == "clt_shs",
 
 mod <- cmdstan_model(stan_file = paste0(mod_loc, mod_name))
 
-burn <- 10000; # burn <- 150
-sample <- 50000;# sample <- 100
+burn <- 10000; burn <- 150
+sample <- 50000;sample <- 100
 
 mod_loc <- "../FluSight-forecast-hub/model-output/"
 #models <- list.files(mod_loc)
@@ -88,25 +88,26 @@ locations <- c("US", locations)
 #horizons <- 1:2
 #models <- models[6:7]
 
-
+date <- sub_dates[3]
+loc <- locations[4]
 # sub_dates <- "2023-11-18"
 # locations <- "US"
 # horizons <- 0
-all_forecasts <- foreach(date = sub_dates,
-                                      .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
-                                                    "VGAM", "distr", "dplyr",
-                                                    "lubridate", "scoringRules", "evalcast")
+#all_forecasts <- foreach(date = sub_dates,
+#                                      .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
+#                                                    "VGAM", "distr", "dplyr",
+#                                                    "lubridate", "scoringRules", "evalcast")
                                       # ,.errorhandling = "remove"
-                                      ,.combine = rbind) %:%
+#                                      ,.combine = rbind) %:%
   #foreach(date = sub_dates, .combine = rbind) %:%
-  foreach(loc = locations, .combine = rbind) %dopar% {
+#  foreach(loc = locations, .combine = rbind) %dopar% {
   # foreach(h = horizons, .combine = rbind) %dopar% {
     source("./simulation/simulation_functions.R")
     #mod <- models[3]
     #h <- 1
     #loc <- locations[22]
     #date <- sub_dates[4]
-    
+ 
     if (dir.exists(paste0("model-fits/", forc_mod, "/results")) == FALSE) {
       dir.create(paste0("model-fits/", forc_mod, "/results"), recursive = TRUE)
     }
@@ -117,10 +118,10 @@ all_forecasts <- foreach(date = sub_dates,
       dir.create(paste0("model-fits/", forc_mod, "/summary_diagnostics"),
                  recursive = TRUE)
     }
-    
+   print(paste0(mod_loc, forc_mod)) 
     forc_file <- list.files(paste0(mod_loc, forc_mod), pattern = date)
     forecasts <- read.csv(paste0(mod_loc, forc_mod, "/", forc_file))
-    
+ print("does it get here?")      
     forecast <- forecasts %>% 
       filter(location == as.character(loc) | location == as.numeric(loc), 
              horizon == as.numeric(h) | horizon == as.character(h), 
@@ -135,8 +136,9 @@ all_forecasts <- foreach(date = sub_dates,
     
     dat <- dat %>% 
       filter(quantile != 0)
-    
+    print("is it broken here")
     stan_data <- make_stan_data(dat, size = 1, comps = num_comps, alph = 1)
+    
     if (loc == "US" & date == "2023-11-18" & as.numeric(h) == 0) {
       
       stan_samp <- mod$sample(data = stan_data,
@@ -275,7 +277,7 @@ all_forecasts <- foreach(date = sub_dates,
     }
     
     
-  }
+  #}
 
 saveRDS(all_forecasts, paste0("./model-fits/", forc_mod, "/results/horizon_",
                               h, "_", fit_mod, "_ncomp_", num_comps, ".rds"))
