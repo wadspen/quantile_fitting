@@ -30,9 +30,9 @@ print(paste("There are", n.cores, "cores!"))
 args <- commandArgs()
 forc_mod <- args[6]
 fit_mod <- args[7]
-h <- as.numeric(args[8])
-horizon <- h
-num_comps <- as.numeric(args[9])
+# h <- as.numeric(args[8])
+# horizon <- h
+num_comps <- as.numeric(args[8])
 
 hosp_loc <- "../FluSight-forecast-hub/target-data/target-hospital-admissions.csv"
 
