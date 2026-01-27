@@ -57,7 +57,7 @@ data {
   // vector[n_components] alpha; // component weights prior parameter
   real a;
   real c1;
-  // real alph;
+  real alph;
 }
 
 transformed data{
@@ -75,7 +75,6 @@ parameters {
   // simplex[n_components] pi;
   real<lower=0> n;
   vector<lower=0, upper = 1>[n_components - 1] v;
-  real<lower=0> alph;
 }
 
 transformed parameters {
@@ -94,7 +93,6 @@ transformed parameters {
 }
 
 model {
-  alph ~ normal(0,6);
   v ~ beta(1, alph);
   // target += log((alpha + (a / c1))^(-1) - (alpha + ((a + 1) / c1))^(-1));
   // pi ~ dirichlet(alpha);
