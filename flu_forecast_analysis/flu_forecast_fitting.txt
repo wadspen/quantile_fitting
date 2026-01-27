@@ -1,8 +1,18 @@
-models=( $(ls ../../../FluSight-forecast-hub/model-output/) )
+models=( $(ls ../../FluSight-forecast-hub/model-output/) )
 
 for mod in "${models[@]}"
 #for mod in "UM-DeepOutbreak"
 do
-  sbatch ./flu_forecast_fitting.sh "$mod"
 
+for fit_mod in "clt_sb" "ord_sb" "ind_sb" "clt" "ord" "ind"
+do
+for h in 0 1 2 3
+do
+for ncomp in 12
+do
+  sbatch ./flu_forecast_fitting.sh "$mod" "$fit_mod" "$h" "$ncomp"
+
+done
+done
+done
 done

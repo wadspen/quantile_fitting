@@ -1,10 +1,9 @@
 #!/bin/bash
 
-#SBATCH --time=7:59:00
+#SBATCH --time=10:59:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=64
-#SBATCH --mem=0
-#SBATCH --exclusive
+#SBATCH --mem=70G
 #SBATCH --constraint=intel
 
 #module purge

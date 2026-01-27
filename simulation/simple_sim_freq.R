@@ -27,7 +27,7 @@ dist <- args[6]
 p <- as.numeric(args[7])
 nind <- as.numeric(args[8])
 
-print(dist); print(p); print(nind); print(model)
+#print(dist); print(p); print(nind); print(model)
 
 
 mod_loc <- "../stan_models/"
