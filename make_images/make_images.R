@@ -41,7 +41,7 @@ probs <- c(.01, .025, seq(.05, .95, by = .05), .975, .99)
 #################################################
 all_dens <- data.frame()
 all_quants <- data.frame()
-dist <- "gmix"
+dist <- "lp"
 for (n in samp_sizes) {
 
   if (dist == "lp") {
@@ -149,22 +149,29 @@ for (n in samp_sizes) {
 
 }
 
-# saveRDS(all_dens, "../make_images/gmix_dens_sb.rds")
-# saveRDS(all_quants, "../make_images/gmix_quants_sb.rds")
+all_dens <- all_dens %>% 
+  filter(row_number() > 20020)
+
+all_quants <- all_quants %>% 
+  filter(row_number() > 8284)
+# saveRDS(all_dens, "../make_images/lp_dens_sb.rds")
+# saveRDS(all_quants, "../make_images/lp_quants_sb.rds")
 # saveRDS(all_dens, "../make_images/gmix_dens.rds")
 # saveRDS(all_quants, "../make_images/gmix_quants.rds")
 
 # all_dens <- readRDS("../make_images/lp_dens.rds")
 # all_quants <- readRDS("../make_images/lp_quants.rds")
 dens_fit <- all_dens %>% 
-  filter(model != "ord") %>% 
+  # filter(row_number() > 20020) %>% 
+  filter(model != "ord") %>%
   filter(N %in% c(50, 150, 500, 1000)) %>% 
   mutate(model = ifelse(model == "cdf", "QGP",
                         ifelse(model == "ind", "IND", 
                                ifelse(model == "kern", "KDE", 
                                       ifelse(model == "spline", "SPL",
-                                             model))))) %>% 
-  mutate(model = factor(model, levels = c("KDE", "SPL", "IND", "QGP"))) %>%
+                                             ifelse(model == "ord", "ORD", 
+                                                    model)))))) %>% 
+  mutate(model = factor(model, levels = c("KDE", "SPL", "IND", "QGP", "ORD"))) %>%
   ggplot() +
   geom_ribbon(aes(x = x, ymin = `0.025`, ymax = `0.975`),
               fill = "pink") + 
@@ -186,6 +193,7 @@ dens_fit <- all_dens %>%
 
 
 quant_fit <- all_quants %>% 
+  # filter(row_number() > 8284) %>%
   filter(model != "ord") %>% 
   filter(N %in% c(50, 150, 500, 1000)) %>% 
   mutate(model = ifelse(model == "cdf", "QGP",
@@ -206,6 +214,7 @@ quant_fit <- all_quants %>%
   # geom_point(data = data.frame(quantile = true_quantiles, prob = probs),
   #            aes(x = prob, y = quantile)) +
   geom_point(data = all_quants %>% 
+               # filter(row_number() > 8284) %>%
                filter(!is.na(quantile), N <= 1000) %>% 
                dplyr::select(prob, quantile, N) %>% 
                unique(),
