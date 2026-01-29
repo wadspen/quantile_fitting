@@ -82,7 +82,7 @@ levels <- list(
 
 
 
-reps <- 200
+reps <- 60
 n <- samp_sizes[nind]
 
 #p <- 7
@@ -92,7 +92,7 @@ n <- samp_sizes[nind]
 #n <- 500
 #dist <- "norm"
 #replicate <- 2
-distance_ind <- foreach(replicate = 1:reps,
+distance <- foreach(replicate = 1:reps,
                     .packages = c("cmdstanr", "evmix", "distfromq", "EnvStats",
                                   "VGAM", "distr", "dplyr", "LaplacesDemon",
                                   "stringr")
@@ -226,7 +226,7 @@ distance_ind <- foreach(replicate = 1:reps,
                                         contains("pi"))
                       # m_params <- apply(params, MARGIN = 2, FUN = mean)
 
-		      ds <- floor(round(seq(1, dim(draws)[1], length.out = 500), 0))
+		      ds <- floor(round(seq(1, dim(draws)[1], length.out = 200), 0))
                       mix_kl_vec <- c()
                       mix_tv_vec <- c()
                       mix_uwd_vec <- c()
