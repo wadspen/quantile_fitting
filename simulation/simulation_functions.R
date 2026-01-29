@@ -299,7 +299,11 @@ est_quantile <- function(p, draws) {
 }
 
 
-
+make_norm_mix <- function(x, mean, sd, weight) {
+  sapply(x, function(xi) {
+    sum(weight * dnorm(xi, mean, sd))
+  })
+}
 
 
 

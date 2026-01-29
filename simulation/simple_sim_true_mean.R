@@ -61,8 +61,8 @@ mod <- cmdstan_model(stan_file = paste0(mod_loc, mod_name))
 
 
 
-burn <- 1000
-samples <- 1000
+burn <- 10000
+samples <- 50000
 out_s <- 5000
 sample_type <- "MCMC"
 
@@ -226,13 +226,13 @@ distance <- foreach(replicate = 1:reps,
                                         contains("pi"))
                       # m_params <- apply(params, MARGIN = 2, FUN = mean)
 
-		      ds <- floor(round(seq(1, dim(draws)[1], length.out = 200), 0))
+		                  ds <- floor(round(seq(1, dim(draws)[1], length.out = 400), 0))
                       mix_kl_vec <- c()
                       mix_tv_vec <- c()
                       mix_uwd_vec <- c()
-                      for (d in ds) {
+                      for (d in 1:length(ds)) {
                       
-                        m_params <- params[d,] #apply(params, MARGIN = 2, FUN = mean)
+                        m_params <- params[ds[d],] #apply(params, MARGIN = 2, FUN = mean)
                         mus <- as.numeric(m_params[str_detect(names(m_params), "mus")])
                         sigmas <- as.numeric(m_params[str_detect(names(m_params), "sigmas")])
                         wts <- as.numeric(m_params[str_detect(names(m_params), "pi")])
@@ -258,10 +258,10 @@ distance <- foreach(replicate = 1:reps,
                         
                         #make_normmix(mus, sigmas, wts)
                         
-                        mix_dist <- make_normmix(mus, sigmas, wts)
+                        # mix_dist <- make_normmix(mus, sigmas, wts)
                         
-                        
-                        dmix <- function(x) {d(mix_dist)(x)}
+                        dmix <- function(x) {make_norm_mix(x, mus, sigmas, wts)}
+                        # dmix <- function(x) {d(mix_dist)(x)}
                         # qmix <- function(p) {q(mix_dist)(p)}
                         # pmix <- function(x) {p(mix_dist)(x)}
                         # pu <- function(x) {pdist(qmix(x))}
