@@ -61,8 +61,8 @@ mod <- cmdstan_model(stan_file = paste0(mod_loc, mod_name))
 
 
 
-burn <- 10000
-samples <- 50000
+burn <- 1000
+samples <- 1000
 out_s <- 5000
 sample_type <- "MCMC"
 
@@ -82,7 +82,7 @@ levels <- list(
 
 
 
-reps <- 8
+reps <- 200
 n <- samp_sizes[nind]
 
 #p <- 7
@@ -171,7 +171,7 @@ distance_ind <- foreach(replicate = 1:reps,
                       fit_mod <- stan_fit_draws(mod, stan_data,
                                                 sampler = sample_type, burn = burn, samp = samples,
                                                 refresh = 100, out_s = 5000)
-                      fit <- mod$optimize(stan_data, iter = 10000)
+                      #fit <- mod$optimize(stan_data, iter = 10000)
                       end <- Sys.time()
                       tdiff <- end - start
                       tdiff <- as.numeric(tdiff, "mins")
@@ -225,10 +225,12 @@ distance_ind <- foreach(replicate = 1:reps,
                         dplyr::select(contains("mus") | contains("sigmas") |
                                         contains("pi"))
                       # m_params <- apply(params, MARGIN = 2, FUN = mean)
+
+		      ds <- floor(round(seq(1, dim(draws)[1], length.out = 500), 0))
                       mix_kl_vec <- c()
                       mix_tv_vec <- c()
                       mix_uwd_vec <- c()
-                      for (d in 201:dim(params)[1]) {
+                      for (d in ds) {
                       
                         m_params <- params[d,] #apply(params, MARGIN = 2, FUN = mean)
                         mus <- as.numeric(m_params[str_detect(names(m_params), "mus")])
