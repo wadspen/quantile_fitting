@@ -1,10 +1,11 @@
 #!/bin/bash
 
-#SBATCH --time=8:59:00
+#SBATCH --time=16:59:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=64
 #SBATCH --mem=70G
 #SBATCH --constraint=intel
+#SBATCH --exlcude=nova22-44, nova22-43
 
 #module purge
 #module load zlib-ng/2.1.6-nf73pqi curl/8.11.1-xzf3njp proj/9.4.1-3qfgrvd gcc udunits gsl
@@ -16,4 +17,4 @@ module load r/4.4.1 gcc udunits proj gsl r-rgdal
 
 
 
-Rscript simple_sim_cover.R "$1" "$2" "$3" "$4" "$5"
+Rscript simple_sim_true_mean.R "$1" "$2" "$3" "$4" "$5"
