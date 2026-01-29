@@ -469,6 +469,29 @@ Thus for estimating $\theta$ one only needs to estimate $\sigma^2$. A special
 case of the QGP for QM of a location-scale family is the normal QGP which we 
 define and explore below.
 
+Often $F_{\theta}$ is not easily invertible making
+$Q_{\boldsymbol{\theta}}$ a 
+complicated function which can be evaluated only via numerical optimization 
+which is often computationally expensive and/or inaccurate. A simple solution 
+is to model the PIT transformed quantiles from the data rather than modeling 
+the quantiles directly. The QGP model (\ref{eq:qgp}) is then reformulated to be 
+model (\ref{eq:pit_qgp}), where  $\Gamma_{ij} = p_i\wedge p_j - p_i p_j$ as in
+(\ref{eq:tqclt}).   
+
+\begin{equation}
+    \label{eq:pit_qgp}
+F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p})) \sim 
+N_K(\boldsymbol{p}, n^{-1} \boldsymbol{\Gamma})
+\end{equation}
+By modeling the PIT quantiles, the only function which requires evaluating is 
+the CDF $F_{\boldsymbol{\theta}}$. Here both $\boldsymbol{p}$ and $\boldsymbol{\Gamma}$ are 
+given, and solving for the transformation 
+$F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p}))$ is unnecessary for our 
+purposes. A Bayesian fit of (\ref{eq:pit_qgp}) is straightforward, requiring 
+only that $F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p}))$ 
+be evaluated as 
+part of the acceptance ratio of a Markov chain Monte Carlo (MCMC) iteration.
+
 
 \subsection{Normal QGP}
 
@@ -534,7 +557,7 @@ situations will require a more complicated QF which doesn't allow for modeling
 the data as a linear regression. Below we consider for instance a finite 
 mixture distribution. 
 
-\subsection{Finite normal mixture QGP}
+\subsection{Normal mixture distribution QGPs}
 
 When the functional form of true QF which one desires to estimate is unknown
 or has a complex shape, such as having several modes, it may be desirous to
@@ -542,7 +565,7 @@ select a more general $Q_{\theta}$ which may approximate the unknown QF. In
 this section we propose two such options, namely the finite mixture distribution
 and the Dirichlet process mixture.
 
-\subsubsection{Finite normal mixture QGP}
+\subsubsection{Finite normal mixture}
 For a continuous random variable distributed according to a finite mixture 
 distribution, the CDF takes the form of (\ref{eq:norm_mix}). Here there are $C$ 
 component distributions where $c \in \{1, ..., C\}$, $F_{\theta_c}$ is a 
@@ -552,105 +575,147 @@ $Q_{\theta}$ as the inverse of $F_{\theta}$ in (\ref{eq:norm_mix}).
 
 \begin{equation}
     \label{eq:norm_mix}
-    F_{\boldsymbol{\theta}}(x) = \sum_{c = 1}^C w_c F_{\psi_c}(x)
+    F_{\theta}(x) = \sum_{c = 1}^C w_c F_{\theta_c}(x)
 \end{equation}
 
-Often $F_{\boldsymbol{\theta}}$ will not be easily invertible, 
-thus $Q_{\boldsymbol{\theta}}$ will be a 
-complicated function which can be evaluated only via numerical optimization 
-which is often computationally expensive and/or inaccurate. A simple solution 
-is to model the PIT transformed quantiles from the data rather than modeling 
-the quantiles directly. The QGP model (\ref{eq:qgp}) is then reformulated to be 
-model (\ref{eq:pit_qgp}), where  $\Gamma_{ij} = p_i\wedge p_j - p_i p_j$ as in
-(\ref{eq:tqclt}).   
-
-\begin{equation}
-    \label{eq:pit_qgp}
-F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p})) \sim 
-N_K(\boldsymbol{p}, n^{-1} \boldsymbol{\Gamma})
-\end{equation}
-By modeling the PIT quantiles, the only function which requires evaluating is 
-the CDF $F_{\boldsymbol{\theta}}$. Here both $\boldsymbol{p}$ and $\boldsymbol{\Gamma}$ are 
-given, and solving for the transformation 
-$F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p}))$ is unnecessary for our 
-purposes. A Bayesian fit of (\ref{eq:pit_qgp}) is straightforward, requiring 
-only that $F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p}))$ 
-be evaluated as 
-part of the acceptance ratio of a Markov chain Monte Carlo (MCMC) iteration.
-
-When $F_{\boldsymbol{\theta}}$ is set as a mixture distribution from (\ref{eq:norm_mix}), 
-it is important to consider the functional forms of the components 
+When $F_{\theta}$ is set as a mixture distribution, 
+it is important to consider the functional forms of the component CDFs 
 $F_{\theta_c}$ as well as the total number of components $C$.
+A popular decision is to set each $F_{\theta_c}$ to be the CDF of a normal
+distribution. In this case 
+$F_{\theta_c}(x) = \Phi((x - \mu_c)/\sigma_c))$ 
+where $\mu_c$ and $\sigma^2_c$ are the mean and variance parameters of a 
+normal distribution, $\theta_c = (\mu_c, \sigma^2_c)$, and (\ref{eq:norm_mix})
+is termed a finite mixture of normals distribution.
 A common claim is that any continuous distribution may be approximated by a 
-finite mixture of normal 
+finite mixture of normals with a sufficiently large number of components
 \cite[]{peel2000finite,nguyen2019approximations,nguyen2020approximation}.
 This claim may be optimistic, but as shown in a simulation study in 
 section \ref{sec:simulation_analyses}, setting each $F_{\theta_c}$ to be the 
 CDF of a normal distribution makes for reasonable approximations of 
-non-normal distributions. Thus
-$F_{\psi_c}(x) = F_{\mu_c, \sigma_c} = \Phi \left( \frac{x - \mu_c}{\sigma^2_c} \right)$. 
-Here the parameter vector is
-$\theta = (\boldsymbol{w}, \boldsymbol{\mu}, \boldsymbol{\sigma}^2)$
-where $\boldsymbol{w} = (w_1, ..., w_C)$, 
-$\boldsymbol{\mu} = (\mu_1, ..., \mu_C)$, 
-$\boldsymbol{\sigma}^2 = (\sigma^2_1, ..., \sigma^2_C)$. 
+non-normal distributions. 
 
-
-\subsubsection{Dirichlet process mixture}
 When selecting the total number of components, one desires that $C$ be large
-enough for $F_{\boldsymbol{\theta}}$ to be sufficiently flexible to 
+enough for $F_{\theta}$ to be sufficiently flexible to 
 capture the unknown 
 distribution shape. At the same time, one also 
 desires that $C$ is not so large that overfitting occurs
 or the computational burden becomes unnecessarily heavy. For a given set of 
 quantile data, one option is to anlayze QM fits for different values of $C$ and
-select an optimal number of components.
-Another option is to model (\ref{eq:norm_mix}) as a Dirichlet process mixture (DPM)
-we take a Bayesian nonparametric approach to select the number of 
-components. The we set the prior on $\boldsymbol{\theta}$ to be as in 
-(\ref{eq:dp_prior}) where $\theta_c = (w_c, \mu_c, \sigma^2_c)$ and
-$\text{DP}_H(M, \mathcal{G}_0)$ denotes the Dirichlet process (DP) 
-\cite[]{muller2015bayesian, ferguson1973bayesian} prior 
-truncated at $H$ components, concentration parameter $M$ and base 
-distribution $\mathcal{G}_0$. In the standard DP setup $H = \infty$, 
-but setting $H$ to be finite as proposed by ?? 
-\cite[]{ishwaran2000markov,}
-makes for easier computation while still approximating a DP. 
+select an optimal number of components. A less tedious and often more robust
+process is to model the QF via a Bayesian nonparametric approach as described
+below.
 
+\subsubsection{Dirichlet process mixture}
+When the form of the QF is unknown,
+an alternative to estimating $Q_{\theta}$ via a finite mixture of normals 
+is to estimate the function with a Dirichlet process mixture (DPM) model.  
+The DPM as defined in \cite[]{muller2015bayesian} was introduced by
+Ferguson \cite[]{ferguson1983bayesian} and Lo \cite[]{lo1984class} and is 
+a infinite extension of the finite mixture distribution (\ref{eq:norm_mix}).
+The DPM is defined in (\ref{eq:dpm}) where $F_{\psi}$ is a 
+CDF function and $\mathcal{G}$ is a probability distribution defined on 
+$\Theta$. In the normal mixture case, $\psi = (\mu_{\psi}, \sigma_{\psi}^2)$
+where $\mu_{\psi}$ and $\sigma^2_{\psi}$ are the mean a variance parameters
+respectively.
 
 \begin{equation}
-  F_{\boldsymbol{\theta}} = \int F_
+  F_{\mathcal{G}}(x) = \int F_{\psi}(x)d\mathcal{G}(\psi)
+  \label{eq:dpm}
 \end{equation}
-
+The DPM is completed by defining the hierarchical prior distributions in 
+\ref{eq:dpm_priors}. Here $\text{DP}(M, G_0)$ denotes the Dirichlet 
+process (DP) prior with 
+total mass parameter $M$ and $G_0$ is a base distribution. 
 
 \begin{align}
-  \theta_c | \mathcal{G} &\overset{\text{iid}}{\sim} \mathcal{G}\\ \nonumber
-  \mathcal{G} &\sim \text{DP}_H(M, \mathcal{G}_0)
-  \label{eq:dp_prior}
+  \theta_h | \mathcal{G} &\overset{\text{iid}}{\sim} \mathcal{G}\\ 
+  \mathcal{G} &\sim \text{DP}(M, G_0) \nonumber
+  \label{eq:dpm_priors}
 \end{align}
 
-The DP is a discrete random probability measure and can be written as
-$\mathcal{G}(\cdot) = \sum_{h=1}^H w_h \delta_{\theta_h}(\cdot)$, 
-where $w_1, w_2, ...$ are weights on the simplex and $\delta_a(\cdot)$ is the
-Dirac measure at $a$. A useful DP construction is the stick breaking 
-constuction introduced by Sethuraman
-\cite[]{sethuraman1994constructive}
-where the weights $w_h$ are generated as
-$w_h = v_h \prod_{l < h} (1 - v_l)$ where $v_h \sim \text{Beta}(1, M)$
-for $h = 1, ..., H - 1$ and $v_H = 1$. The parameters $\theta_c$ are drawn
-from a base distribution $\mathcal{G}_0$ which in our case is the product of 
-prior distributions for $\mu_c$ and $\sigma_c^2$. 
+The DP is an almost surely discrete distribution introduced by 
+Ferguson \cite[]{ferguson1973bayesian} as a nonparametric model, and following
+Sethuraman \cite[]{sethuraman1994constructive} can be represented with the 
+stick breaking construction. In this construction, $\mathcal{G}$ is 
+represented by the infinite sum in (\ref{eq:dp_sum}) where the
+$\theta_h$ are i.i.d draws from the base distribution $G_0$ and 
+$\delta_a(\cdot)$ is the Dirac measure at $a$. We set $G_0$ to be the product
+of the prior distributions for $\mu_{\psi}$ and $\sigma^2_{\psi}$.
+The $w_h$ are weights defined
+as $w_h = v_h \prod_{l < h} (1 - v_l)$ where 
+$v_h \sim \text{Beta}(1, M)$ and $\{\theta_h\}$ and $\{v_h\}$ are
+independent.
 
+\begin{equation}
+  \mathcal{G}(\cdot) = \sum_{h=1}^{\infty} w_h \delta_{\theta_h}(\cdot)
+  \label{eq:dp_sum}
+\end{equation}
 
-In section \ref{sec:simulation_analyses}, we analyze PIT transformed QGP model 
-(\ref{eq:pit_qgp}) where $F_{\theta}$ is set as a normal mixture distribution. 
-Fitting this model proved faster 
-and produced better results than trying to fit the QGP model (\ref{eq:qgp}) and 
-evaluating $Q_{\theta}$ the QF of a normal mixture. In fact we found that in 
+The DP can be approximated by the finite Dirichlet process (FDP)
+$\mathcal{G}(\cdot) = \sum_{h=1}^H w_h \delta_{\theta_h}(\cdot)$ for some 
+$H < \infty$. The FDP was introduced by 
+Ishwaran and Zarepour \cite[]{ishwaran2000markov} and 
+Ishwaran and James \cite[]{ishwaran2002approximate} as a close approximation
+to the DP with major computational advantages. The FDP can also be represented
+with the stick breaking construction as defined above with the only difference
+being that $v_h  \sim \text{Beta}(1, M)$ for $h = 1, ..., H - 1$ and 
+$v_h = 1$. This ensures that $\sum_{h = 1}^H w_h = 1$.
+
+In section \ref{sec:simulation_analyses} a simulation study is included 
+where sample quantiles are generated from ``unknown'' continuous distributions.
+In a real data analysis in \ref{sec:qm_analysis}, given quantiles are also 
+from unknown distributions.
+% , so to estimate $Q_{\theta}$, we utilize either the
+% finite mixture distribution in (\ref{eq:norm_mix}) or the 
+% DPM in (\ref{eq:dpm}). 
+In these analyses, we analyze PIT transformed QGP model 
+(\ref{eq:pit_qgp}) where $F_{\theta}$ is set as a final normal mixture 
+distribution (\ref{eq:norm_mix}) or the DPM (\ref{eq:dpm}). 
+Fitting model (\ref{eq:pit_qgp}) proved much 
+faster than fitting (\ref{eq:qgp}), and the results were also better.
+ In fact we found that in 
 cases where $F_{\theta}$ was a simpler function, such as a normal or 
 exponential distribution, fitting model (\ref{eq:pit_qgp}) was at least as fast 
 and the results were at least as good as fitting (\ref{eq:qgp}). Thus when 
 possible, we elected to fit (\ref{eq:pit_qgp}).  
+
+
+
+
+
+
+
+
+
+
+
+% Often $F_{\theta}$ is not easily invertible --as is the case where
+% $F_{\theta}$ is defined as a finite mixture (\ref{eq:norm_mix}) or a DPM
+% (\ref{eq:dpm}). Thus under these constructions,
+% $Q_{\boldsymbol{\theta}}$ is a 
+% complicated function which can be evaluated only via numerical optimization 
+% which is often computationally expensive and/or inaccurate. A simple solution 
+% is to model the PIT transformed quantiles from the data rather than modeling 
+% the quantiles directly. The QGP model (\ref{eq:qgp}) is then reformulated to be 
+% model (\ref{eq:pit_qgp}), where  $\Gamma_{ij} = p_i\wedge p_j - p_i p_j$ as in
+% (\ref{eq:tqclt}).   
+% 
+% \begin{equation}
+%     \label{eq:pit_qgp}
+% F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p})) \sim 
+% N_K(\boldsymbol{p}, n^{-1} \boldsymbol{\Gamma})
+% \end{equation}
+% By modeling the PIT quantiles, the only function which requires evaluating is 
+% the CDF $F_{\boldsymbol{\theta}}$. Here both $\boldsymbol{p}$ and $\boldsymbol{\Gamma}$ are 
+% given, and solving for the transformation 
+% $F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p}))$ is unnecessary for our 
+% purposes. A Bayesian fit of (\ref{eq:pit_qgp}) is straightforward, requiring 
+% only that $F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p}))$ 
+% be evaluated as 
+% part of the acceptance ratio of a Markov chain Monte Carlo (MCMC) iteration.
+
+
 
 
 
