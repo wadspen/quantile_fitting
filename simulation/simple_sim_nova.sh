@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#SBATCH --time=16:59:00
+#SBATCH --time=12:59:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=64
 #SBATCH --mem=70G
 #SBATCH --constraint=intel
-#SBATCH --exlcude=nova22-44, nova22-43
+
 
 #module purge
 #module load zlib-ng/2.1.6-nf73pqi curl/8.11.1-xzf3njp proj/9.4.1-3qfgrvd gcc udunits gsl

@@ -82,7 +82,7 @@ levels <- list(
 
 
 
-reps <- 60
+reps <- 200
 n <- samp_sizes[nind]
 
 #p <- 7
