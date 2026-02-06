@@ -16,7 +16,7 @@ library(parallel)
 library(doParallel)
 library(doMC)
 #n.cores <- detectCores()
-n.cores <- 64
+n.cores <- 62
 #n.cores <- 1
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
@@ -33,7 +33,7 @@ fit_mod <- args[7]
 h <- as.numeric(args[8])
 horizon <- h
 num_comps <- as.numeric(args[9])
-
+print(forc_mod); print(fit_mod);
 hosp_loc <- "../FluSight-forecast-hub/target-data/target-hospital-admissions.csv"
 
 hosp_data <- read.csv(hosp_loc) %>% 
@@ -219,6 +219,7 @@ all_forecasts <- foreach(date = sub_dates,
       
       score_sum
     } else {
+      start <- Sys.time()
       stan_samp <- mod$sample(data = stan_data,
                               iter_warmup = burn,
                               iter_sampling = sample,
@@ -226,7 +227,9 @@ all_forecasts <- foreach(date = sub_dates,
                               adapt_delta = .999,
                               refresh = 100)
       
-      
+      end <- Sys.time()
+      tdiff <- end - start
+      tdiff <- as.numeric(tdiff, "mins")
       draws <- stan_samp$draws(format = "df") %>% 
         filter(if_all(everything(), ~ !is.na(.)))
       
@@ -277,6 +280,7 @@ all_forecasts <- foreach(date = sub_dates,
                fit_model = fit_mod)
       
       score_sum$comps <- num_comps
+      score_sum$fittime <- tdiff
       score_sum
       
       
