@@ -280,9 +280,9 @@ eval_sum <- function(summary, true_params, quantile_data) {
   params_res <- params_res %>% dplyr::select(contains(true_params[,1])) %>% 
     dplyr::select(-contains("rho"))
     # dplyr::select(width_mu, width_sigma, width_n, cover95_mu, cover95_sigma, cover95_n)
-  
+
   quants_res <- summary %>% 
-    filter(str_detect(variable, "Q_rep")) %>% 
+    filter(str_detect(variable, "Q_rep")) %>%
     mutate(true_quantile = quantile_data$true_quantile) %>% 
     mutate(width = q97.5 - q2.5, 
            cover = between(true_quantile, q2.5, q97.5)) %>% 

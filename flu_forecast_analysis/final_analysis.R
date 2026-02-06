@@ -164,7 +164,7 @@ all_forecasts <- foreach(date = sub_dates,
       
       
       saveRDS(diag, paste0("model-fits/", forc_mod, 
-                           "/summary_diagnostics/diagnostics.rds"))
+                           "/summary_diagnostics/", fit_mod, "_diagnostics.rds"))
       
       # saveRDS(diag, paste0("model-fits-ord/all_diags/", mod, "diagnostics.rds"))
       
