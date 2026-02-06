@@ -12,7 +12,7 @@ library(parallel)
 library(doParallel)
 library(doMC)
 #n.cores <- detectCores()
-n.cores <- 1
+n.cores <- 62
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -24,7 +24,6 @@ sample_type = args[6]
 p <- as.numeric(args[7])
 nind <- as.numeric(args[8])
 print(p); print(nind)
-
 cltmod <- cmdstan_model(stan_file = 
                           '../stan_models/cdf_normal_quantiles.stan')
 
@@ -83,19 +82,19 @@ out_s <- 10000
 samples <- 50000
 models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
 
-reps <- 1
+reps <- 500
 set.seed(92)
 n <- samp_sizes[nind]
 seeds <- sample(999999999, reps)
 pdist <- function(x) {pnorm(x, mu, sigma)} 
 replicate <- 4
-#distance <- foreach(replicate = 1:reps,
-#                    .packages = c("cmdstanr", "evmix", "distfromq", "dplyr", "tidyr",
-#                                  "janitor", "posterior", "stringr")
-#                    #,.errorhandling = "remove"
-#                    ,.combine = rbind) %dopar% {
-#                      #foreach(n = samp_sizes, .combine = rbind) %:%
-#                      #	foreach(p = 1:length(levels), .combine = rbind) %dopar% {
+distance <- foreach(replicate = 1:reps,
+                    .packages = c("cmdstanr", "evmix", "distfromq", "dplyr", "tidyr",
+                                  "janitor", "posterior", "stringr")
+                    ,.errorhandling = "remove"
+                    ,.combine = rbind) %dopar% {
+                      #foreach(n = samp_sizes, .combine = rbind) %:%
+                      #	foreach(p = 1:length(levels), .combine = rbind) %dopar% {
                       
                       true_params <- data.frame(variable = c("mu", "sigma", "n"), 
                                                 truth = c(mu, sigma, n))
@@ -173,14 +172,14 @@ replicate <- 4
                                                       posterior::default_summary_measures()[1:4],
                                                       quantiles = ~ quantile2(., probs = c(0.025, 0.975)),
                                                       posterior::default_convergence_measures())
-                      print("does it get here?") 
+                       
                       sum_eval <- rbind(eval_sum(sum_cltn, true_params, data),
                                         eval_sum(sum_ordn, true_params, data),
                                         eval_sum(sum_clt, true_params, data),
                                         eval_sum(sum_ord, true_params, data),
                                         eval_sum(sum_ind, true_params, data)
                       )
-                      print("how about here?")
+                      
                       sum_eval$time <- times
                       #sum_eval$model <- mod
                       sum_eval$model <- models[1:5]
@@ -193,6 +192,7 @@ replicate <- 4
                       
                       
                       
+		      
                       params_cltn <- fit_cltn[[2]]$draws(variables = c("mu", "sigma"), 
                                                     format = "df") %>% 
                                       as.data.frame()
@@ -223,7 +223,7 @@ replicate <- 4
                       ind_tv <- c()
                       
                       ds <- floor(round(seq(1, dim(params_cltn)[1], length.out = 400), 0))
-                      
+                       
                       for (d in 1:length(ds)) {
                         
                         # pull parameters once
@@ -283,10 +283,11 @@ replicate <- 4
                           ddist
                         )
                         
-                        if (d %% 10 == 0) message(d)
+                        #if (d %% 10 == 0) message(d)
                       }
                       
                       
+		     
                       
                       # true_draws <- rnorm(length(draws_clt), mu, sigma)
                       # 
@@ -421,12 +422,12 @@ replicate <- 4
                       
                       
                       
- #                   }
+                   }
 
 
 saveRDS(distance, paste0("sim_scores/normtm_", sample_type, "/", 
                            "size", n, "_probs", length(levels[[p]]), 
-                           "_scores.rds"), row.names = FALSE)
+                           "_scores.rds"))
 
 
 
