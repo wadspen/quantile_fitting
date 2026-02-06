@@ -1,5 +1,8 @@
 source("./simulation_functions.R")
 library(cmdstanr)
+library(dplyr)
+library(stringr)
+library(posterior)
 library(distfromq)
 library(evmix)
 library(janitor)
@@ -8,7 +11,8 @@ library(tidyr)
 library(parallel)
 library(doParallel)
 library(doMC)
-n.cores <- detectCores()
+#n.cores <- detectCores()
+n.cores <- 1
 my.cluster <- makeCluster(n.cores, type = "PSOCK")
 doParallel::registerDoParallel(cl = my.cluster)
 foreach::getDoParRegistered()
@@ -79,19 +83,19 @@ out_s <- 10000
 samples <- 50000
 models <- c("cltn", "ordn", "clt", "ord", "ind", "spline", "kern")
 
-reps <- 500
+reps <- 1
 set.seed(92)
 n <- samp_sizes[nind]
 seeds <- sample(999999999, reps)
 pdist <- function(x) {pnorm(x, mu, sigma)} 
-
-distance <- foreach(replicate = 1:reps,
-                    .packages = c("cmdstanr", "evmix", "distfromq", "dplyr", "tidyr",
-                                  "janitor", "posterior")
-                    ,.errorhandling = "remove"
-                    ,.combine = rbind) %dopar% {
-                      #foreach(n = samp_sizes, .combine = rbind) %:%
-                      #	foreach(p = 1:length(levels), .combine = rbind) %dopar% {
+replicate <- 4
+#distance <- foreach(replicate = 1:reps,
+#                    .packages = c("cmdstanr", "evmix", "distfromq", "dplyr", "tidyr",
+#                                  "janitor", "posterior", "stringr")
+#                    #,.errorhandling = "remove"
+#                    ,.combine = rbind) %dopar% {
+#                      #foreach(n = samp_sizes, .combine = rbind) %:%
+#                      #	foreach(p = 1:length(levels), .combine = rbind) %dopar% {
                       
                       true_params <- data.frame(variable = c("mu", "sigma", "n"), 
                                                 truth = c(mu, sigma, n))
@@ -169,14 +173,14 @@ distance <- foreach(replicate = 1:reps,
                                                       posterior::default_summary_measures()[1:4],
                                                       quantiles = ~ quantile2(., probs = c(0.025, 0.975)),
                                                       posterior::default_convergence_measures())
-                      
+                      print("does it get here?") 
                       sum_eval <- rbind(eval_sum(sum_cltn, true_params, data),
                                         eval_sum(sum_ordn, true_params, data),
                                         eval_sum(sum_clt, true_params, data),
                                         eval_sum(sum_ord, true_params, data),
                                         eval_sum(sum_ind, true_params, data)
                       )
-                      
+                      print("how about here?")
                       sum_eval$time <- times
                       #sum_eval$model <- mod
                       sum_eval$model <- models[1:5]
@@ -310,11 +314,11 @@ distance <- foreach(replicate = 1:reps,
                       dspline <- make_d_fn(probs, quantiles)
                       rkern <- function(n) {rkden(n, quantiles, kernel = "gaussian")}
                       dkern <- function(x) {dkden(x, quantiles, kernel = "gaussian")}
-                      pucltno <- function(x) {pdist(qcltn(x))}
-                      puordno <- function(x) {pdist(qordn(x))}
-                      puclto <- function(x) {pdist(qclt(x))}
-                      puordo <- function(x) {pdist(qord(x))}
-                      puindo <- function(x) {pdist(qind(x))}
+                      #pucltno <- function(x) {pdist(qcltn(x))}
+                      #puordno <- function(x) {pdist(qordn(x))}
+                      #puclto <- function(x) {pdist(qclt(x))}
+                      #puordo <- function(x) {pdist(qord(x))}
+                      #puindo <- function(x) {pdist(qind(x))}
                       
                       #pu <- function(x) {ecdf(udraws)(x)}
                       #uwd1 <- unit_wass_dist(pu, d = 1)
@@ -350,11 +354,11 @@ distance <- foreach(replicate = 1:reps,
                       uwd2_spline <- unit_wass_dist(puspline, d = 2)
                       uwd2_kern <- unit_wass_dist(pukern, d = 2)
                       
-                      uwd1_cltno <- unit_wass_dist(pucltno, d = 1)
-                      uwd1_ordno <- unit_wass_dist(puordno, d = 1)
-                      uwd1_clto <- unit_wass_dist(puclto, d = 1)
-                      uwd1_ordo <- unit_wass_dist(puordo, d = 1)
-                      uwd1_indo <- unit_wass_dist(puindo, d = 1)
+                      #uwd1_cltno <- unit_wass_dist(pucltno, d = 1)
+                      #uwd1_ordno <- unit_wass_dist(puordno, d = 1)
+                      #uwd1_clto <- unit_wass_dist(puclto, d = 1)
+                      #uwd1_ordo <- unit_wass_dist(puordo, d = 1)
+                      #uwd1_indo <- unit_wass_dist(puindo, d = 1)
                       
                       
                       ks_cltn <- ks.test(udraws_cltn, "punif")$statistic
@@ -397,8 +401,8 @@ distance <- foreach(replicate = 1:reps,
                       uwd2s <- c(uwd2_cltn, uwd2_ordn, uwd2_clt, uwd2_ord, uwd2_ind, uwd2_spline,
                                  uwd2_kern)
                       
-                      uwd1os <- c(uwd1_cltno, uwd1_ordno, uwd1_clto, uwd1_ordo, uwd1_indo, uwd1_spline,
-                                  uwd1_kern) 
+                      #uwd1os <- c(uwd1_cltno, uwd1_ordno, uwd1_clto, uwd1_ordo, uwd1_indo, uwd1_spline,
+                      #            uwd1_kern) 
                       
                       kss <- c(ks_cltn, ks_ordn, ks_clt, ks_ord, ks_ind, ks_spline, ks_kern)
                       
@@ -410,19 +414,19 @@ distance <- foreach(replicate = 1:reps,
                       
                       
                       data.frame(rep = replicate, n = n, probs = p, quants = length(probs), 
-                                 model = models, uwd1 = uwd1s, uwd1o = uwd1os, 
+                                 model = models, uwd1 = uwd1s,
                                  uwd2 = uwd2s, ks = kss, kld = klds,
                                  tv = tvs) %>% 
                         left_join(sum_eval, by = "model")
                       
                       
                       
-                    }
+ #                   }
 
 
-write.csv(distance, paste0("sim_scores/normtm_", sample_type, "/", 
+saveRDS(distance, paste0("sim_scores/normtm_", sample_type, "/", 
                            "size", n, "_probs", length(levels[[p]]), 
-                           "_scores.csv"), row.names = FALSE)
+                           "_scores.rds"), row.names = FALSE)
 
 
 
