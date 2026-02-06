@@ -4,11 +4,11 @@ for mod in "${models[@]}"
 #for mod in "UM-DeepOutbreak"
 do
 
-for fit_mod in "clt_sb" "ord_sb" "ind_sb" "clt" "ord" "ind"
+for fit_mod in "clt_sb" "ord_sb" "ind_sb" #"clt" "ord" "ind"
 do
 for h in 0 1 2 3
 do
-for ncomp in 12
+for ncomp in 20
 do
   sbatch ./flu_forecast_fitting.sh "$mod" "$fit_mod" "$h" "$ncomp"
 
