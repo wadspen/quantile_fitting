@@ -178,7 +178,9 @@ sum_cover %>%
 #########################################
 
 exp_score <- readRDS("../simulation/comb_res/scores_exp_MCMC.rds")
-exp_score <- readRDS("../simulation/sim_scores/exp_MCMC/exp_comb_res.rds")
+# exp_score <- readRDS("../simulation/sim_scores/exp_MCMC/exp_comb_res.rds")
+
+exp_score <- readRDS("../simulation/sim_scores/exptm_MCMC/comb_res.rds")
 
 
 exp_sum <- exp_score %>% 
@@ -315,6 +317,50 @@ cowplot::plot_grid(cover_plot, dist_plot, ncol = 1,
 
 
 
+exp_dist %>% 
+  filter(quants %in% 2:23, metric != "mwd2") %>% 
+  filter(quants %in% c(3, 5, 7, 9, 11, 13, 15, 19, 23)) %>%
+  # filter(quants == 23) %>%
+  filter(n %in% c(150, 500, 1000, 5000)) %>%
+  # group_by(metric, quants, n, model) %>% 
+  # summarise(dist = dist - mean(dist)) %>% 
+  filter(!(model %in% c("cltn", "ordn", "kern"))) %>% 
+  mutate(facet = ifelse(metric == "mwd1", "UWD1", 
+                        ifelse(metric == "mtv", "TV", "KLD"))) %>% 
+  mutate(facet = factor(facet, levels = c("UWD1", "TV", "KLD"))) %>% 
+  ggplot() +
+  geom_path(aes(x = quants, y = dist, group = model, 
+                colour = model, linetype = model), size = 1.1, alpha = .9) +
+  ggh4x::facet_grid2(n~facet, scale = "free", independent = "y") +
+  scale_colour_manual(name = "Model",
+                      labels = c("QGP", "IND","ORD", "SPL"),
+                      values = c("#0072B2", "#009E73",
+                                 "#E69F00", "#CC79A7")) +
+  scale_linetype_manual(name= "Model",
+                        labels=c("QGP", "IND","ORD", "SPL"),
+                        values=c("solid", "dashed",
+                                 "longdash","dotdash")) +
+  scale_y_continuous(n.breaks = 3) +
+  ylab("") +
+  xlab("# Quantiles K") +
+  # facet_wrap(~metric) +
+  theme_bw() +
+  theme(axis.text.y=element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x=element_text(size=13),
+        axis.title=element_text(size=18),
+        strip.text.y = element_text(size = 14),
+        strip.text.x = element_text(size = 15),
+        legend.title = element_text(size = 13),
+        strip.text = element_text(margin = margin(0,0,0,0, "cm")),
+        legend.text = element_text(size = 11),
+        # legend.position = c(.93,.7),
+        legend.position = "bottom",
+        legend.key.height = unit(.3, 'cm'), 
+        legend.key.width = unit(.4, 'cm'))
+
+
+
 #########################################
 ###############Norm Scores###############
 #########################################
@@ -323,10 +369,10 @@ library(dplyr)
 library(ggplot2)
 library(stringr)
 library(tidyr)
-setwd("./make_images/")
 norm_score <- readRDS("../simulation/comb_res/scores_norm_MCMC.rds")
 norm_score <- readRDS("../simulation/sim_scores/norm_MCMC/norm_comb_res.rds")
 
+norm_score <- readRDS("../simulation/sim_scores/normtm_MCMC/comb_res.rds")
 
 norm_sum <- norm_score %>% 
   mutate(n = factor(n)) %>%
@@ -365,6 +411,7 @@ cover_plot <- norm_sum %>%
                         ifelse(param == "mcs", "sigma", 
                                ifelse(param == "mcn", "n", "Q(p)")))) %>% 
   mutate(facet = factor(facet, levels = c("mu", "sigma", "n", "Q(p)"))) %>% 
+  # filter(facet == "Q(p)") %>% 
   ggplot() +
   geom_hline(yintercept = 95, size = .9) +
   geom_path(aes(x = n, y = mean_param*100, group = model, 
@@ -456,8 +503,53 @@ dist_plot <- norm_dist %>%
 
 cowplot::plot_grid(cover_plot, dist_plot, ncol = 1,
                    align = "v")
+
   
 
+
+
+
+norm_dist %>% 
+  filter(quants %in% 2:23, metric != "mwd2") %>% 
+  filter(quants %in% c(3, 5, 7, 9, 11, 15, 19,23)) %>%
+  # filter(quants == 23) %>%
+  filter(n %in% c(150, 500, 1000, 5000)) %>%
+  # group_by(metric, quants, n, model) %>% 
+  # summarise(dist = dist - mean(dist)) %>% 
+  filter(!(model %in% c("cltn", "ordn", "kern"))) %>% 
+  mutate(facet = ifelse(metric == "mwd1", "UWD1", 
+                        ifelse(metric == "mtv", "TV", "KLD"))) %>% 
+  mutate(facet = factor(facet, levels = c("UWD1", "TV", "KLD"))) %>% 
+  ggplot() +
+  geom_path(aes(x = quants, y = dist, group = model, 
+                colour = model, linetype = model), size = 1.1, alpha = .9) +
+  ggh4x::facet_grid2(n~facet, scale = "free", independent = "y") +
+  scale_colour_manual(name = "Model",
+                      labels = c("QGP", "IND","ORD", "SPL"),
+                      values = c("#0072B2", "#009E73",
+                                 "#E69F00", "#CC79A7")) +
+  scale_linetype_manual(name= "Model",
+                        labels=c("QGP", "IND","ORD", "SPL"),
+                        values=c("solid", "dashed",
+                                 "longdash","dotdash")) +
+  scale_y_continuous(n.breaks = 3) +
+  ylab("") +
+  xlab("# Quantiles K") +
+  # facet_wrap(~metric) +
+  theme_bw() +
+  theme(axis.text.y=element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x=element_text(size=13),
+        axis.title=element_text(size=18),
+        strip.text.y = element_text(size = 14),
+        strip.text.x = element_text(size = 15),
+        legend.title = element_text(size = 13),
+        strip.text = element_text(margin = margin(0,0,0,0, "cm")),
+        legend.text = element_text(size = 11),
+        # legend.position = c(.93,.7),
+        legend.position = "bottom",
+        legend.key.height = unit(.3, 'cm'), 
+        legend.key.width = unit(.4, 'cm'))
 
 
 

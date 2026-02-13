@@ -105,48 +105,48 @@
 \\~\\
 \normalsize
 
-\emph{
-The paper has been read by two referees and myself. The review team finds that 
-the paper is novel and well-written. The authors should revise their work 
-taking account of the comments of the referees. Of particular interest is 
-exploring sensitivity to the number of quantiles and misspecification of the 
-parametric model, and explaining details of the fitting in the case of finite 
-mixture models.}
-\\~\\
+% \emph{
+% The paper has been read by two referees and myself. The review team finds that 
+% the paper is novel and well-written. The authors should revise their work 
+% taking account of the comments of the referees. Of particular interest is 
+% exploring sensitivity to the number of quantiles and misspecification of the 
+% parametric model, and explaining details of the fitting in the case of finite 
+% mixture models.}
+% \\~\\
 
 \Huge
 \noindent Reviewer 1
 \normalsize
 
-\section*{Overview}
-\emph{
-I have carefully reviewed the manuscript. The authors propose to estimate the 
-entire probability distribution of a random variable given a finite set of 
-estimated quantiles. To do so, the authors leverage the quantile
-central limit theorem in order to motivate their so-called Quantile Gaussian 
-Process Model. Essentially, they
-use a Gaussian process to model the finite set of quantiles, with the mean 
-and covariance functions given by
-a pre-specified distribution for the data. This enables quantile prediction 
-and posterior predictive sampling
-through the probability integral transform, which enables both CDF and PDF 
-estimation. They explore
-ways to incorporate this framework for nonparametric distribution functions. 
-An extensive simulation study
-compares both the estimation accuracy and the computational efficiency of 
-their approach relative to other
-Quantile Matching approaches. A real data analysis provides a new evaluation 
-of quantile forecasts for flu
-hospitalizations.
-}
+% \section*{Overview}
+% \emph{
+% I have carefully reviewed the manuscript. The authors propose to estimate the 
+% entire probability distribution of a random variable given a finite set of 
+% estimated quantiles. To do so, the authors leverage the quantile
+% central limit theorem in order to motivate their so-called Quantile Gaussian 
+% Process Model. Essentially, they
+% use a Gaussian process to model the finite set of quantiles, with the mean 
+% and covariance functions given by
+% a pre-specified distribution for the data. This enables quantile prediction 
+% and posterior predictive sampling
+% through the probability integral transform, which enables both CDF and PDF 
+% estimation. They explore
+% ways to incorporate this framework for nonparametric distribution functions. 
+% An extensive simulation study
+% compares both the estimation accuracy and the computational efficiency of 
+% their approach relative to other
+% Quantile Matching approaches. A real data analysis provides a new evaluation 
+% of quantile forecasts for flu
+% hospitalizations.
+% }
 
-\emph{
-I think this is a nice paper; it is well-written and provides some interesting 
-ideas about estimating
-distributions with coarse information. However, I think there is some room 
-for additional detail and methods
-development. I elaborate in further detail below,
-}
+% \emph{
+% I think this is a nice paper; it is well-written and provides some interesting 
+% ideas about estimating
+% distributions with coarse information. However, I think there is some room 
+% for additional detail and methods
+% development. I elaborate in further detail below,
+% }
 
 \section*{Sensitivity Analyses are Needed}
 \emph{
@@ -164,23 +164,108 @@ the authors to look more into the quantiles available - utility frontier,
 perhaps with further simulations.
 }
 
+In the revised manuscript, we enlarged the simulation study beginning on page 
+14 and the study beginning on page 18 by including 
+results for increasing values of $K$ from 3 to 23. 
+For the page 14 study, the results are shown in 
+plots in the supplementary materials, but we refer to them in the main text.
+Referring to figure \ref{fig:norm_quant_sens} 
+which was added to the supplementary material, 
+the following is stated on page 15 in the text.
+
+\begin{quote}
+    Additional results in the supplementary materials show model performance under
+    different values of quantiles $K$. The results show that for the QGP, ORD, and
+    IND models, the QM fits improves drastically from $K = 3$ to $K = 5$ and
+    typically improves as $K$ increases. However, the results
+    also show that when 
+    estimated quantiles in 
+    the extreme tails are included, the QM fits may suffer due to 
+    the large tail uncertainty. For example, when $K = 11$ the most extreme
+    quantiles included are the $0.05^{th}$ and $0.95^{th}$, but for $K = 15$, the
+    additional quantiles include the $0.01^{th}, 0.025^{th}, 0.975^{th}$, and
+    $0.99^{th}$.
+    The effect is present for the QGP,
+    but the negative effect
+    decreases if the sample size $n$ is large.
+\end{quote}
+
+
+\begin{figure}[hbt!]
+\centering
+  \includegraphics[width = 1\linewidth]{Images/norm_quant_sensitive.png}
+\caption{Distance between the true normal distribution
+and the estimated QM predictive distribution averaged over the 500 replications
+for increasing number of quantiles $K$. 
+Distances
+include the UWD1, TV, and KLD, and sample size $n$ is an additional facet.}
+\label{fig:norm_quant_sens}
+\end{figure}
+
+Simulation results for various sizes of $K$ are also included in the simulation
+studies in 4.2 beginning on page 18. The results are coupled with results
+for additional modeling using a Dirichlet process mixture model. These are
+included in our response to the reviewer's comment 2 under 
+``Unknown Marginals''.
 
 \section*{Finite Sample Behavior vs. Asymptotic Behavior?}
 \emph{
 I am confused at some of the coverage results presented in the simulation 
 study. For example, looking at
 Figure 5, the empirical coverage rates of the QGP when assuming a Gaussian 
-mixture all approach 100%.
+mixture all approach 100\%.
 By contrast, when the marginal distribution is correctly specified, the 
 intervals under-cover (and severely so
 for small sample sizes) the true parameter values (e.g., Figure 2).
 This result is counter-intuitive and should be explored more. One would 
-think that coverage would close
+think that coverage would be close to
 the enumerated level when the model is correctly specified. When the model 
 is misspecified, the intervals
 should be biased and thus decrease coverage. The results presented in Figures 
 2 and 5 tell the opposite story. Why is this?
 }
+
+The confusion here is partly as a result of us not explaining carefully what 
+was in the plots. The coverage results in figure 2 are strictly for the true
+model parameters. The coverage results in figure 5 (figure 8 in the 
+revised manuscript) are results for the 
+true quantiles and not the parameters. 
+To help make this clarification, figure 2 was replaced with
+figure \ref{fig:normal_cov_dists} below. 
+The new figure has a coverage plot for $Q(p)$, the 
+true quantiles. We also clarified in the text that the results in the now
+figure 8 represent coverage of the ``true quantiles $Q(p)$''.
+
+      \begin{figure}[hbt!]
+      %\begin{subfigure}{.465\linewidth}
+        % \includegraphics[width=.4\linewidth]{Images/normal_coverage.png}
+        % \caption{}
+        % \label{MLEDdet}
+      %\end{subfigure}\hfill % <-- "\hfill"
+      %\begin{subfigure}{.524\linewidth}
+        % \includegraphics[width=.4\linewidth]{Images/normal_dists.png}
+        \centering
+        \includegraphics[width=1\linewidth]{Images/normal_cover_dist.png}
+        % \caption{}
+        % \label{energydetPSK}
+      %\end{subfigure}
+      \caption{Posterior coverage (top) for models of $K = 23$ quantiles
+      calculated as the percentage of times the 
+      true parameter fell within the modeled 95\% credible interval over the 500 
+      replications. Coverage is faceted by the normal parameters $\mu$, $\sigma$,
+      and shown by increasing sample size 
+      ($x$-axis). The five models QGP, ORD, QGP-n, ORD-n, and IND are colored as 
+      shown the legend. The horizontal line (black) is at the nominal 95\% level. 
+      Only QGP and ORD appear for inference for the parameter $n$ as they are the 
+      only two models which 
+      estimate an unknown $n$.
+      Distance between the true distribution and the estimated QM predictive 
+      distribution (bottom) averaged over the 500 replications. Distances include the 
+      UWD1, TV, and KLD for increasing sample 
+      size ($x$-axis).}
+      \label{fig:normal_cov_dists}
+      \end{figure}
+
 
 \section*{Unknown Marginals}
 \emph{
@@ -193,41 +278,236 @@ analysis. However, I have a few questions/suggestions for the authors to
 consider:
 }
 
-\begin{itemize}
-  
-  \item \emph{Rather than pre-specifying the number of mixture components when
-  they use
-  the finite mixture as the
-  marginal model, is it possible to learn the number of mixture components
-  during model estimation,
-  perhaps using a truncated Dirichlet Process Prior on the mixing weights?
-  How will this impact computation? If the authors are able to do allow for
-  an unknown number of mixture components, this
-  will really strengthen the comparison to ORD. The results between the two
-  methods are quite similar,
-  though I note that the authors demonstrate the potential computational
-  advantages of QGP relative
-  to ORD.
-  }
-
-\item \emph{Can the authors explain how they do parameter estimation
-(i.e. more means
-and variances/covariances)
-under the QGP when the finite mixture is assumed?
-}
-
-\item \emph{Why are there spikes in the estimated density functions in Figure 4
-for some of the sample sizes, but
-not all? I would assume that the spikes would smooth out as the sample sizes
-get bigger, but this is
-not the case.
-}
-\end{itemize}
+\begin{enumerate}
+                
+                \item \emph{Rather than pre-specifying the number of mixture components when
+                they use
+                the finite mixture as the
+                marginal model, is it possible to learn the number of mixture components
+                during model estimation,
+                perhaps using a truncated Dirichlet Process Prior on the mixing weights?
+                How will this impact computation? If the authors are able to do allow for
+                an unknown number of mixture components, this
+                will really strengthen the comparison to ORD. The results between the two
+                methods are quite similar,
+                though I note that the authors demonstrate the potential computational
+                advantages of QGP relative
+                to ORD.
+                }
+                \\~\\
+                We greatly appreciated this comment. It led us to model the unknown 
+                distribution using a latent truncated Dirichlet process mixture (DPM)
+                prior and
+                examine model performance under both the original finite mixture (FM) and 
+                DPM settings. In the revised manuscript, it is shown in the simulation study
+                for the unknown distributions that the DPM provides robustness which the 
+                FM does not, especially where $K$ is small. The DPM is immediately implemented
+                in each of the QGP, ORD, and IND models, so it doesn't necessarily 
+                provide the QGP with a large advantage over the ORD. But the additional 
+                assessment into the number of normal components $C$ in the FM setting show
+                in our simulation settings
+                that the QGP is more robust than ORD if one specifies $C$ as being very large.
+                We discuss this a little more in the revised supplementary materials.
+                In the DPM setting, large $C$ isn't shown as a problem becuase the prior
+                provides regularization to a smaller number of components. 
+                
+                Section 3.2.2 was added to describe the DPM model. It's included below.
+                
+              \begin{quote}
+              \section*{3.2.2 Dirichlet process mixture}
+                            When the form of the QF is unknown,
+                            an alternative to estimating $Q_{\theta}$ via a finite mixture of normals 
+                            is to estimate the function with a Dirichlet process mixture (DPM) model.  
+                            The DPM as defined in Muller et al. \cite[]{muller2015bayesian} was introduced by
+                            Ferguson \cite[]{ferguson1983bayesian} and Lo \cite[]{lo1984class} and is 
+                            an infinite extension of the FM distribution in (\ref{eq:norm_mix}).
+                            The DPM is defined in (\ref{eq:dpm}) where $F_{\psi}$ is a 
+                            CDF function and $\mathcal{G}$ is a probability distribution defined on 
+                            $\Theta$. In the normal mixture case, $\psi = (\mu_{\psi}, \sigma_{\psi})$
+                            where $\mu_{\psi}$ and $\sigma^2_{\psi}$ are the mean a variance parameters
+                            respectively.
+                            
+                            \begin{equation}
+                              F_{\mathcal{G}}(x) = \int F_{\psi}(x)d\mathcal{G}(\psi)
+                              \label{eq:dpm}
+                            \end{equation}
+                            The DPM is completed by defining the hierarchical prior distributions in 
+                            (\ref{eq:dpm_priors}). Here $\text{DP}(M, G_0)$ denotes the Dirichlet 
+                            process (DP) prior with 
+                            total mass parameter $M$ and $G_0$ is a base prior distribution. 
+                            \newpage
+                            \begin{align}
+                              \psi_c | \mathcal{G} &\overset{\text{iid}}{\sim} \mathcal{G} \nonumber \\ 
+                              \mathcal{G} &\sim \text{DP}(M, G_0) 
+                              \label{eq:dpm_priors}
+                            \end{align}
+                            
+                            
+                            The DP is an almost surely discrete distribution introduced by 
+                            Ferguson \cite[]{ferguson1973bayesian} as a nonparametric model, and following
+                            Sethuraman \cite[]{sethuraman1994constructive} can be represented with the 
+                            stick breaking construction. In this construction, $\mathcal{G}$ is 
+                            represented by the infinite sum in (\ref{eq:dp_sum}) where the
+                            $\psi_c$ are i.i.d draws from the base distribution $G_0$ and 
+                            $\delta_a(\cdot)$ is the Dirac measure at $a$. We set $G_0$ to be the product
+                            of the prior distributions for $\mu_{\psi}$ and $\sigma_{\psi}$.
+                            The $\omega_c$ are weights defined
+                            as $\omega_c = v_c \prod_{l < c} (1 - v_l)$ where 
+                            $v_c \sim \text{Beta}(1, M)$ and $\{\psi_c\}$ and $\{v_c\}$ are
+                            independent.
+                            
+                            \begin{equation}
+                              \mathcal{G}(\cdot) = \sum_{c=1}^{\infty} w_h \delta_{\psi_c}(\cdot)
+                              \label{eq:dp_sum}
+                            \end{equation}
+                            Using the stick breaking construction, an equivalent representation of 
+                            (\ref{eq:dpm}) is 
+                            \[
+                              F_{\mathcal{G}}(x) = \sum_{c = 1}^{\infty} \omega_c F_{\psi_c}.
+                            \]
+                            
+                            The DPM can be approximated by the truncated Dirichlet process mixture (TDPM)
+                            by replacing (\ref{eq:dp_sum}) with 
+                            $\mathcal{G}(\cdot) = \sum_{c=1}^C \omega_c \delta_{\psi_c}(\cdot)$ for  
+                            $C < \infty$. The FDP was introduced by 
+                            Ishwaran and Zarepour \cite[]{ishwaran2000markov} and 
+                            Ishwaran and James \cite[]{ishwaran2002approximate} as a close approximation
+                            to the DP with major computational advantages. The TDPM 
+                            stick breaking construction is similar to that defined above with the 
+                            only difference
+                            being that $v_c  \sim \text{Beta}(1, M)$ for $c = 1, ..., C - 1$ and 
+                            $v_c = 1$. This ensures that $\sum_{c = 1}^C w_c = 1$.
+                          % example.
+              \end{quote}
+                
+              We compared fitting results using the FM to those using the TDPM and included
+              them in in the simulation study in 4.2. The results also include those for 
+              various values of $K$ as described earlier. The two figures with
+              these results (figures 7 and 8 in the main text) are below along with
+              the paragraphs describing the results.
+              
+              \begin{quote}
+                  Figures \ref{fig:mixC_K} and \ref{fig:numK_dist} highlight differences 
+                  between the FM and TDPM constructions for QGP, ORD, and IND models where
+                  sample quantiles are estimated from samples of the EV distribution. 
+                  Figure \ref{fig:mixC_K} shows how the value $C$ influences the goodness of QM 
+                  fit in UWD1 for several values of $K$. The TDPM models are affected little by
+                  the size of $C$ for each $K$, whereas for smaller values of $K$, the FM models
+                  are greatly affected. Specifically, the ORD suffers the most from setting $C$ 
+                  too high and the IND suffers the least. The results in this figure are for the
+                  EV distribution. 
+                  Figure \ref{fig:numK_dist} shows how each of the six models performs in QM 
+                  goodness of fit by UWD1 as the number of quantiles $K$ increases from
+                  3 to 23. For $K$ less than 11, the goodness of fit of all models worsens
+                  rapidly but much more rapidly for FM than for TDPM. Under the FM 
+                  construction the ORD suffers the most from small $K$.
+                  Overall, the regularization provided by the TDPM construction provides more 
+                  robust fits than are provided by the TDPM. Results in the supplmentary materials
+                  show how under the TDPM construction and for $C = 20$ how many components are
+                  actually used to fit the QM models. In almost all cases, the TDPM selects no 
+                  more than 6 components which contribute to the fit.
+                  Figures similar to \ref{fig:mixC_K} and 
+                  \ref{fig:numK_dist} but for the La and MIX distributions are included in the
+                  supplementary materials.
+                  
+                  \begin{figure}[hbt!]
+                  \centering
+                  \includegraphics[width=1.1\linewidth]{Images/uwd1_dpm_vs_fm.png}
+                  \caption{UWD1 distance between extreme value distribution $EV(0,1)$
+                  and QM estimated distributions for increasing sample size $n$. Plots are 
+                  faceted by number of quantiles $K$ (columns) 
+                  and number of mixture distribution 
+                  components $C$ (rows). Results are colored by mixture distribution model, and
+                  linetypes are by model type.
+                  }
+                  \label{fig:mixC_K}
+                  \end{figure}
+                  
+                  
+                  
+                  \begin{figure}[hbt!]
+                  \centering
+                  \includegraphics[width=1.1\linewidth]{Images/uwd1_num_quantiles_analysis.png}
+                  \caption{UWD1 distance between extreme value distribution $EV(0,1)$ and
+                  QM estimated distributions for increasing number of quantiles $K$. Plots are
+                  facetd by sample size $n$ (columns) and by true distribution (rows).
+                  Results are colored by mixture distribution model, and
+                  linetypes are by model type.
+                  }
+                  \label{fig:numK_dist}
+                  \end{figure}
+              \end{quote}
+              % \\~\\
+              \item \emph{Can the authors explain how they do parameter estimation
+              (i.e. more means
+              and variances/covariances)
+              under the QGP when the finite mixture is assumed?
+              }
+              \\~\\
+              We state at the beginning of section 4 that all model fitting is done
+              using HMC in \texttt{Stan}.
+              When the finite mixture is assumed, it is because the distribution family is
+              unknown, or we believe it may not be reasonable to assume a simple family like
+              the normal. Hence when performing QM in this situation, we're more interested
+              in approximating the distribution and not in estimating the parameters. 
+              At the same time, under the mixture model we don't expect parameters to be 
+              identifiable without adding significant constraints to the model or sampler, 
+              which constraints don't always work. We modified what was said earlier 
+              near the end of page 18
+              to help clarify this. It now reads:
+              
+              \begin{quote}
+                Often when implementing posterior 
+                sampling for a mixture distribution model, 
+                one deals with an issue called the label-switching problem. This is where for a
+                mixture distribution parameter $\theta = \{\theta_1,...,\theta_C\}$, the model 
+                likelihood is the same for different permutations of $\theta$. This lack of 
+                identifiability for elements of $\theta$ makes parameter inference useless, 
+                but the predictive distribution may still be close to the true distribution 
+                \cite[]{stephens2000dealing}.
+                \\~\\
+              \end{quote}
+              
+              \item \emph{Why are there spikes in the estimated density functions in Figure 4
+              for some of the sample sizes, but
+              not all? I would assume that the spikes would smooth out as the sample sizes
+              get bigger, but this is
+              not the case.
+              \\~\\
+              }
+              
+              We realized that the spikes were as a result of including too 
+              many components in the mixture distribution model. When we fit
+              the models with using the TDPM prior, they quit showing up.
+              We replaced the images in the original manuscript with some
+              made after fitting with the TDPM prior and made sure to include
+              some discussion on the added robustness from the TDPM as 
+              alluded to earlier.
+              
+              \begin{figure}[hbt!]
+                  \centering
+                  %\begin{subfigure}{.5\textwidth}
+                    \centering
+                    % \includegraphics[width=\paperwidth]{Images/quants_dens_evd.png}
+                    \makebox[\textwidth][c]{%
+                          \adjustbox{trim=0 0 0 0,clip}{\includegraphics[width=1.3\textwidth]{Images/quants_dens_evd.png}}%
+                      }
+                  
+                  \caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for 
+                  $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the extreme 
+                  value distribution $Ev(0,1)$. The quantile fits (left) show the true quantiles 
+                  (black) with either the QM fit line (grey) or the credible intervals of 50\% 
+                  (red) and 95\% (pink). 
+                  The estimated PDF plots (right) show the true PDF (black) with either a the QM 
+                  estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink).}
+                  \label{fig:evd_fits}
+              \end{figure}
+\end{enumerate}
 
 
 \section*{Minor Points}
 
-\begin{itemize}
+\begin{itemize}[1.]
  
   \item \emph{Feldman and Kowal 2024, JMLR consider the problem of estimating 
   distribution 
@@ -235,16 +515,30 @@ not the case.
   finite set of quantiles and use smoothing techniques, and so should be cited 
   in the introduction
   }
+  \\~\\
+  To address this, we included the following statement in the introduction.
+  \begin{quote}
+      Related to QM, Feldman and Kowal introduce a margin adjustment for infering
+      the marginal CDFs of a Gaussian copula model by combining the model with 
+      the rank-likelihood in a missing data under multiple data types problem
+      \cite[]{feldman2024nonparametric}.
+  \end{quote}
   
   
   \item \emph{Can the authors clarify whether they performed QM using the QGP for all 
   160,000 forecasts?
   }
   
-  \item \emph{Pg. 21, please reformat: “Unsurprisingly, the correlation between the QM 
+  
+  \item \emph{Pg. 21, please reformat: ``Unsurprisingly, the correlation between the QM 
   CRPS and WIS is very
-  highly correlated for each method”
+  highly correlated for each method''
   }
+  This now reads
+  \begin{quote}
+    Unsurprisingly the correlation between the QM CRPS and WIS is very high for each method.
+  \end{quote}
+  
 \end{itemize}
 \newpage
 
@@ -252,46 +546,46 @@ not the case.
 \noindent Reviewer 2
 \normalsize
 
-\emph{
-The paper proposes the Quantile Gaussian Process model for recovering a 
-continuous distribution from a set of estimated quantiles. The approach 
-builds on the well-known asymptotic distribution of sample quantiles, treating 
-the vector of quantiles as approximately multivariate normal with a covariance 
-structure determined by the quantile density function. The Bayesian 
-formulation allows for uncertainty quantification and incorporation of prior 
-information, which is useful in applications where one has domain knowledge 
-about the underlying distribution.
-}
+% \emph{
+% The paper proposes the Quantile Gaussian Process model for recovering a 
+% continuous distribution from a set of estimated quantiles. The approach 
+% builds on the well-known asymptotic distribution of sample quantiles, treating 
+% the vector of quantiles as approximately multivariate normal with a covariance 
+% structure determined by the quantile density function. The Bayesian 
+% formulation allows for uncertainty quantification and incorporation of prior 
+% information, which is useful in applications where one has domain knowledge 
+% about the underlying distribution.
+% }
 
-\emph{
-The theoretical development is clear and the connection to standard linear 
-regression in the location-scale case is a nice insight that makes the model 
-accessible. The alternative formulation using the probability integral 
-transform is a practical contribution that extends the method to situations
-where the quantile function is difficult to evaluate but the cumulative 
-distribution function is available. This is demonstrated convincingly with the 
-generalized lambda and metalog distributions, where the order statistics 
-approach struggles computationally.
-}
+% \emph{
+% The theoretical development is clear and the connection to standard linear 
+% regression in the location-scale case is a nice insight that makes the model 
+% accessible. The alternative formulation using the probability integral 
+% transform is a practical contribution that extends the method to situations
+% where the quantile function is difficult to evaluate but the cumulative 
+% distribution function is available. This is demonstrated convincingly with the 
+% generalized lambda and metalog distributions, where the order statistics 
+% approach struggles computationally.
+% }
 
-\emph{
-The simulation studies are thorough. The comparisons with spline 
-interpolation, kernel density estimation, the independent error model, and 
-the order statistics model are fair and well executed. The results show that 
-the QGP performs comparably to the order statistics model for standard 
-distributions while offering advantages for quantile-defined distributions. 
-The coverage analysis demonstrates that the asymptotic approximation works 
-well even for moderate sample sizes.
-}
+% \emph{
+% The simulation studies are thorough. The comparisons with spline 
+% interpolation, kernel density estimation, the independent error model, and 
+% the order statistics model are fair and well executed. The results show that 
+% the QGP performs comparably to the order statistics model for standard 
+% distributions while offering advantages for quantile-defined distributions. 
+% The coverage analysis demonstrates that the asymptotic approximation works 
+% well even for moderate sample sizes.
+% }
 
-\emph{
-The application to the CDC FluSight forecasts is relevant and timely. 
-Disease forecasting hubs increasingly rely on quantile submissions, and the 
-ability to convert these to full distributions for scoring with the 
-continuous ranked probability score or for ensemble construction is 
-practically valuable. The analysis of over 160,000 forecasts shows that the 
-method scales to real applications.
-}
+% \emph{
+% The application to the CDC FluSight forecasts is relevant and timely. 
+% Disease forecasting hubs increasingly rely on quantile submissions, and the 
+% ability to convert these to full distributions for scoring with the 
+% continuous ranked probability score or for ensemble construction is 
+% practically valuable. The analysis of over 160,000 forecasts shows that the 
+% method scales to real applications.
+% }
 
 \emph{
 One area where the paper could say more is the sensitivity of the QGP to model 
@@ -299,13 +593,110 @@ misspecification when using mixture distributions to approximate unknown
 shapes. The paper reports that four components work well for the 
 distributions considered, but some discussion of how one might detect 
 inadequacy in practice would be helpful for users applying this to new problems.
+\\~\\
 }
+      In the revised manuscript, we enlarged the simulation study beginning on page 
+      14 and the study beginning on page 18 by including 
+      results for increasing values of $K$ from 3 to 23. 
+      For the page 14 study, the results are shown in 
+      plots in the supplementary materials, but we refer to them in the main text.
+      Referring to figure \ref{fig:norm_quant_sens} 
+      which was added to the supplementary material, 
+      the following is stated on page 15 in the text.
+      
+      \begin{quote}
+          Additional results in the supplementary materials show model performance under
+          different values of quantiles $K$. The results show that for the QGP, ORD, and
+          IND models, the QM fits improves drastically from $K = 3$ to $K = 5$ and
+          typically improves as $K$ increases. However, the results
+          also show that when 
+          estimated quantiles in 
+          the extreme tails are included, the QM fits may suffer due to 
+          the large tail uncertainty. For example, when $K = 11$ the most extreme
+          quantiles included are the $0.05^{th}$ and $0.95^{th}$, but for $K = 15$, the
+          additional quantiles include the $0.01^{th}, 0.025^{th}, 0.975^{th}$, and
+          $0.99^{th}$.
+          The effect is present for the QGP,
+          but the negative effect
+          decreases if the sample size $n$ is large.
+      \end{quote}
+      
+      
+      \begin{figure}[hbt!]
+      \centering
+        \includegraphics[width = 1\linewidth]{Images/norm_quant_sensitive.png}
+      \caption{Distance between the true normal distribution
+      and the estimated QM predictive distribution averaged over the 500 replications
+      for increasing number of quantiles $K$. 
+      Distances
+      include the UWD1, TV, and KLD, and sample size $n$ is an additional facet.}
+      \label{fig:norm_quant_sens}
+      \end{figure}
+      
+      Simulation results for various sizes of $K$ are also included in the simulation
+      studies in 4.2 beginning on page 18. The results are coupled with results
+      for additional modeling using a Dirichlet process mixture model.The two figures with
+              these results (figures 7 and 8 in the main text) are below along with
+              the paragraphs describing the results.
+              
+              \begin{quote}
+                  Figures \ref{fig:mixC_K} and \ref{fig:numK_dist} highlight differences 
+                  between the FM and TDPM constructions for QGP, ORD, and IND models where
+                  sample quantiles are estimated from samples of the EV distribution. 
+                  Figure \ref{fig:mixC_K} shows how the value $C$ influences the goodness of QM 
+                  fit in UWD1 for several values of $K$. The TDPM models are affected little by
+                  the size of $C$ for each $K$, whereas for smaller values of $K$, the FM models
+                  are greatly affected. Specifically, the ORD suffers the most from setting $C$ 
+                  too high and the IND suffers the least. The results in this figure are for the
+                  EV distribution. 
+                  Figure \ref{fig:numK_dist} shows how each of the six models performs in QM 
+                  goodness of fit by UWD1 as the number of quantiles $K$ increases from
+                  3 to 23. For $K$ less than 11, the goodness of fit of all models worsens
+                  rapidly but much more rapidly for FM than for TDPM. Under the FM 
+                  construction the ORD suffers the most from small $K$.
+                  Overall, the regularization provided by the TDPM construction provides more 
+                  robust fits than are provided by the TDPM. Results in the supplmentary materials
+                  show how under the TDPM construction and for $C = 20$ how many components are
+                  actually used to fit the QM models. In almost all cases, the TDPM selects no 
+                  more than 6 components which contribute to the fit.
+                  Figures similar to \ref{fig:mixC_K} and 
+                  \ref{fig:numK_dist} but for the La and MIX distributions are included in the
+                  supplementary materials.
+                  
+                  \begin{figure}[hbt!]
+                  \centering
+                  \includegraphics[width=1.1\linewidth]{Images/uwd1_dpm_vs_fm.png}
+                  \caption{UWD1 distance between extreme value distribution $EV(0,1)$
+                  and QM estimated distributions for increasing sample size $n$. Plots are 
+                  faceted by number of quantiles $K$ (columns) 
+                  and number of mixture distribution 
+                  components $C$ (rows). Results are colored by mixture distribution model, and
+                  linetypes are by model type.
+                  }
+                  \label{fig:mixC_K}
+                  \end{figure}
+                  
+                  
+                  
+                  \begin{figure}[hbt!]
+                  \centering
+                  \includegraphics[width=1.1\linewidth]{Images/uwd1_num_quantiles_analysis.png}
+                  \caption{UWD1 distance between extreme value distribution $EV(0,1)$ and
+                  QM estimated distributions for increasing number of quantiles $K$. Plots are
+                  facetd by sample size $n$ (columns) and by true distribution (rows).
+                  Results are colored by mixture distribution model, and
+                  linetypes are by model type.
+                  }
+                  \label{fig:numK_dist}
+                  \end{figure}
+              \end{quote}
 
-\emph{
-The writing is clear throughout and the paper is well organized. The code 
-availability will support adoption by practitioners working with forecast 
-hubs and similar applications.
-}
 
 
+
+
+
+
+
+\bibliography{master_bib}
 \end{document}

@@ -1,8 +1,8 @@
 \section{Introduction} \label{seq:intro}
 
 The use of quantiles in statistical modeling and in reporting inferential or 
-predictive uncertainty is widespread, and reporting several quantiles or 
-predictive intervals is common for probabilistic forecasting 
+predictive uncertainty is widespread. Likewise, reporting several quantiles or 
+predictive intervals is common in probabilistic forecasting 
 \cite[]{gneiting2023model}. Quantiles can be easier to interpret than 
 statistical model parameters and are often used to define confidence or 
 prediction intervals. Thus with multiple quantiles for a particular outcome, 
@@ -10,11 +10,11 @@ one has a measure of uncertainty.
 Estimating quantiles in the presence of covariates via 
 quantile regression is a common
 statistical and machine learning strategy, and where parametric models are 
-complicated or nonexistent quantiles may be easier to estimate via machine 
+complicated or nonexistent, quantiles may be easier to estimate via machine 
 learning methods \cite[]{martin2022direct,chung2021beyond, koenker2017quantile, 
 koenker1978regression}. In estimating multiple quantiles, quantile regression 
-often provides a tradeoff with parametric modeling in that for some problems 
-quantile regression may be easier to perform but that predicted quantiles lack 
+often provides a tradeoff with parametric modeling where for some problems 
+quantile regression is easier to perform but the predicted quantiles lack 
 the detailed information of a fully defined predictive distribution 
 \cite[]{pohle2020murphy}. 
 % Quantile regression may also lead to other issues 
@@ -30,7 +30,7 @@ Census or medical data, which can be very large or personal to the subjects,
 may be published as summary or aggregate data including percentiles (quantiles) 
 and medians 
 \cite[]{simpson2023interpolating,cdc2022growthcharts,nirwan2020bayesian}. In 
-collaborative forecast initiatives and competitions, probabilistic forecasts 
+collaborative forecast hubs, probabilistic forecasts 
 are often submitted as a set of predictive quantiles 
 % for given probabilities 
 \cite[]{gneiting2023model,hong2016probabilistic}. In recent years, disease 
@@ -43,26 +43,31 @@ cramer2022evaluation,sherratt2023predictive,bracher2021evaluating}.
  
 A set of quantiles may provide distributional information for an event, but it 
 is not as informative as a distribution defined by a cumulative distribution 
-function (CDF), the inverse-CDF or quantile function QF, or a probability 
-density/mass function (PDF), and quantiles provide no distribution tail 
-information --information for values below the smallest quantile or above the 
-largest quantile. Another drawback for using quantiles to define a distribution 
+function (CDF), the inverse-CDF or quantile function (QF), or a probability 
+density/mass function (PDF). 
+Likewise, a set of quantiles provides no information on
+values below the smallest quantile or above the 
+largest quantile. In other words, it provides no distribution tail information.
+Another drawback for using quantiles to define a distribution 
 is that many tools for evaluating or scoring continuous distributions require 
 a CDF or PDF
-\cite[]{gneiting2007strictly,gneiting2014probabilistic}. Likewise combining 
+\cite[]{gneiting2007strictly,gneiting2014probabilistic}. Combining 
 distributions into an ensemble distribution is commonly 
 done by aggregating multiple QFs or 
-CDFs/PDFs, the latter being possible only when a CDF/PDF is available 
+CDFs/PDFs, but the latter of these is possible only when a CDF/PDF is available 
 \cite[]{gneiting2005calibrated,wang2023forecast}.
 
-Fitting quantiles to recover or estimate a continuous distribution is done in 
+Fitting a distribution given
+quantiles in order to recover or 
+estimate an unknown distribution is done in 
 many fields, often for the purpose of evaluating forecasts using rules that 
 require a CDF or PDF \cite[]{simpson2023interpolating, gerding2023evaluating}. 
-Fitting may also be done to allow combining multiple forecasts using aggregation 
+Fitting may also be done to allow for combining of 
+multiple forecasts using aggregation 
 methods that require CDFs or PDFs 
 \cite[]{gyamerah2020probabilistic,li2019combining,baran2018combining,
 bogner2017combining,he2016short,gneiting2005calibrated}. 
-An example of fitting quantiles is given in figure 
+An example of fitting a distribution given quantiles is given in figure 
 \ref{fig:quant_match_example}. The 12 points in the figure are quantiles 
 estimated from a random sample of size 100 from a standard normal distribution 
 for given probabilities. The quantile function of the standard normal 
@@ -87,25 +92,30 @@ quantiles and the QF.
 
 Hereafter we refer to estimating a continuous distribution by fitting 
 quantiles as quantile matching (QM).
-\cite{sgouropoulos2015matching} performed QM by minimizing the mean square 
+Sgouropoulos et al. performed QM by minimizing the mean square 
 difference between quantiles of a response variable and a linear combination 
-of quantiles of covariates. Selecting distribution parameters which minimize 
+of quantiles of covariates \cite{sgouropoulos2015matching}.
+Related to QM, Feldman and Kowal introduce a margin adjustment for inferring
+the marginal CDFs of a Gaussian copula model by combining the model with 
+the rank-likelihood in a missing data under multiple data types problem
+\cite[]{feldman2024nonparametric}.
+Selecting distribution parameters which minimize 
 the mean square error
-% \jarad{is least squares different than minimizing the mean square difference?}
 between quantiles and a QF is a common QM method 
-\cite[]{dilger2022distributions,li2019combining, belgorodski2017quantilemse}, 
-% \jarad{Describe, briefly, what these methods do rather than just listing them.}
+\cite[]{dilger2022distributions,li2019combining, belgorodski2017quantilemse},
 kernel density estimation and spline interpolation are common nonparametric 
 QM methods 
 \cite[]{gerding2023evaluating,gyamerah2020probabilistic,he2016short}, 
-and \cite{keelin2016metalog} introduced a semiparametric method based on 
-defining a flexible QF to fit quantiles. An issue shared by these methods is 
+and 
+Keelin introduced a semiparametric method based on 
+defining a flexible QF to fit quantiles \cite{keelin2016metalog}. 
+An issue shared by these methods is 
 that they do not adequately account for the uncertainty inherent from the 
-estimation of quantiles.  \cite{nirwan2020bayesian} introduced a QM model 
-based on the definition of sample quantiles as order statistics and formulated
-% \jarad{using as?}
+estimation of quantiles.  
+Nirwan and Bertschinger introduced a QM model 
+based on representing sample quantiles as order statistics and formulated
 a model likelihood for the quantiles as the joint PDF of multiple order 
-statistics. This model 
+statistics \cite{nirwan2020bayesian}. This model 
 provides exact inference for quantile uncertainty, but relies on the CDF and 
 PDF of the distribution, making it less practical for fitting quantile defined 
 distributions which have a QF but for which the CDF and PDF either do not exist 
@@ -128,25 +138,34 @@ The QGP can provide accurate asymptotic inference of the quantile uncertainty,
 and it works well for QM when modeling quantile defined distributions. The 
 QGP is fit using Bayesian methods and thus allows for using prior information
 to influence the QM.
+The QGP as presented herein requires that either a continuous QF or 
+CDF family be selected a priori. It will often be the case that
+the true QF which one wishes
+to estimate is unknown and/or has a complicated shape. To account for this,
+we use either finite mixture distribution or a Bayesian nonparametric 
+construction for estimating the unknown function.
 In section \ref{sec:quant_func} the QF of a continuous random variable and 
 sample quantiles are each defined, and important properties and asymptotic 
 theory are reviewed. In section \ref{sec:qgp_model} the QGP model for QM is 
 introduced. Section \ref{sec:simulation_analyses} contains simulation studies 
 illustrating the QGP's ability to make parameter inference and match the 
-distribution from which the quantiles where estimated. Section 
+distribution from which the quantiles were estimated. Section 
 \ref{sec:qm_analysis} contains an application of QM using the QGP model for 
 quantile forecasts of the 2023-24 United States Centers for Disease Control and
 Prevention
 (CDC) flu forecasting competition, also known as FluSight. 
 The analyses in sections \ref{sec:simulation_analyses} and
-\ref{sec:qm_analysis} show that the QGP accurately estimates distribuions from
+\ref{sec:qm_analysis} show that the QGP accurately estimates distributions from
 which the quantiles are estimated and while doing so accurately captures the 
-uncertainty inherent in estimating quantiles. The QGP outperforms all
+inherent uncertainty from estimating quantiles. 
+The Bayesian nonparametric construction provides robustness for QM estimation
+where one might easily overparameterize the model.
+The QGP outperforms all
 but one other competing methods in estimating the unknown distributions and
-capturing uncertainty, and also allows for QM in situations where the other 
+capturing uncertainty, but it also allows for QM in situations where the other 
 methods cannot be used.
 Section 
-\ref{sec:qm_conclusion} concludes this manuscript with a short summary and 
+\ref{sec:qm_conclusion} concludes this manuscript with a summary and 
 ideas for further development in QM modeling. 
 
 
@@ -170,7 +189,7 @@ quantiles on which the QGP is based.
 
 \subsection{Quantile function definition and properties}
 
-The QF is defined in definition \ref{def:qf}.
+The QF is defined in the following.
 
 
 \begin{definition}
@@ -183,9 +202,9 @@ The QF is defined in definition \ref{def:qf}.
     \begin{equation*}
     \label{eq:qf}
         Q\left(p\right) = F^{-1}\left(p\right) := 
-        \emph{inf}\{x \in \mathbb{R} : F\left(x\right) \geq p\}, 
+        \text{inf}\{x \in \mathbb{R} : F\left(x\right) \geq p\}, 
         \quad p \in \left[0,1\right]
-    \end{equation*}
+    \end{equation*}\\
     An alternative definition not in terms of the cumulative distribution 
     function is a function 
     $Q: \left[0,1\right] \rightarrow \mathbb{R} \cup \{-\infty, \infty\}$, which is 
@@ -196,8 +215,8 @@ The QF is defined in definition \ref{def:qf}.
 For most statistical applications, it is useful to define the QF as the inverse 
 of the CDF. However, it is sometimes the case that defining a distribution by 
 a QF rather than a CDF is advantageous. For instance when a distribution is 
-defined by a 
-QF but has no closed form CDF or when simple QFs may be aggregated to define 
+defined only by a 
+QF and has no closed form CDF or when simple QFs may be aggregated to define 
 more complex distributions 
 \cite[]{perepolkin2023tenets, gasthaus2019probabilistic, alvarez2023quantile}. 
 This section continues with important properties of the QF and functions 
@@ -218,14 +237,14 @@ location-scale family then takes the form $\mu + \sigma Q_0\left(p \right)$
 \cite[]{parzen2004quantile}. By the addition and multiplication rules from 
 section 3.2 of \cite{gilchrist2000statistical}, 
 %(should I include a table listing properties somehwere??), 
-this is a valid QF. \cite{gilchrist2000statistical} outlines the 
+this is a valid QF. Gilchrist outlines the 
 standardization rule which states that if the random variable $Y$ with QF 
-$Q_Y\left(p \right)$ has a standard distribution, that is the 
+$Q_Y\left(p \right)$ has a standard distribution --that is the 
 random variable $Y$ is 
-centered (by a mean or median) at 0 and has a scale of 1, then a random 
+centered (by a mean or median) at 0 and has a scale of 1-- then a random 
 variable with quantile function 
 $Q_{T\left(Y \right)}\left(p \right) = \mu + \sigma Q_Y\left(p \right)$ is 
-centered at $\mu$ and has scale $\sigma$.
+centered at $\mu$ and has scale $\sigma$ \cite{gilchrist2000statistical}.
 
 The linear form for a QF is already inherent in some distributions families 
 such as the normal and logistic distribution families, with respective QFs 
@@ -234,7 +253,7 @@ $\mu + \sigma \text{log}\left(p/ \left(1 - p \right) \right)$. For the
 normal distribution, 
 $\Phi^{-1}\left(p \right)$ is the QF of a standard normal distribution 
 and $\mu$ and $\sigma$ are the mean and standard deviation of the 
-location-scale transformed normal distribution. For the logistic distribution 
+location-scale transformed normal distribution. For the logistic distribution, 
 $\text{log}\left(p/\left(1-p \right) \right)$ 
 is the QF of a logistic distribution with mean 0 and 
 scale 1, and $\mu$ and $\sigma$ become the mean and scale parameters of the 
@@ -254,8 +273,8 @@ the derivative of the QF defined as
     q(p) = \frac{dQ(p)}{dp}.
 \]
 If $Q(p)$ is the inverse of a CDF $F(x)$, a calculus result shows that the 
-reciprocal QDF $[q(p)]^{-1} = f(Q(p))$, or the PDF evaluated at the QF 
-evaluated at $p$ 
+reciprocal of the QDF is equal to the PDF evaluated at the QF of $p$, or
+$[q(p)]^{-1} = f(Q(p))$
 \cite[]{perepolkin2023tenets, gilchrist2000statistical}. The QDF is important 
 for establishing the CLTs in section \ref{sec:samp_quants} and for the QGP 
 models introduced in section \ref{sec:qgp_model}.
@@ -266,7 +285,8 @@ probability distributions via the probability integral transform (PIT). The
 PIT states that for any continuous random variable $Y$ with CDF $F_Y(y)$, the 
 transformed random variable $X = F_Y(Y)$ is uniformly distributed on $(0,1)$, 
 or $X \sim \text{Unif}(0,1)$. Thus if one can sample from a standard uniform 
-distribution, one may also sample from a continuous distribution provided the 
+distribution, one may also sample from a continuous distribution,
+provided that the 
 QF of that distribution can be evaluated or reasonably approximated 
 \cite[]{wilkinson2018stochastic}. The PIT is useful for assessing model fit via 
 generalized residuals \cite[]{yang2024double, cox1968general} and the 
@@ -328,12 +348,13 @@ for comparing different quantile matching methods.
 
 \subsection{Sample quantiles} \label{sec:samp_quants}
 
-Using samples of a random variable to estimate quantiles is prevalent in 
-statistical modeling. Given a random sample from some distribution, the sample 
-quantile function may be defined in terms of the order statistics. 
-\cite{hyndman1996sample} review several definitions of sample quantiles used in 
+% Using samples of a random variable to estimate quantiles is prevalent in 
+% statistical modeling. 
+Given a random sample from some distribution, the sample 
+quantile function may be defined in terms of the order statistics.
+Hyndman and Fan review several definitions of sample quantiles used in 
 statistical packages and state definition \ref{def:sqf} as a general definition 
-of the functions reviewed. 
+of the functions reviewed \cite{hyndman1996sample}. 
 
 \begin{definition}
 For $n$ independent observations $Y_1, ..., Y_n$ from a distribution with 
@@ -353,7 +374,7 @@ function $\hat{Q}_n(p)$ may be defined as
 \end{definition}
 
 Sample quantiles are used to give a probability summary of a dataset. Sample 
-quantiles of Markov chain Monte Carlo draws from a Bayesian posterior 
+quantiles of Markov chain Monte Carlo (MCMC) draws from a Bayesian posterior 
 distribution are used to analyze posterior distributions, for example by using 
 quantiles to form credible intervals. 
 Well known asymptotic results of sample quantiles are presented below, and it 
@@ -411,17 +432,25 @@ found in \cite{walker1968note}. The entries in the covariance matrix in
     \rho_{ij} = [p_i \wedge p_j - p_i p_j]q(p_i)q(p_j)
     \label{eq:qgp_simp_cov}
 \end{equation}
-where $q$ is the QDF. Another CLT in (\ref{eq:tqclt}) for a set of quantiles 
-transformed by the underlying CDF $F(\hat{\boldsymbol{Q}}_n(\boldsymbol{p})) = 
-(F(\hat{Q}_n(p_1)), ..., F(\hat{Q}_n(p_k)))$ is in (\ref{eq:qclt}) and can be 
+where $q$ is the QDF. Another CLT in corollary \ref{cor:nclt}
+for the transformed set of quantiles 
+$F(\hat{\boldsymbol{Q}}_n(\boldsymbol{p})) = 
+(F(\hat{Q}_n(p_1)), ..., F(\hat{Q}_n(p_k)))$ can be 
 derived from (\ref{eq:qclt}) by using the PIT and the Delta method 
 \cite[]{parzen2004quantile}.
 
+
+\begin{corollary}{\emph{PIT transformed sample quantiles}}
+\label{cor:nclt}
+
+Under the same conditions as theorem \ref{thm:qclt}, the following holds
 \begin{equation}
     \label{eq:tqclt}
     \sqrt{n}(F(\hat{\boldsymbol{Q}}_n(\boldsymbol{p})) - \boldsymbol{p}) 
     \overset{D}{\rightarrow} N_K(0, \boldsymbol{\Gamma})
 \end{equation}
+
+\end{corollary}
 Here the covariance matrix $\Gamma$ has entries $\Gamma_{ij} = p_i \wedge p_j - 
 p_i p_j$, making the asymptotic distribution in (\ref{eq:tqclt}) a 
 Brownian bridge \cite[]{chow2009brownian}. This second result makes QM using 
@@ -456,21 +485,28 @@ covariance function $\kappa_{\theta}(\cdot, \cdot)$ where
 \]
 
 The covariance function $\kappa_{\theta} (\cdot, \cdot)$ initially appears as 
-if it will be difficult to evaluate and indeed can be, depending on the 
+though it is difficult to evaluate and indeed can be, depending on the 
 functional forms of $f_{\theta}$ and $Q_{\theta}$. But where these functions 
 belong to distributions in a location-scale family, 
 the covariance function can be greatly 
 simplified. 
-Noting that the covariance is a function of $f_{\theta}(Q_{\theta}(p)) = q_{\theta}(p)$, the QDF, if $\theta = (\mu, \sigma)$ where $\mu$ is a location parameter and $\sigma$ is a scale parameter, then $q_{\theta}(p) = \sigma q(p)$ where $q(p)$ is the QDF of a standard distribution having location 0 and shape 1. \cite{staudte2017shapes} calls this the location invariant and scale equivariant property. For location-scale distribution families, this greatly simplifies the form of $\kappa_{\theta}(\cdot,\cdot)$ so that it becomes
+Noting that the covariance is a function of $f_{\theta}(Q_{\theta}(p)) = q_{\theta}(p)$, 
+the QDF, if $\theta = (\mu, \sigma)$ where $\mu$ is a location parameter and $\sigma$ 
+is a scale parameter, then $q_{\theta}(p) = \sigma q(p)$ where $q(p)$ is the QDF 
+of a standard distribution having location 0 and shape 1. 
+Staudte calls this the location invariant and scale 
+equivariant property \cite{staudte2017shapes}. 
+For location-scale distribution families, this greatly simplifies the 
+form of $\kappa_{\theta}(\cdot,\cdot)$ so that it becomes
 \[
     \kappa_{\theta}(p, p') = \sigma^{2}[p\wedge p' - p p'] q(p)q(p') 
 \] 
 Thus for estimating $\theta$ one only needs to estimate $\sigma^2$. A special 
 case of the QGP for QM of a location-scale family is the normal QGP which we 
-define and explore below.
+define and explore further later on.
 
 Often $F_{\theta}$ is not easily invertible making
-$Q_{\boldsymbol{\theta}}$ a 
+$Q_{\theta}$ a 
 complicated function which can be evaluated only via numerical optimization 
 which is often computationally expensive and/or inaccurate. A simple solution 
 is to model the PIT transformed quantiles from the data rather than modeling 
@@ -480,7 +516,7 @@ model (\ref{eq:pit_qgp}), where  $\Gamma_{ij} = p_i\wedge p_j - p_i p_j$ as in
 
 \begin{equation}
     \label{eq:pit_qgp}
-F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p})) \sim 
+F_{\theta}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p})) \sim 
 N_K(\boldsymbol{p}, n^{-1} \boldsymbol{\Gamma})
 \end{equation}
 By modeling the PIT quantiles, the only function which requires evaluating is 
@@ -490,7 +526,7 @@ $F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p}))$ is unnecessary
 purposes. A Bayesian fit of (\ref{eq:pit_qgp}) is straightforward, requiring 
 only that $F_{\boldsymbol{\theta}}(\hat{\boldsymbol{Q}}_n(\boldsymbol{p}))$ 
 be evaluated as 
-part of the acceptance ratio of a Markov chain Monte Carlo (MCMC) iteration.
+part of the acceptance ratio of a MCMC step.
 
 
 \subsection{Normal QGP}
@@ -499,7 +535,8 @@ If the quantiles in a dataset
 $(\hat{\boldsymbol{Q}}_n(\boldsymbol{p}),\boldsymbol{p})$ are assumed to be 
 calculated from a normal distribution $N(\mu, \sigma^2)$, and the desire is to 
 estimate the parameters $\mu$ and $\sigma$ by modeling the quantiles according 
-to the QGP in (\ref{eq:qgp}), then one may use the model (\ref{eq:norm_qgp}). 
+to the QGP in (\ref{eq:qgp}), then one may use the model (\ref{eq:norm_qgp})
+for QM. 
 
 \begin{equation}
     \label{eq:norm_qgp}
@@ -521,7 +558,8 @@ greater than 0 and that $\sigma$ is both a regression coefficient and part of
 the variance.
 % making $\sigma$ unidentifiable.
 Note also that the sample size $n$ is included as part of the variance. If $n$ 
-is known, then it may be multiplied through $\Psi$ and forgotten. If unknown, 
+is known, then it may be multiplied through $\boldsymbol{\Psi}$ and ignored. 
+If unknown, 
 it can then be accounted for as an unknown part of the variance. 
 
 Take for instance the data 
@@ -535,12 +573,12 @@ becomes
 \]
 In this model, one simplifying assumption may be to treat $\sigma$ and 
 $\gamma^2$ separately and proceed to fit a standard linear regression model. 
-All frequentist and Bayesian results of the linear regression model apply, 
+All frequentist and Bayesian results of the linear regression model then apply, 
 including the existence of conditionally conjugate prior distributions. The 
 positive constraint on $\sigma$ can also be dealt with without adding much 
 complication (see \cite{gelman2013bayesian} pgs. 377-378). 
-If, for a certain problem it is important to make inference on the unknown $n$, or $\sigma$ and 
-$\gamma^2$ cannot treated as separate, then one may estimate the two parameters 
+If for a certain problem it is important to make inference on the unknown $n$, or $\sigma$ and 
+$\gamma^2$ cannot be treated as separate, then one may estimate the two parameters 
 by assigning appropriate prior distributions to $\sigma$ and $n$ and reverting 
 back to (\ref{eq:norm_qgp}). In section \ref{sec:simulation_analyses}, we 
 analyze a normal QGP in a simulation study where we assign independent prior 
@@ -551,47 +589,52 @@ coefficient and as part of the variance.
 
 For any QGP model where the QF belongs to a location-scale family, the 
 discussed relation to the normal linear regression model applies. The only 
-difference in modeling becomes formulating the matrix $\Psi$ using the proper 
-QDF, and the data $\boldsymbol{X}$ with the proper quantile function. Many 
-situations will require a more complicated QF which doesn't allow for modeling 
-the data as a linear regression. Below we consider for instance a finite 
-mixture distribution. 
+difference in modeling becomes formulating the matrix 
+$\boldsymbol{\Psi}$ using the proper 
+QDF, and the data $\boldsymbol{X}$ with the proper quantile function. 
+% Many 
+% situations will require a more complicated QF which doesn't allow for modeling 
+% the data as a linear regression. Below we consider for instance a finite 
+% mixture distribution. 
 
-\subsection{Normal mixture distribution QGPs}
+\subsection{Normal mixture distribution QF approximating functions}
 
-When the functional form of true QF which one desires to estimate is unknown
-or has a complex shape, such as having several modes, it may be desirous to
-select a more general $Q_{\theta}$ which may approximate the unknown QF. In
-this section we propose two such options, namely the finite mixture distribution
-and the Dirichlet process mixture.
+When the functional form of the true QF which one desires to estimate is unknown
+or has a complicated shape --such as having several modes-- it may be desirous to
+select a more general $Q_{\theta}$ for approximating the unknown QF. In
+this section we propose two such options, namely the finite mixture (FM)
+distribution
+and the Dirichlet process mixture. 
 
 \subsubsection{Finite normal mixture}
-For a continuous random variable distributed according to a finite mixture 
-distribution, the CDF takes the form of (\ref{eq:norm_mix}). Here there are $C$ 
-component distributions where $c \in \{1, ..., C\}$, $F_{\theta_c}$ is a 
-continuous CDF with parameter $\theta_c$, and $w_c > 0$ is a weight such that 
-$\sum_{c = 1}^C w_c = 1$. When the QF is unknown, one may formulate 
+For a continuous random variable distributed according to a FM
+distribution, the CDF takes the form of (\ref{eq:norm_mix}). Here, there are $C$ 
+component distributions where $c \in \{1, ..., C\}$, $F_{\psi_c}$ is a 
+continuous CDF with parameter $\psi_c$, $w_c > 0$ is a weight such that 
+$\sum_{c = 1}^C w_c = 1$,
+and $\theta = (\psi_1, ..., \psi_C, w_1, ..., w_C)$. 
+When the QF is unknown, one may formulate 
 $Q_{\theta}$ as the inverse of $F_{\theta}$ in (\ref{eq:norm_mix}).
 
 \begin{equation}
     \label{eq:norm_mix}
-    F_{\theta}(x) = \sum_{c = 1}^C w_c F_{\theta_c}(x)
+    F_{\theta}(x) = \sum_{c = 1}^C w_c F_{\psi_c}(x)
 \end{equation}
 
 When $F_{\theta}$ is set as a mixture distribution, 
 it is important to consider the functional forms of the component CDFs 
-$F_{\theta_c}$ as well as the total number of components $C$.
-A popular decision is to set each $F_{\theta_c}$ to be the CDF of a normal
+$F_{\psi_c}$ as well as the total number of components $C$.
+A popular decision is to set each $F_{\psi_c}$ to be the CDF of a normal
 distribution. In this case 
-$F_{\theta_c}(x) = \Phi((x - \mu_c)/\sigma_c))$ 
+$F_{\psi_c}(x) = \Phi((x - \mu_c)/\sigma_c))$ 
 where $\mu_c$ and $\sigma^2_c$ are the mean and variance parameters of a 
-normal distribution, $\theta_c = (\mu_c, \sigma^2_c)$, and (\ref{eq:norm_mix})
+normal distribution, $\psi_c = (\mu_c, \sigma_c)$, and (\ref{eq:norm_mix})
 is termed a finite mixture of normals distribution.
 A common claim is that any continuous distribution may be approximated by a 
 finite mixture of normals with a sufficiently large number of components
 \cite[]{peel2000finite,nguyen2019approximations,nguyen2020approximation}.
 This claim may be optimistic, but as shown in a simulation study in 
-section \ref{sec:simulation_analyses}, setting each $F_{\theta_c}$ to be the 
+section \ref{sec:simulation_analyses}, setting each $F_{\psi_c}$ to be the 
 CDF of a normal distribution makes for reasonable approximations of 
 non-normal distributions. 
 
@@ -603,19 +646,19 @@ desires that $C$ is not so large that overfitting occurs
 or the computational burden becomes unnecessarily heavy. For a given set of 
 quantile data, one option is to anlayze QM fits for different values of $C$ and
 select an optimal number of components. A less tedious and often more robust
-process is to model the QF via a Bayesian nonparametric approach as described
+process is to model the QF via a Bayesian nonparametric approach as outlined
 below.
 
 \subsubsection{Dirichlet process mixture}
 When the form of the QF is unknown,
 an alternative to estimating $Q_{\theta}$ via a finite mixture of normals 
 is to estimate the function with a Dirichlet process mixture (DPM) model.  
-The DPM as defined in \cite[]{muller2015bayesian} was introduced by
+The DPM as defined in Muller et al. \cite[]{muller2015bayesian} was introduced by
 Ferguson \cite[]{ferguson1983bayesian} and Lo \cite[]{lo1984class} and is 
-a infinite extension of the finite mixture distribution (\ref{eq:norm_mix}).
+an infinite extension of the FM distribution in (\ref{eq:norm_mix}).
 The DPM is defined in (\ref{eq:dpm}) where $F_{\psi}$ is a 
 CDF function and $\mathcal{G}$ is a probability distribution defined on 
-$\Theta$. In the normal mixture case, $\psi = (\mu_{\psi}, \sigma_{\psi}^2)$
+$\Theta$. In the normal mixture case, $\psi = (\mu_{\psi}, \sigma_{\psi})$
 where $\mu_{\psi}$ and $\sigma^2_{\psi}$ are the mean a variance parameters
 respectively.
 
@@ -624,54 +667,63 @@ respectively.
   \label{eq:dpm}
 \end{equation}
 The DPM is completed by defining the hierarchical prior distributions in 
-\ref{eq:dpm_priors}. Here $\text{DP}(M, G_0)$ denotes the Dirichlet 
+(\ref{eq:dpm_priors}). Here $\text{DP}(M, G_0)$ denotes the Dirichlet 
 process (DP) prior with 
-total mass parameter $M$ and $G_0$ is a base distribution. 
-
+total mass parameter $M$ and $G_0$ is a base prior distribution. 
+\newpage
 \begin{align}
-  \theta_h | \mathcal{G} &\overset{\text{iid}}{\sim} \mathcal{G}\\ 
-  \mathcal{G} &\sim \text{DP}(M, G_0) \nonumber
+  \psi_c | \mathcal{G} &\overset{\text{iid}}{\sim} \mathcal{G} \nonumber \\ 
+  \mathcal{G} &\sim \text{DP}(M, G_0) 
   \label{eq:dpm_priors}
 \end{align}
+
 
 The DP is an almost surely discrete distribution introduced by 
 Ferguson \cite[]{ferguson1973bayesian} as a nonparametric model, and following
 Sethuraman \cite[]{sethuraman1994constructive} can be represented with the 
 stick breaking construction. In this construction, $\mathcal{G}$ is 
 represented by the infinite sum in (\ref{eq:dp_sum}) where the
-$\theta_h$ are i.i.d draws from the base distribution $G_0$ and 
+$\psi_c$ are i.i.d draws from the base distribution $G_0$ and 
 $\delta_a(\cdot)$ is the Dirac measure at $a$. We set $G_0$ to be the product
-of the prior distributions for $\mu_{\psi}$ and $\sigma^2_{\psi}$.
-The $w_h$ are weights defined
-as $w_h = v_h \prod_{l < h} (1 - v_l)$ where 
-$v_h \sim \text{Beta}(1, M)$ and $\{\theta_h\}$ and $\{v_h\}$ are
+of the prior distributions for $\mu_{\psi}$ and $\sigma_{\psi}$.
+The $\omega_c$ are weights defined
+as $\omega_c = v_c \prod_{l < c} (1 - v_l)$ where 
+$v_c \sim \text{Beta}(1, M)$ and $\{\psi_c\}$ and $\{v_c\}$ are
 independent.
 
 \begin{equation}
-  \mathcal{G}(\cdot) = \sum_{h=1}^{\infty} w_h \delta_{\theta_h}(\cdot)
+  \mathcal{G}(\cdot) = \sum_{c=1}^{\infty} w_h \delta_{\psi_c}(\cdot)
   \label{eq:dp_sum}
 \end{equation}
+Using the stick breaking construction, an equivalent representation of 
+(\ref{eq:dpm}) is 
+\[
+  F_{\mathcal{G}}(x) = \sum_{c = 1}^{\infty} \omega_c F_{\psi_c}.
+\]
 
-The DP can be approximated by the finite Dirichlet process (FDP)
-$\mathcal{G}(\cdot) = \sum_{h=1}^H w_h \delta_{\theta_h}(\cdot)$ for some 
-$H < \infty$. The FDP was introduced by 
+The DPM can be approximated by the truncated Dirichlet process mixture (TDPM)
+by replacing (\ref{eq:dp_sum}) with 
+$\mathcal{G}(\cdot) = \sum_{c=1}^C \omega_c \delta_{\psi_c}(\cdot)$ for  
+$C < \infty$. The FDP was introduced by 
 Ishwaran and Zarepour \cite[]{ishwaran2000markov} and 
 Ishwaran and James \cite[]{ishwaran2002approximate} as a close approximation
-to the DP with major computational advantages. The FDP can also be represented
-with the stick breaking construction as defined above with the only difference
-being that $v_h  \sim \text{Beta}(1, M)$ for $h = 1, ..., H - 1$ and 
-$v_h = 1$. This ensures that $\sum_{h = 1}^H w_h = 1$.
+to the DP with major computational advantages. The TDPM 
+stick breaking construction is similar to that defined above with the 
+only difference
+being that $v_c  \sim \text{Beta}(1, M)$ for $c = 1, ..., C - 1$ and 
+$v_c = 1$. This ensures that $\sum_{c = 1}^C w_c = 1$.
 
 In section \ref{sec:simulation_analyses} a simulation study is included 
 where sample quantiles are generated from ``unknown'' continuous distributions.
-In a real data analysis in \ref{sec:qm_analysis}, given quantiles are also 
+In a real data analysis in section \ref{sec:qm_analysis}, given quantiles are also 
 from unknown distributions.
 % , so to estimate $Q_{\theta}$, we utilize either the
 % finite mixture distribution in (\ref{eq:norm_mix}) or the 
 % DPM in (\ref{eq:dpm}). 
 In these analyses, we analyze PIT transformed QGP model 
-(\ref{eq:pit_qgp}) where $F_{\theta}$ is set as a final normal mixture 
-distribution (\ref{eq:norm_mix}) or the DPM (\ref{eq:dpm}). 
+(\ref{eq:pit_qgp}) where $F_{\theta}$ is set as a FM
+distribution (\ref{eq:norm_mix}) or the TDPM (\ref{eq:dpm}) where
+$\infty$ is replaced with $C$. 
 Fitting model (\ref{eq:pit_qgp}) proved much 
 faster than fitting (\ref{eq:qgp}), and the results were also better.
  In fact we found that in 
@@ -679,6 +731,11 @@ cases where $F_{\theta}$ was a simpler function, such as a normal or
 exponential distribution, fitting model (\ref{eq:pit_qgp}) was at least as fast 
 and the results were at least as good as fitting (\ref{eq:qgp}). Thus when 
 possible, we elected to fit (\ref{eq:pit_qgp}).  
+While the methods described in this section provide
+flexible functions for estimating unknown distributions, we note that
+any function which meets the technical definition of a CDF would 
+be appropriate to use for $F_{\theta}$, see \cite{gasthaus2019probabilistic} for an 
+example.
 
 
 
@@ -789,7 +846,11 @@ set of order statistics is the model likelihood. The likelihood of a set of
 order statistics from a continuous distribution is a function of both the CDF 
 and PDF of a continuous distribution. ORD is the method most similar to QGP and 
 it provides exact inference of quantile uncertainty whereas the QGP provides 
-asymptotic inference of uncertainty. 
+asymptotic inference of uncertainty. We also note that the 
+FM and TDPM 
+constructions in (\ref{eq:norm_mix}) and (\ref{eq:dpm})
+for estimating the true QF
+may immediately be incoporated into the IND and ORD models.
 
 For assessing QM, there are two aspects we analyze. The first is a model's 
 ability to estimate parameters and the second is how far away a fit QM 
@@ -885,12 +946,15 @@ using $f$ to approximate $g$.
 \section{Quantile matching methods comparison on simulated data} \label{sec:simulation_analyses}
 
 In this section we present simulation studies assessing the QM of the
-QGP model and compare results with those of the SPL, KDE, IND, and ORD matching
+QGP model and compare results with those of the SPL, KDE, IND, and ORD QM
 methods. The QGP, IND, and ORD models were each fit via Hamiltonian Monte Carlo
 (HMC) sampling using the \texttt{Stan} software and the \texttt{cmdstanr}
-package developed and maintained by the \cite{stan2024manual}
-\cite[]{gabry2022stan}. Simulation studies are done to assess parameter
-estimation and inference as well as QM estimation of a distribution.
+package developed and maintained by the Stan Development Team
+\cite{stan2024manual, gabry2022stan}.
+Simulation studies are done to assess parameter
+estimation and inference for known distribution families
+as well as QM estimation of a distribution for both known and unknown
+distribution families.
 
 
 
@@ -916,11 +980,12 @@ from independent samples from a normal distribution and compare parameter
 estimation with fits from the QGP model. Quantiles were simulated by first 
 drawing a sample of size $n$ from a known distribution then estimating $K$ 
 quantiles given probabilities $\{p_1, ..., p_K\}$. The ORD, IND, and QGP models 
-were then fit to the quantiles where $F$ was set to be the CDF of a normal 
+were then fit to the quantiles where $F_{\theta}$ 
+was set to be the CDF of a normal 
 distribution. For each of 
 $n \in \{50, 150, 500, 1{,}000, 5{,}000\}$ and 
 % $K \in \{3,7,15,50\}$
-$K = 23$, there 
+$K \in \{3, 5, 7, 9, 11, 15, 19, 23\}$, there 
 were 500 simulation replicates. The data were simulated from a normal 
 distribution with mean $\mu = 4$ and standard deviation $\sigma = 3.5$.
 For each of QGP, ORD, and IND models, we assigned the same prior distributions 
@@ -931,7 +996,8 @@ it is reasonable that an
 informative prior, centered near where the data is
 centered, be assigned to $\mu$. 
 We took this approach herein, and for scale parameters,
-we assigned normal priors truncated at 0 as recommended by
+we assigned normal priors truncated at 0 as recommended by Gelman and 
+Andrew
 \cite{gelman2006prior}.
 The prior distributions were $\mu \sim N(5,7^2)$,
 $\sigma \sim N(0, 6^2) \mathds{1} \{\sigma > 0\}$, and
@@ -976,20 +1042,24 @@ with the first 10,000 discarded as a burn-in.
 % \end{figure}
 
 
-The top of figure \ref{fig:normal_cov_dists} shows the 90\% coverage of 
+The top of figure \ref{fig:normal_cov_dists} shows the 95\% coverage of 
 the posterior distribution credible intervals as $n$ increases for 
-$\mu$, $\sigma$ and $n$ for five models. QGP-n and ORD-n models where $n$ is 
+$\mu$, $\sigma$, $n$ and the true quantiles $Q(\boldsymbol{p})$ 
+when $K = 23$ for five models. 
+QGP-n and ORD-n models where $n$ is 
 known are included along with QGP, ORD, and IND. 
-The 90\% credible intervals of the 
-parameters were calculated by computing the $0.05^{th}$ and $0.95^{th}$ 
+The 95\% credible intervals of the 
+parameters were calculated by computing the $0.025^{th}$ and $0.975^{th}$ 
 quantiles from the posterior distribution samples. The coverage percentage is 
 calculated as the percentage of the 500 replicates for 
 which the true parameter 
-value was within the 90\% credible interval.
+value was within the 95\% credible interval.
 As expected, the nominal coverage for the QGP and ORD models is better than 
 that of the IND model, and for the two models where $n$ is known the coverage 
 is better than where it is unknown, particularly for lower values of 
-$n$ and $K$. The coverage for the ORD models appears to be slightly better 
+$n$ and $K$. Also of note is that the coverage of 
+95\% predictive intervals of $Q(p)$ is a bit conservative and near 100\%.
+The coverage for the ORD models appears to be slightly better 
 than for the QGP models though not by much, and the difference
 decreases as $n$ increases. 
 The superior performance of the ORD model is possibly because it
@@ -1013,11 +1083,11 @@ whereas the QGP model provides asymptotic inference.
 %\end{subfigure}
 \caption{Posterior coverage (top) for models of $K = 23$ quantiles
 calculated as the percentage of times the 
-true parameter fell within the modeled 90\% credible interval over the 500 
+true parameter fell within the modeled 95\% credible interval over the 500 
 replications. Coverage is faceted by the normal parameters $\mu$, $\sigma$,
 and shown by increasing sample size 
 ($x$-axis). The five models QGP, ORD, QGP-n, ORD-n, and IND are colored as 
-shown the legend. The horizontal line (black) is at the nominal 90\% level. 
+shown the legend. The horizontal line (black) is at the nominal 95\% level. 
 Only QGP and ORD appear for inference for the parameter $n$ as they are the 
 only two models which 
 estimate an unknown $n$.
@@ -1049,79 +1119,101 @@ sample $\{\xi_m\}^M$. $F_{\xi}$ in (\ref{eq:pit_wass_dist}) was then replaced
 by $\hat{F}_{\xi}$ to calculate UWD1. For SPL and KDE $F_{\xi}(x)$ was replaced 
 by the respective estimated CDFs. The \texttt{integrate} function in \texttt{R} 
 was used for calculating the UWD1 in (\ref{eq:pit_wass_dist}).
+The TV and KLD were both estimated as the mean score over 400 posterior draws
+of the model parameters. The draws were selected by thinning 400 equally 
+spaced draws from the 50,000 total. The thinning
+was done to save time on computation.
 
-To estimate TV and KLD, rather than sampling from the posterior distribution, 
-the marginal means for the parameters were calculated from the posterior 
-distribution samples. These marginal means  are 
-$\Bar{\theta}_M = (\Bar{\mu}_M, \Bar{\sigma}_M)$ where $\Bar{\mu}_M$ and 
-$\Bar{\sigma}_M$. To calculate TV, 
-$f$ in (\ref{eq:tot_var}) is replaced by $f_{\Bar{\theta}_M}$ and $g$ is 
-replaced by $f_{\theta}$. The TV calculation was done using the 
-\texttt{integrate} function in \texttt{R}. The KLD was estimated also using 
-$f_{\Bar{\theta}_M}$ and $f_{\theta}$, but was done via Monte Carlo sampling. 
-That is (\ref{eq:kld}) was estimated by
-
-\[
-    \widehat{KLD}(f_{\theta} || f_{\Bar{\theta}_M}) = 
-    \frac{1}{S}\sum_{s = 1}^S \text{log} 
-    \left(\frac{f_{\theta}(Y_s)}{f_{\Bar{\theta}_M}(Y_s)}\right)
-\]
-where $S$ is the total number of Monte Carlo samples and
-$Y_s \overset{iid}{\sim} F_{\theta}$. For both SPL and KDE, 
-$f_{\Bar{\theta}_M}$ is the estimated PDF.
+% To estimate TV and KLD, rather than sampling from the posterior distribution, 
+% the marginal means for the parameters were calculated from the posterior 
+% distribution samples. These marginal means  are 
+% $\Bar{\theta}_M = (\Bar{\mu}_M, \Bar{\sigma}_M)$ where $\Bar{\mu}_M$ and 
+% $\Bar{\sigma}_M$. To calculate TV, 
+% $f$ in (\ref{eq:tot_var}) is replaced by $f_{\Bar{\theta}_M}$ and $g$ is 
+% replaced by $f_{\theta}$. The TV calculation was done using the 
+% \texttt{integrate} function in \texttt{R}. The KLD was estimated also using 
+% $f_{\Bar{\theta}_M}$ and $f_{\theta}$, but was done via Monte Carlo sampling. 
+% That is (\ref{eq:kld}) was estimated by
+% 
+% \[
+%     \widehat{KLD}(f_{\theta} || f_{\Bar{\theta}_M}) = 
+%     \frac{1}{S}\sum_{s = 1}^S \text{log} 
+%     \left(\frac{f_{\theta}(Y_s)}{f_{\Bar{\theta}_M}(Y_s)}\right)
+% \]
+% where $S$ is the total number of Monte Carlo samples and
+% $Y_s \overset{iid}{\sim} F_{\theta}$. For both SPL and KDE, 
+% $f_{\Bar{\theta}_M}$ is the estimated PDF.
 
 
 The bottom of figure \ref{fig:normal_cov_dists} shows the UWD1, TV, and 
 KLD metrics averaged over the 500 simulation replicates as $n$ increases for 
-the five QM methods. The QGP, ORD, and IND are nearly indistinguishable and 
+the five QM methods. The QGP, ORD, and IND are very similar to eachother and 
 outperform the SPL and KDE in almost every case. 
 For UWD1, the SPL performs similarly to the parametric QM methods, but for the 
-TV and KLD, the SPL performs much worse, especially for smaller sample sizes. 
+TV and KLD, the SPL performs much worse, especially for smaller sample sizes.
+Additional results in the supplementary materials show model performance under
+different values of quantiles $K$. The results show that for the QGP, ORD, and
+IND models, the QM fits improves drastically from $K = 3$ to $K = 5$ and
+typically improves as $K$ increases. However, the results
+also show that when 
+estimated quantiles in 
+the extreme tails are included, the QM fits may suffer due to 
+the large tail uncertainty. For example, when $K = 11$ the most extreme
+quantiles included are the $0.05^{th}$ and $0.95^{th}$, but for $K = 15$, the
+additional quantiles include the $0.01^{th}, 0.025^{th}, 0.975^{th}$, and
+$0.99^{th}$.
+The effect is present for the QGP,
+but the negative effect
+decreases if the sample size $n$ is large. These methods greatly outperform 
+the SPL and KDE methods, which interestingly worsen as $K$ increases.
+When fitting the Bayesian models both in the normal and in the exponential 
+setting, the IND model tended to fit the fastest, followed by the ORD models, 
+and finally the QGP models. The time to fit, however, was very fast, usually no 
+more than seven seconds. 
+% except for the case where $K = 50$ quantiles, in which 
+% case the QGP model where $n$ was unknown often took around 20 seconds to fit. 
+% However, with $K = 50$ the QGP-n model continued to fit very rapidly, fitting in 
+% under seven seconds.
 
 This study shows the ability of the QGP QM model to estimate and perform 
 inference on model parameters where the true distribution family is known. It 
 also shows the QGP's ability to produce a posterior predictive distribution 
 which closely matches a true distribution, according to several metrics, 
-relative to other QM methods. Between parameter inference and predicting the 
+relative to other QM methods, and it greatly outperforms SPL and KDE.
+The QGP also allows for making inference on the sample size $n$.
+Between parameter inference and predicting the 
 true distribution, QGP is superior to all methods we compared it with except 
-for the ORD model which has similar results to --or for small sample size
-slighty better than-- the QGP. However, we feel the QGP's linear model form is
-easier to understand than the ORD model and thus preferable for interpretation.
+for the ORD model which has similar results to (or for small sample size
+slightly better than) the QGP. However, we feel the QGP's linear model form is
+easier to understand than the ORD model and is 
+thus preferable for interpretation.
 Additional plots for this study and for a similar simulation 
 study where the data was simulated from an exponential family distribution are 
 in the supplementary materials.
 % \ref{app:extra_sim}. 
 The results of the exponential family study are similar to those of the 
 normal distribution family study.
+% The following section outlines a situation where the QGP model may be a better 
+% option for QM than the ORD model. 
 
 
 
+% The analysis above show the usefulness in using the QGP model both in parameter 
+% estimation and in QM when given sample quantiles. In the normal case, the QGP 
+% showed improved parameter inference over the IND model and allows for making 
+% inference on the sample size $n$. Compared to the SPL and KDE QM methods, the 
+% QGP fits tend to be closer in distance to the true distribution. The QGP model, 
+% however, performs about the same or for smaller $n$ slightly poorer than the
+% ORD model in terms of inference and QM. However, we feel the QGP is a simpler
+% model to
+% understand than the ORD and easier to interpret.
 
-When fitting the Bayesian models both in the normal and in the exponential 
-setting, the IND model tended to fit the fastest, followed by the ORD models, 
-and finally the QGP models. The time to fit however was very fast, usually no 
-more than seven seconds except for the case where $K = 50$ quantiles, in which 
-case the QGP model where $n$ was unknown often took around 20 seconds to fit. 
-However, with $K= 50$ the QGP-n model continued to fit very rapidly, fitting in 
-under seven seconds.
-
-The analysis above show the usefulness in using the QGP model both in parameter 
-estimation and in QM when given sample quantiles. In the normal case, the QGP 
-showed improved parameter inference over the IND model and allows for making 
-inference on the sample size $n$. Compared to the SPL and KDE QM methods, the 
-QGP fits tend to be closer in distance to the true distribution. The QGP model, 
-however, performs about the same or for smaller $n$ slightly poorer than the
-ORD model in terms of inference and QM. However, we feel the QGP is a simpler
-model to
-understand than the ORD and easier to interpret.
-The following section outlines a situation where the QGP model may be a better 
-option for QM than the ORD model. 
 
 
 \subsubsection{Quantile defined distributions}
 The normal and exponential families both have CDF and PDF functions which are 
 either available in closed form or are easy to evaluate with software which is 
-widely accessible. The next study we performed was done to compare the QGP and 
+widely accessible. The study in this section was done to compare the QGP and 
 ORD models where the distribution family was a quantile defined distribution 
 which lacks a CDF that is easy to evaluate. The purpose of this study was to 
 show an example where one may prefer to perform QM using the QGP rather than 
@@ -1175,50 +1267,63 @@ minutes.
 The simulation studies in this section are for the situation where the true 
 distribution family is unknown, unimportant, or too complex to be practically 
 evaluated but where one still wishes to recover or approximate the 
-distribution. We selected three distributions each with a different shape to 
+distribution. We selected three distributions, each with a different shape, to 
 analyze how well the distributions can be approximated by QM using the QGP and 
-the competing methods. 
-
-With the true distribution family being unknown, we made the modeling decision 
-to set $F$ in the QGP model of (\ref{eq:pit_qgp}) to be a mixture of normals 
-distribution taking the form of (\ref{eq:norm_mix}). This decision to use
-a normal mixture was 
-based on the common claim that any continuous distribution may be approximated 
-by a finite mixture of normal distributions 
-\cite[]{peel2000finite,nguyen2019approximations,nguyen2020approximation}. This 
-claim may be optimistic, but we found that with enough components,
-the normal mixture 
-distribution can approximate the non-normally shaped distributions reasonably 
-well. However, any function which meets the technical definition of a CDF would 
-be appropriate to use for $F$, see \cite{gasthaus2019probabilistic} for an 
-example.
-After a small analysis comparing fits of one to six normal components,
-the number of component 
-distributions was chosen to be $C = 4$. The results, included in the 
-supplementary materials, show that as the number of components in the mixture
-distrubtion increases, the distribution approximation improves. But for the 
-cases considered, the improvement from four to five components or more is small.
+competing methods. 
 
 
-
-
-The three distributions from which data were simulated and sample quantiles 
-estimated and to which QM methods were fit were the extreme value (EV) 
+From the three selected distributions, data were simulated, sample quantiles 
+estimated, and QM methods were fit and assessed for accuracy.
+The distributions were the extreme value (EV) 
 distribution with location 0 and scale 1 $EV(0,1)$, Laplace (La) with location 
 0 and scale 1 $La(0,1)$, and a two component normal mixture (MIX) 
-$w N(-1, 0.9) + (1-w)N(1.2, 0.6)$ where $w = 0.35$. From the three 
-distributions, 500 replicates of $K = 23$ quantiles were simulated for each of 
-$n \in \{50, 150, 500, 1{,}000, 2{,}000, 5{,}000\}$. QM for each replicate of 
-simulated quantiles was done using QGP, ORD, IND, SPL, and KDE. For the QGP, 
-ORD, and IND models, $\theta = \{\theta_1, \theta_2, \theta_3, \theta_4\}$ 
-where $\theta_c = (\mu_c, \sigma_c)$ for $c \in \{1,2,3,4\}$. The prior 
-distributions assigned were $\mu_c \overset{ind}{\sim} N(5, 7^2)$,
-$\sigma_c \overset{ind}{\sim} N(0, 6^2)\mathds{1}\{\sigma_c > 0\}$,
-$w \sim Dirichlet(\boldsymbol{1}_C)$, and
-$\nu \sim N(0, 3000^2)\mathds{1}\{\nu > 0\}$
-% as below 
+$w N(-1, 0.9) + (1-w)N(1.2, 0.6)$ where $w = 0.35$.
+From the three 
+distributions, 200 replicates of $K \in \{3,5,11,15,19,23\}$
+quantiles were simulated for each of 
+$n \in \{50, 150, 500, 1{,}000, 5{,}000\}$. QM for each replicate of 
+simulated quantiles was done using QGP, ORD, IND, SPL, and KDE.
+
+With the true distribution family being unknown, we set $F_{\theta}$ 
+in the QGP model of 
+(\ref{eq:pit_qgp}) to be a mixture of normals 
+distribution taking the form of either the FM (\ref{eq:norm_mix}) or the TDPM
+(\ref{eq:dpm}). 
+For the QGP, 
+ORD, and IND models, under the FM formulation, the parameters to be estimated
+are 
+$\theta_c = \{\mu_c, \sigma^2_c, w_c\}$ for $c = 1,2, ..., C$ and $\nu$
 where $\nu = n$ for the QGP and ORD models 
-and $\nu = 1/\sigma_{\rho}$ for the IND model. 
+and $\nu = 1/\sigma_{\rho}$ for the IND model.
+The prior 
+distributions assigned 
+were $\mu_c \overset{ind}{\sim} N(5, 7^2)$,
+$\sigma_c \overset{ind}{\sim} N(0, 6^2)\mathds{1}\{\sigma_c > 0\}$,
+$w \sim \text{Dirichlet}(\boldsymbol{1}_C)$, and
+$\nu \sim N(0, 3000^2)\mathds{1}\{\nu > 0\}$.
+Under the TDPM construction, $F_{\theta} = F_{\mathcal{G}}$ from 
+(\ref{eq:dpm}) with the base prior distribution
+$G_0 = N(5, 7^2) \times N(0, 6^2)\mathds{1}\{\sigma_c > 0\}$ and the total
+mass parameter $M = 1$. 
+
+Selecting the number of normal mixture components $C$ for the FM model was 
+based on simply analyzing the performance for several different values of 
+$C$. Included in the supplementary materials are 
+QM results of fitting a QGP model
+under the FM construction for several values of $C$.
+For the TDPM model, Ishwaran and James  
+provide an $\mathcal{L}_1$ bound for the approximation of a TDPM to an 
+infinite DPM which depends on the size of the data, the number of components
+$C$, and the total mass parameter $M$, see section 2.1 in 
+\cite[]{ishwaran2002approximate} for details. From their recommendation and 
+given the specifications for $K$ and $M$, $C = 20$ should provide the TDPM with 
+a reasonably close approximation to the DPM. Figure \ref{fig:numK_dist} below,
+however, shows that QM results for $C \in \{8,12,20\}$ are similar when 
+fitting the simulated data. The QM models were fit via HMC sampling 
+using \texttt{Stan}
+software.
+
+ 
 % (cite an example of using dirichlet prior ??). 
     % \begin{align*}
     %     \mu_c &\overset{ind}{\sim} N(5, 7^2) \\
@@ -1227,31 +1332,40 @@ and $\nu = 1/\sigma_{\rho}$ for the IND model.
     %     \nu &\sim N(0, 3000^2)\mathds{1}\{\nu > 0\}
     % \end{align*}
  %the problem with $\nu$ is that for the QGP and ORD the prior is on the variance whereas for IND it is on the sd.
-Often when implementing posterior sampling for a mixture distribution model, 
+Often when implementing posterior 
+sampling for a mixture distribution model, 
 one deals with an issue called the label-switching problem. This is where for a
 mixture distribution parameter $\theta = \{\theta_1,...,\theta_C\}$, the model 
 likelihood is the same for different permutations of $\theta$. This lack of 
 identifiability for elements of $\theta$ makes parameter inference useless, 
 but the predictive distribution may still be close to the true distribution 
 \cite[]{stephens2000dealing}.
-Because of this, the HMC posterior sampling chain was run longer than in 
-studies of the previous section. The chain was run for 80,000 steps where the 
-first 20,000 draws were discarded as a burn-in. For this study, we were 
-concerned only with QM and not with parameter inference, so the fact that the 
-parameters are unidentifiable was not considered critical. However, when 
-assessing the TV and KLD between the QM and true distributions, variational 
-Bayes (VB) in \texttt{Stan} was used instead of HMC for fitting the models 
-\cite[]{kucukelbir2015automatic}. This decision was made because of the lack of 
-parameter identifiability and because the marginal parameter means are used to 
-estimate the PDF. While MCMC methods perform better on parameter inference, 
-VB methods have been shown to have predictive performance comparable to MCMC 
-\cite[]{blei2017variational}.
+Because of this issue and because our interest is in QM, 
+we did not consider parameter estimation 
+as being critical and simply focus 
+on how well the posterior 
+predictive distribution approximates the true distribution.
+For estimating the posterior distribution, 
+the HMC posterior sampling chain was run for 60,000 steps with the 
+first 10,000 dropped as a burn-in. 
+% When assessing convergence --again because of the label-switching problem--
+% we focused on the convergence of the posterior 
+% predictive distribution only and not the model parameters.
 
+% However, when 
+% assessing the TV and KLD between the QM and true distributions, variational 
+% Bayes (VB) in \texttt{Stan} was used instead of HMC for fitting the models 
+% \cite[]{kucukelbir2015automatic}. This decision was made because of the lack of 
+% parameter identifiability and because the marginal parameter means are used to 
+% estimate the PDF. While MCMC methods perform better on parameter inference, 
+% VB methods have been shown to have predictive performance comparable to MCMC 
+% \cite[]{blei2017variational}.
 
 Figure \ref{fig:evd_fits}, 
 shows examples of fits of $K=23$ quantiles simulated from the EV distribution
 for different sample sizes $n$. Included QM methods 
-are KDE, SPL, IND, and QGP. ORD was excluded to make visualization easier, but 
+are KDE, SPL, IND, and QGP under the TDPM construction where $C = 12$. 
+ORD was excluded to make visualization easier, but 
 the fits are very similar to the QGP fits. The KDE and SPL fits provide no 
 uncertainty estimation of the quantiles, and return only a continuous function. 
 The SPL fits show a lot of wiggle with the wiggle decreasing as $n$ increases, 
@@ -1259,8 +1373,6 @@ whereas the KDE fits do not show as much wiggle, but the KDE fits the
 distribution tails poorly even as $n$ increases. The IND and QGP models provide 
 uncertainty in the fits, but the QGP is much more conservative with wider 
 intervals which provide superior coverage of the quantiles and the PDFs. 
-
-
 
 
 \begin{figure}[hbt!]
@@ -1282,102 +1394,142 @@ estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink).}
 \label{fig:evd_fits}
 \end{figure}
 
-% \begin{figure}[hbt!]
-% \centering
-% %\begin{subfigure}{.5\textwidth}
-%   \centering
-%   \includegraphics[width=.49\linewidth]{Images/quants_lp.png}
-%   % \caption{A subfigure}
-%   % \label{fig:sub1}
-% %\end{subfigure}%
-% %\begin{subfigure}{.5\textwidth}
-%   \centering
-%   \includegraphics[width=.49\linewidth]{Images/dens_lp.png}
-%   % \caption{A subfigure}
-%   % \label{fig:sub2}
-% %\end{subfigure}
-% \caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the Laplace distribution $La(0,1)$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
-% The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink).}
-% \label{fig:lp_fits}
-% \end{figure}
 
 
-% \begin{figure}[hbt!]
-% \centering
-% %\begin{subfigure}{.5\textwidth}
-%   \centering
-%   \includegraphics[width=.49\linewidth]{Images/quants_gmix.png}
-%   % \caption{A subfigure}
-%   % \label{fig:sub1}
-% %\end{subfigure}%
-% %\begin{subfigure}{.5\textwidth}
-%   \centering
-%   \includegraphics[width=.49\linewidth]{Images/dens_gmix.png}
-%   % \caption{A subfigure}
-%   % \label{fig:sub2}
-% %\end{subfigure}
-% \caption{QM fits of $K=23$ quantiles by KDE, SPL, IND, and QGP for $n \in \{50, 150, 500, 1{,}000\}$. The quantiles were sampled from the two component normal mixture distribution $w N(-1, 0.9) + (1-w)N(1.2, .6)$ where $w = 0.35$. The quantile fits (left) show the true quantiles (black) with either the QM fit line (grey) or the credible intervals of 50\% (red) and 95\% (pink). 
-% The estimated PDF plots (right) show the true PDF (black) with either a the QM estimated PDF (grey) or the credible intervals of 50\% (red) and 95\% (pink). }
-% \label{fig:gmix_fits}
-% \end{figure}
-
-
-
-The top of figure \ref{fig:uk_cover} shows the 95\% simulated coverage of the 
-true quantiles 
-for QGP, ORD, and IND fits of quantiles from the EV, La, and MIX distributions. 
-The percent coverage is 
-averaged over all $K = 23$ quantiles and all 500 simulated replicates.  
-The plots show that the QGP and ORD models are largely able to meet and exceed 
-the nominal coverage where the IND model coverage is low. Because of the time it
-took to evaluate the QF when calculating coverage, calculation was done on 
-a thinned sample of the posterior distribution where only every $100^{th}$ HMC 
-draw was kept so that the coverage was calculated using 6,000 posterior draws 
-rather than the full 60,000.
+Figures \ref{fig:mixC_K} and \ref{fig:numK_dist} highlight differences 
+between the FM and TDPM constructions for QGP, ORD, and IND models where
+sample quantiles are estimated from samples of the EV distribution. 
+Figure \ref{fig:mixC_K} shows how the value $C$ influences the goodness of QM 
+fit in UWD1 for several values of $K$. The TDPM models are affected little by
+the size of $C$ for each $K$, whereas for smaller values of $K$, the FM models
+are greatly affected. Specifically, the ORD suffers the most from setting $C$ 
+too high and the IND suffers the least. The results in this figure are for the
+EV distribution. 
+Figure \ref{fig:numK_dist} shows how each of the six models performs in QM 
+goodness of fit by UWD1 as the number of quantiles $K$ increases from
+3 to 23. For $K$ less than 11, the goodness of fit of all models worsens
+rapidly but much more rapidly for FM than for TDPM. Under the FM 
+construction the ORD suffers the most from small $K$.
+Overall, the regularization provided by the TDPM construction provides more 
+robust fits than are provided by the TDPM. Results in the supplmentary materials
+show how under the TDPM construction and for $C = 20$ how many components are
+actually used to fit the QM models. In almost all cases, the TDPM selects no 
+more than 6 components which contribute to the fit.
+Figures similar to \ref{fig:mixC_K} and 
+\ref{fig:numK_dist} but for the La and MIX distributions are included in the
+supplementary materials.
 
 \begin{figure}[hbt!]
-%\begin{subfigure}{.465\linewidth}
-  % \includegraphics[width=.4\linewidth]{Images/uk_cover50.png}
-  % \caption{}
-  % \label{MLEDdet}
-%\end{subfigure}\hfill % <-- "\hfill"
-%\begin{subfigure}{.532\linewidth}
-  % \includegraphics[width=.4\linewidth]{Images/uk_cover95.png}
-  % \caption{}
-  % \label{energydetPSK}
-%\end{subfigure}
 \centering
-\includegraphics[width=.9\linewidth]{Images/uk_cover_dist.png}
-\caption{
-(top) Percent coverage of the true quantile values for select quantiles for 
-500 simulated replicates of sample quantiles averaged over all $K = 23$
-quantiles faceted by the true EV, La, and normal mixture distributions.
-The plots shows percent coverage for the 95\% credible intervals. The models 
-included are QGP, ORD, and IND. The vertical bar (black) shows the nominal 
-coverage level.
-(bottom) Distance between the true distribution and the QM estimated 
-distribution 
-averaged over 500 simulation replicates and measured by KLD, TV and UWD1. 
-Plots are faceted by distribution with the distributions being 
-EV, La, and MIX. 
-Lines are colored and shaped by QM method, and are drawn by increasing sample 
+\includegraphics[width=1.1\linewidth]{Images/uwd1_dpm_vs_fm.png}
+\caption{UWD1 distance between extreme value distribution $EV(0,1)$
+and QM estimated distributions for increasing sample size $n$. Plots are 
+faceted by number of quantiles $K$ (columns) 
+and number of mixture distribution 
+components $C$ (rows). Results are colored by mixture distribution model, and
+linetypes are by model type.
+}
+\label{fig:mixC_K}
+\end{figure}
+
+
+
+\begin{figure}[hbt!]
+\centering
+\includegraphics[width=1.1\linewidth]{Images/uwd1_num_quantiles_analysis.png}
+\caption{UWD1 distance between extreme value distribution $EV(0,1)$ and
+QM estimated distributions for increasing number of quantiles $K$. Plots are
+facetd by sample size $n$ (columns) and by true distribution (rows).
+Results are colored by mixture distribution model, and
+linetypes are by model type.
+}
+\label{fig:numK_dist}
+\end{figure}
+
+Figure \ref{fig:uk_dists} shows for $K = 23$ the goodness of QM fit for 
+QGP, ORD, IND --under the TDPM construction-- KDE, and SPL models in terms of 
+KLD, TV, and UWD1.
+In nearly every case for $n$ larger than 50, the KDE shows the worst fit by
+far. Otherwise the fits for QGP, ORD, IND, and SPL tend to be very similar.
+Figure \ref{fig:uk_cover} shows the empirical 95\% posterior interval coverage 
+of the true quantiles for the QGP, ORD, and IND DPM models. The QGP and ORD 
+models clearly outperform the IND model with coverage slightly too 
+conservative approaching 100\% whereas IND coverage is far below 95\% 
+especially for small $K$.
+
+
+\begin{figure}[hbt!]
+\centering
+\includegraphics[width=1.1\linewidth]{Images/uk_dist_final.png}
+\caption{Distance between the true distribution and the QM estimated
+distribution
+averaged over 200 simulation replicates and measured by KLD, TV and UWD1.
+Plots are faceted by distribution with the distributions being
+EV, La, and MIX.
+Lines are colored and shaped by QM method, and are drawn by increasing sample
 size $n$.}
+\label{fig:uk_dists}
+\end{figure}
+
+\begin{figure}[hbt!]
+\centering
+\includegraphics[width=1.1\linewidth]{Images/coverage_overall_quantiles.png}
+\caption{Percent coverage of the true quantile values for select quantiles for
+200 simulated replicates of sample quantiles averaged over all 
+$K \in \{3, 11, 23\}$
+quantiles faceted by the true EV, La, and normal mixture distributions.
+The plots shows percent coverage for the 95\% credible intervals. The models
+included are QGP, ORD, and IND. The vertical bar (black) shows the nominal
+coverage level.}
 \label{fig:uk_cover}
 \end{figure}
 
 
 
 
+% \begin{figure}[hbt!]
+% %\begin{subfigure}{.465\linewidth}
+%   % \includegraphics[width=.4\linewidth]{Images/uk_cover50.png}
+%   % \caption{}
+%   % \label{MLEDdet}
+% %\end{subfigure}\hfill % <-- "\hfill"
+% %\begin{subfigure}{.532\linewidth}
+%   % \includegraphics[width=.4\linewidth]{Images/uk_cover95.png}
+%   % \caption{}
+%   % \label{energydetPSK}
+% %\end{subfigure}
+% \centering
+% \includegraphics[width=.9\linewidth]{Images/uk_cover_dist.png}
+% \caption{
+% (top) Percent coverage of the true quantile values for select quantiles for
+% 500 simulated replicates of sample quantiles averaged over all $K = 23$
+% quantiles faceted by the true EV, La, and normal mixture distributions.
+% The plots shows percent coverage for the 95\% credible intervals. The models
+% included are QGP, ORD, and IND. The vertical bar (black) shows the nominal
+% coverage level.
+% (bottom) Distance between the true distribution and the QM estimated
+% distribution
+% averaged over 500 simulation replicates and measured by KLD, TV and UWD1.
+% Plots are faceted by distribution with the distributions being
+% EV, La, and MIX.
+% Lines are colored and shaped by QM method, and are drawn by increasing sample
+% size $n$.}
+% \label{fig:uk_cover}
+% \end{figure}
 
-The bottom of \ref{fig:uk_cover} shows the UWD1, TV, and KLD distances between 
-QM and true distributions averaged over 500 simulation replicates for the 
-five QM methods. In the UWD1 plot, there appears to be little or no difference
-in performance between the QGP, ORD, IND, and SPL fits, but each of these
-outperforms the KDE fits. For TV, the QGP, ORD, and SPL perform similarly, 
-though the QGP does the best for the MIX distribution.
-And for KLD, the QGP and ORD perform the best for lower values of $n$, but as
-$n$ increases, SPL appears to perform the best. Additional plots and results
-from these analyses are found in the supplementary materials.
+
+
+
+
+% The bottom of \ref{fig:uk_cover} shows the UWD1, TV, and KLD distances between 
+% QM and true distributions averaged over 500 simulation replicates for the 
+% five QM methods. In the UWD1 plot, there appears to be little or no difference
+% in performance between the QGP, ORD, IND, and SPL fits, but each of these
+% outperforms the KDE fits. For TV, the QGP, ORD, and SPL perform similarly, 
+% though the QGP does the best for the MIX distribution.
+% And for KLD, the QGP and ORD perform the best for lower values of $n$, but as
+% $n$ increases, SPL appears to perform the best. Additional plots and results
+% from these analyses are found in the supplementary materials.
 
 % \begin{figure}[hbt!]
 % %\begin{subfigure}{.456\linewidth}
@@ -1403,18 +1555,19 @@ from these analyses are found in the supplementary materials.
 % \end{figure}
 
 
+The simulation studies in this section show the ability of the QGP model to
+accurately perfom QM in various settings. 
+Where the distribution family is known, the QGP and ORD models
+make more accurate parameter inference than the IND model, but in the quantile
+defined setting, the ORD models is much more difficult to fit making the QGP
+the preferrable choice. 
+In the unknown distribution setting, the FM Bayesian QM models can suffer from
+model misspecification with the ORD model performing especially poorly. The
+regularization provided by the TDPM construction provides much more robust fits
+which provide better QM fits than KDE and fits generally on par with SPL. 
+The QGP and ORD also provide reasonable quantile inference with 
+conservative predictive intervals.
 
-
-This section shows the ability of the QGP model to accurately perform parameter 
-inference and QM when given sample quantiles. Although the inference for QGP 
-is asymptotic, the QGP performance in inference and in QM is similar to that 
-of ORD which provides exact inference. There are also circumstances where the 
-QGP may outperform the ORD as shown in cases where the QF is easily evaluated 
-but where the CDF is difficult to evaluate. Another case where the QGP 
-outperformed the ORD was in QM of the normal mixture distribution. An 
-advantage that the QGP has over SPL and KDE is that it provides accurate 
-uncertainty estimation of quantile uncertainty where SPL and KDE provide no 
-uncertainty estimation.
 
 
 
@@ -1561,11 +1714,13 @@ To calculate the WIS, we use the \texttt{evalcast} \texttt{R} package
 Figure \ref{fig:flu_methods_corr} shows results of 
 comparing the WIS from quantile forecasts and the CRPS from the 
 fitted forecasts for QGP, ORD, IND, SPL, and KDE methods. 
+The QGP, ORD, and IND fits were done using the TDPM construction with 
+$C = 20$.
 The plots have in the $x$-axis the WIS and 
 CRPS is in the $y$-axis. Each point represents
 one forecast for any participating 
-team, season week, and state. Unsurprisingly, the correlation between the
-QM CRPS and WIS is very highly correlated for each method. For all but the KDE
+team, season week, and state. Unsurprisingly the correlation between the
+QM CRPS and WIS is very high for each method. For all but the KDE
 method, there is a tendency for some CRPS values to go above the $x = y$ line
 suggesting the CRPS scores are enlarged due to the addition of distribution
 tails. The CRPS scores for the IND method also go below the $x = y$ line 
@@ -1596,11 +1751,20 @@ Figure \ref{fig:all_methods_dists} shows the average over week mean absolute
 error (MAE) and mean sqaure error (MSE) between the the newly estimated 
 QM quantiles and the original forecast quantiles. The MAE and MSE values for the
 SPL method are 0 for every week because the estimated quantile functions are 
-interpolations of the original forecasts. Besides the SPL, however, the QGP
-appears to estimate quantiles that are the closest to the original forecast
-quantiles. The average MAE for the QGP is smaller than for the remaining methods
-for each week and the MSE is smaller for most weeks showing a robustness which
-the other methods -- namely ORD and KDE -- may lack.
+interpolations of the original forecasts. 
+For MAE, the QGP, ORD, and IND perform similiary well, and greatly outperform
+KDE. For MSE, the IND performs more poorly showing a lack of robustness.
+Figure \ref{fig:fittime_box} shows in minutes boxplots of time to fit the QGP,
+ORD, and IND models. The QGP fit time is, as expected,
+generally a bit slower than the 
+IND due to the Gaussian process uncertainty matrix, and the ORD has slower
+fittimes than the QGP. 
+% Besides the SPL, however, the QGP
+% appears to estimate quantiles that are the closest to the original forecast
+% quantiles. 
+% The average MAE for the QGP is smaller than for the remaining methods
+% for each week and the MSE is smaller for most weeks showing a robustness which
+% the other methods -- namely ORD and KDE -- may lack.
 
 
 \begin{figure}[hbt!]
@@ -1611,6 +1775,16 @@ the other methods -- namely ORD and KDE -- may lack.
     \caption{Mean absolute error (MAE) and mean square error (MSE) over week
     for FluSight QM quantiles for each of QGP, ORD, IND, SPL, and KDE methods.}
     \label{fig:all_methods_dists}
+\end{figure}
+
+\begin{figure}[hbt!]
+    \centering
+    \makebox[\textwidth][c]{%
+        \adjustbox{trim=0 0 0 0,clip}{\includegraphics[scale=.45]{Images/final_flu_fittime.png}}%
+    }
+    \caption{Boxplots of time to fit in minutes of QM quantile forecasts for the 
+    QGP, ORD, and IND models.}
+    \label{fig:fittime_box}
 \end{figure}
 
 
@@ -1637,14 +1811,18 @@ which it is compared, sometimes with the exception of the ORD.
 An added advantage, however, is that the QGP 
 provides a way to perform QM for distributions defined by CDFs as well as 
 quantile distributions where the CDF is difficult to evaluate.
+For cases where the form of the CDF from which sample quantiles were 
+estimated is unknown, we proposed modeling the unknown CDF
+as a mixture distribution and implemented a TDPM prior as a robust method of 
+selecting contributing mixture distribution components. 
+
 An application of QM on quantile forecasts from the 2023-24 
-FluSight project demonstrates that QM methods allow for the use of the CRPS
-for scoring forecasts which is able to account for distribution tail 
-uncertainty. 
+FluSight competition demonstrates that QM methods allow for the use of the CRPS
+for scoring forecasts.
 QGP and other QM forecasts may be scored using a variety of scoring rules 
 unavailable to quantile forecasts, and independent forecasts may be combined 
 using methods made only for combining distributions by CDF or PDF functions. 
-QGP has already been applied in chapter 4 of \cite{wadsworth2024quantile} who 
+QGP has been applied in chapter 4 of Wadsworth \cite{wadsworth2024quantile} who 
 used the QGP predictive distributions fit in section \ref{sec:qm_analysis} to 
 construct ensemble forecasts.
 In the analysis, it is shown that the QGP may offer a more robust
@@ -1652,7 +1830,8 @@ fit to quantile distributions than other QM methods.
 
 
 Approximating continuous distributions given only a set of estimated quantiles 
-is not a new idea, but QGP provides a method of doing so while also accurately 
+is not a new idea, but the 
+QGP provides a method of doing so while also accurately 
 accounting for asymptotic uncertainty in estimated or predicted quantiles. The 
 CLTs in this manuscript
 are limited to the case where the quantiles are estimated 
@@ -1661,17 +1840,19 @@ quantile regression case where quantiles are estimated in the presence of
 covariates \cite[]{kocherginsky2005practical, koenker1978regression}. These 
 results could lead to additional QM modeling using the QGP model where 
 covariates are given, and this may be more akin to the QM done by 
+Sgouropoulos
 \cite{sgouropoulos2015matching}. 
-Additional research for the QGP model may be in how the required distribution 
+Additional research for the QGP model may be on how the required distribution 
 function is selected. Where a true model is unknown, we elected to model a 
 distribution as a normal mixture distribution. Of course this has its limits, 
-and using other non parametric functions, similar to 
-\cite{gasthaus2019probabilistic}, may provide needed flexibility. As long as 
+and using other nonparametric functions, similar to that used in 
+Gasthaus et al.
+\cite{gasthaus2019probabilistic} may provide needed flexibility. As long as 
 the selected function is continuous and once differentiable, the theory herein 
 applies. 
-The applications here suggests QM being useful for forecast hubs.  
-\cite{gerding2023evaluating} found QM a necessity in order to evaluate 
-forecasts by a new scoring rule with COVID-19 specific applications. 
+% The applications here suggest QM being useful for forecast hubs.  
+% \cite{gerding2023evaluating} found QM a necessity in order to evaluate 
+% forecasts by a new scoring rule with COVID-19 specific applications. 
 
 
 \section*{Acknowledgments}

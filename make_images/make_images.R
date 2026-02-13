@@ -159,8 +159,8 @@ all_quants <- all_quants %>%
 # saveRDS(all_dens, "../make_images/gmix_dens.rds")
 # saveRDS(all_quants, "../make_images/gmix_quants.rds")
 
-# all_dens <- readRDS("../make_images/lp_dens.rds")
-# all_quants <- readRDS("../make_images/lp_quants.rds")
+all_dens <- readRDS("../make_images/gmix_dens_sb.rds")
+all_quants <- readRDS("../make_images/gmix_quants_sb.rds")
 dens_fit <- all_dens %>% 
   # filter(row_number() > 20020) %>% 
   filter(model != "ord") %>%
@@ -177,8 +177,8 @@ dens_fit <- all_dens %>%
               fill = "pink") + 
   geom_ribbon(aes(x = x, ymin = `0.25`, ymax = `0.75`),
               fill = "red") +
-  geom_line(aes(x = x, y = yhat), colour = "darkgrey") +
-  geom_line(aes(x = x, y = y)) + 
+  geom_line(aes(x = x, y = yhat), colour = "darkgrey", size = .9) +
+  geom_line(aes(x = x, y = y), size = .9) + 
   ggh4x::facet_grid2(N~model,
                      scales = "free_y", independent = "y",
                      remove_labels = TRUE, ) +
@@ -188,8 +188,9 @@ dens_fit <- all_dens %>%
   theme_bw() +
   theme(axis.text.y = element_blank(),
         axis.ticks.y = element_blank(),
-        axis.title = element_text(size = 15),
-        strip.text = element_text(size = 11))
+        axis.text.x = element_text(size = 14),
+        axis.title = element_text(size = 20),
+        strip.text = element_text(size = 18))
 
 
 quant_fit <- all_quants %>% 
@@ -218,7 +219,7 @@ quant_fit <- all_quants %>%
                filter(!is.na(quantile), N <= 1000) %>% 
                dplyr::select(prob, quantile, N) %>% 
                unique(),
-             aes(x = prob, y = quantile), size = .8) +
+             aes(x = prob, y = quantile), size = 1.4) +
   ylab("Q(p)") +
   xlab("p") +
   # coord_cartesian(ylim = c(-5, 5)) + #laplace
@@ -231,8 +232,9 @@ quant_fit <- all_quants %>%
   theme_bw() +
   theme(axis.ticks.y = element_blank(),
         axis.text.y = element_blank(),
-        axis.title = element_text(size = 15),
-        strip.text = element_text(size = 11))
+        axis.text.x = element_text(size = 14),
+        axis.title = element_text(size = 20),
+        strip.text = element_text(size = 18))
 
 
 cowplot::plot_grid(quant_fit, dens_fit, nrow = 1,

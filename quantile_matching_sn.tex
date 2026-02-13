@@ -81,6 +81,7 @@
 %% as per the requirement new theorem styles can be included as shown below
 \theoremstyle{thmstyleone}%
 \newtheorem{theorem}{Theorem}%  meant for continuous numbers
+\newtheorem{corollary}{Corollary}
 %%\newtheorem{theorem}{Theorem}[section]% meant for sectionwise numbers
 %% optional argument [theorem] produces theorem numbering sequence instead of independent numbers for Proposition
 \newtheorem{proposition}[theorem]{Proposition}% 
@@ -92,6 +93,7 @@
 
 \theoremstyle{thmstylethree}%
 \newtheorem{definition}{Definition}%
+
 
 \raggedbottom
 %%\unnumbered% uncomment this for unnumbered level heads
@@ -146,19 +148,27 @@ distribution function. Many researchers do so to make evaluation or
 ensemble modeling simpler. Most existing methods for fitting a distribution to 
 quantiles lack accurate representation of the inherent uncertainty from 
 quantile estimation or are limited in their applications. In this manuscript, we 
-present a Gaussian process model, the quantile Gaussian process, which is based 
+present a Gaussian process model, the quantile Gaussian process --based 
 on established asymptotic results
-of quantile functions and sample quantiles, to construct 
-a probability distribution given estimated quantiles. A Bayesian application of 
+of quantile functions and sample quantiles-- to construct 
+a probability distribution given estimated quantiles. 
+In some applications, 
+the form of an unknown distribution function from which sample
+quantiles are drawn must be estimated, for which case we 
+propose the use of a latent
+truncated Dirichlet process mixture model for estimation.
+A Bayesian application of 
 the quantile Gaussian process is evaluated for parameter inference and 
-distribution approximation in simulation studies. The quantile Gaussian 
-process is used to approximate the distributions of quantile forecasts from the 
+distribution approximation in simulation studies as well as in a real
+data analysis of quantile forecasts
+The quantile Gaussian 
+% process is used to approximate the distributions of quantile forecasts 
+from the 
 2023-24 US Centers for Disease Control collaborative flu forecasting 
-initiative. The simulation studies and data analysis show that the quantile 
+initiative. The simulation studies and data analysis show that 
+compared to other existing methods, the quantile 
 Gaussian process leads to accurate inference on model parameters, estimation of 
 a continuous distribution, and uncertainty quantification of sample quantiles.
-The method being Bayesian also allows for the use of prior information when 
-approximating a distribution given quantiles.
 }
 
 \keywords{Sample quantiles, Quantile regression, Probabilistic forecasting, 
